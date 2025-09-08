@@ -1,0 +1,34 @@
+'use client'
+import React from 'react'
+import { useAuth } from '@/components/common/AuthContext';
+import { useRouter } from 'next/navigation';
+
+export default function DashboardPage() {
+  const { isAuthenticated, logout } = useAuth();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) {
+    return null; // Or a loading spinner
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+      <div className="bg-white p-8 rounded shadow-md w-full max-w-md text-center">
+        <h1 className="text-2xl font-bold mb-4">Dashboard Page</h1>
+        <p className="mb-6">Welcome! You are logged in.</p>
+        <button
+          onClick={logout}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  );
+}

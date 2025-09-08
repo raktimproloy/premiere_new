@@ -1,0 +1,92 @@
+[
+  {
+    "id": "1",
+    "propertyName": "Urban Apartment",
+    "personName": "MD Siam",
+    "paymentMethod": "Paypal",
+    "payAmount": "$85/night",
+    "status": "Paid",
+    "paymentDate": "2025-06-30"
+  },
+  {
+    "id": "2",
+    "propertyName": "Urban Apartment",
+    "personName": "MD Rahat",
+    "paymentMethod": "Stripe",
+    "payAmount": "$85/night",
+    "status": "Reject",
+    "paymentDate": "2025-06-30"
+  },
+  {
+    "id": "3",
+    "propertyName": "Cozy Lakeview Cabin",
+    "personName": "Rifat Hassan",
+    "paymentMethod": "Stripe",
+    "payAmount": "$85/night",
+    "status": "Pending",
+    "paymentDate": "2025-07-10"
+  },
+  {
+    "id": "4",
+    "propertyName": "Luxury Beach Villa",
+    "personName": "Hasib ali",
+    "paymentMethod": "Paypal",
+    "payAmount": "$85/night",
+    "status": "Paid",
+    "paymentDate": "2025-07-05"
+  },
+  {
+    "id": "5",
+    "propertyName": "Urban Apartment",
+    "personName": "Sbbir Rahman",
+    "paymentMethod": "Stripe",
+    "payAmount": "$85/night",
+    "status": "Paid",
+    "paymentDate": "2025-06-30"
+  },
+  {
+    "id": "6",
+    "propertyName": "Urban Apartment",
+    "personName": "MD Siam",
+    "paymentMethod": "Paypal",
+    "payAmount": "$85/night",
+    "status": "Paid",
+    "paymentDate": "2025-06-30"
+  },
+  {
+    "id": "7",
+    "propertyName": "Urban Apartment",
+    "personName": "MD Rahat",
+    "paymentMethod": "Stripe",
+    "payAmount": "$85/night",
+    "status": "Reject",
+    "paymentDate": "2025-06-30"
+  },
+  {
+    "id": "8",
+    "propertyName": "Cozy Lakeview Cabin",
+    "personName": "Rifat Hassan",
+    "paymentMethod": "Stripe",
+    "payAmount": "$85/night",
+    "status": "Pending",
+    "paymentDate": "2025-07-10"
+  },
+  {
+    "id": "9",
+    "propertyName": "Luxury Beach Villa",
+    "personName": "Hasib ali",
+    "paymentMethod": "Paypal",
+    "payAmount": "$85/night",
+    "status": "Paid",
+    "paymentDate": "2025-07-05"
+  },
+  {
+    "id": "10",
+    "propertyName": "Urban Apartment",
+    "personName": "Sbbir Rahman",
+    "paymentMethod": "Stripe",
+    "payAmount": "$85/night",
+    "status": "Paid",
+    "paymentDate": "2025-06-30"
+  }
+] 

@@ -1,0 +1,209 @@
+{
+  "timestamp": 1757129256618,
+  "data": {
+    "role": "admin",
+    "previousRevenue": [
+      {
+        "amount": 0,
+        "month": 10,
+        "year": 2024
+      },
+      {
+        "amount": 0,
+        "month": 11,
+        "year": 2024
+      },
+      {
+        "amount": 0,
+        "month": 12,
+        "year": 2024
+      },
+      {
+        "amount": 0,
+        "month": 1,
+        "year": 2025
+      },
+      {
+        "amount": 0,
+        "month": 2,
+        "year": 2025
+      },
+      {
+        "amount": 0,
+        "month": 3,
+        "year": 2025
+      },
+      {
+        "amount": 0,
+        "month": 4,
+        "year": 2025
+      },
+      {
+        "amount": 0,
+        "month": 5,
+        "year": 2025
+      },
+      {
+        "amount": 0,
+        "month": 6,
+        "year": 2025
+      },
+      {
+        "amount": 0,
+        "month": 7,
+        "year": 2025
+      },
+      {
+        "amount": 0,
+        "month": 8,
+        "year": 2025
+      },
+      {
+        "amount": 0,
+        "month": 9,
+        "year": 2025
+      }
+    ],
+    "occupancyTrends": [
+      {
+        "month": "Oct",
+        "year": 2024,
+        "value": 0
+      },
+      {
+        "month": "Nov",
+        "year": 2024,
+        "value": 0
+      },
+      {
+        "month": "Dec",
+        "year": 2024,
+        "value": 0
+      },
+      {
+        "month": "Jan",
+        "year": 2025,
+        "value": 0
+      },
+      {
+        "month": "Feb",
+        "year": 2025,
+        "value": 0
+      },
+      {
+        "month": "Mar",
+        "year": 2025,
+        "value": 0
+      },
+      {
+        "month": "Apr",
+        "year": 2025,
+        "value": 0
+      },
+      {
+        "month": "May",
+        "year": 2025,
+        "value": 0
+      },
+      {
+        "month": "Jun",
+        "year": 2025,
+        "value": 0
+      },
+      {
+        "month": "Jul",
+        "year": 2025,
+        "value": 0
+      },
+      {
+        "month": "Aug",
+        "year": 2025,
+        "value": 0
+      },
+      {
+        "month": "Sep",
+        "year": 2025,
+        "value": 0
+      }
+    ],
+    "bookingSources": {
+      "total": 0,
+      "sources": []
+    },
+    "nightlyRates": [
+      {
+        "monthName": "Oct",
+        "year": 2024,
+        "totalNights": 0,
+        "ratePerNight": 0
+      },
+      {
+        "monthName": "Nov",
+        "year": 2024,
+        "totalNights": 0,
+        "ratePerNight": 0
+      },
+      {
+        "monthName": "Dec",
+        "year": 2024,
+        "totalNights": 0,
+        "ratePerNight": 0
+      },
+      {
+        "monthName": "Jan",
+        "year": 2025,
+        "totalNights": 0,
+        "ratePerNight": 0
+      },
+      {
+        "monthName": "Feb",
+        "year": 2025,
+        "totalNights": 0,
+        "ratePerNight": 0
+      },
+      {
+        "monthName": "Mar",
+        "year": 2025,
+        "totalNights": 0,
+        "ratePerNight": 0
+      },
+      {
+        "monthName": "Apr",
+        "year": 2025,
+        "totalNights": 0,
+        "ratePerNight": 0
+      },
+      {
+        "monthName": "May",
+        "year": 2025,
+        "totalNights": 0,
+        "ratePerNight": 0
+      },
+      {
+        "monthName": "Jun",
+        "year": 2025,
+        "totalNights": 0,
+        "ratePerNight": 0
+      },
+      {
+        "monthName": "Jul",
+        "year": 2025,
+        "totalNights": 0,
+        "ratePerNight": 0
+      },
+      {
+        "monthName": "Aug",
+        "year": 2025,
+        "totalNights": 0,
+        "ratePerNight": 0
+      },
+      {
+        "monthName": "Sep",
+        "year": 2025,
+        "totalNights": 0,
+        "ratePerNight": 0
+      }
+    ],
+    "bookings": []
+  }
+}

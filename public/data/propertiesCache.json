@@ -1,0 +1,147 @@
+{
+  "properties": [
+    {
+      "active": true,
+      "address": {
+        "city": "Miami",
+        "country": "UNITED STATES",
+        "id": 694398279,
+        "is_default": false,
+        "postal_code": "33127",
+        "state": "Florida",
+        "street1": "259 Northwest 39th Street",
+        "street2": "Complete Property"
+      },
+      "bathrooms": 5,
+      "bathrooms_full": 4,
+      "bathrooms_half": 1,
+      "bedrooms": 6,
+      "check_in": "15:00",
+      "check_out": "11:00",
+      "currency_code": "USD",
+      "id": 460000,
+      "is_snoozed": false,
+      "key": "353e5be6-afcf-458e-9d8a-d8cccfa34b69",
+      "latitude": 25.8126625,
+      "listing_numbers": {
+        "Airbnb": "1052117495221241968"
+      },
+      "longitude": -80.2007511,
+      "max_children": 0,
+      "max_guests": 16,
+      "max_pets": 0,
+      "name": "Wynwood Townhomes w/Heated Pools",
+      "property_type": "house",
+      "thumbnail_url": "https://uc.orez.io/i/d53dc27e2ae84dba91d67039bcf54b40-Thumb",
+      "thumbnail_url_large": "https://uc.orez.io/i/d53dc27e2ae84dba91d67039bcf54b40-Large",
+      "thumbnail_url_medium": "https://uc.orez.io/i/d53dc27e2ae84dba91d67039bcf54b40-Medium"
+    },
+    {
+      "active": true,
+      "address": {
+        "city": "Miami",
+        "country": "UNITED STATES",
+        "id": 694395314,
+        "is_default": false,
+        "postal_code": "33127",
+        "state": "Florida",
+        "street1": "259 Northwest 39th Street",
+        "street2": "Complete Property"
+      },
+      "bathrooms": 3,
+      "bathrooms_full": 2,
+      "bathrooms_half": 1,
+      "bedrooms": 3,
+      "check_in": "15:00",
+      "check_out": "11:00",
+      "currency_code": "USD",
+      "id": 459941,
+      "is_snoozed": false,
+      "key": "db5793cf-83d1-4426-a5d4-cf4106eb05ac",
+      "latitude": 25.81266381,
+      "listing_numbers": {
+        "Airbnb": "743455221086012901"
+      },
+      "longitude": -80.20074986,
+      "max_guests": 10,
+      "max_pets": 0,
+      "name": "Modern Design District Wynwood TH w/Heated Pool",
+      "property_type": "townhome",
+      "thumbnail_url": "https://uc.orez.io/i/0f4ff9101bcb4f689633cee3c8eb5547-Thumb",
+      "thumbnail_url_large": "https://uc.orez.io/i/0f4ff9101bcb4f689633cee3c8eb5547-Large",
+      "thumbnail_url_medium": "https://uc.orez.io/i/0f4ff9101bcb4f689633cee3c8eb5547-Medium"
+    },
+    {
+      "active": true,
+      "address": {
+        "city": "Miami",
+        "country": "UNITED STATES",
+        "id": 694395968,
+        "is_default": false,
+        "postal_code": "33127",
+        "state": "Florida",
+        "street1": "257 Northwest 39th Street",
+        "street2": "Complete Property"
+      },
+      "bathrooms": 3,
+      "bathrooms_full": 2,
+      "bathrooms_half": 1,
+      "bedrooms": 3,
+      "check_in": "15:00",
+      "check_out": "11:00",
+      "currency_code": "USD",
+      "id": 459940,
+      "is_snoozed": false,
+      "key": "ed9a8540-bedb-4e07-9d2f-ba077c162a86",
+      "latitude": 25.81268886,
+      "listing_numbers": {
+        "Airbnb": "1052090851461774832"
+      },
+      "longitude": -80.20073611,
+      "max_guests": 10,
+      "max_pets": 0,
+      "name": "Wynwood/Design District TH w/heated Pool",
+      "property_type": "house",
+      "thumbnail_url": "https://uc.orez.io/i/e0995045a86a40728ccd7870684649bf-Thumb",
+      "thumbnail_url_large": "https://uc.orez.io/i/e0995045a86a40728ccd7870684649bf-Large",
+      "thumbnail_url_medium": "https://uc.orez.io/i/e0995045a86a40728ccd7870684649bf-Medium"
+    },
+    {
+      "active": true,
+      "address": {
+        "city": "Miami",
+        "country": "UNITED STATES",
+        "id": 694395298,
+        "is_default": false,
+        "postal_code": "33127",
+        "state": "Florida",
+        "street1": "75 Northwest 46th Street",
+        "street2": "Guesthouse"
+      },
+      "bathrooms": 1,
+      "bathrooms_full": 1,
+      "bathrooms_half": 0,
+      "bedrooms": 2,
+      "check_in": "15:00",
+      "check_out": "11:00",
+      "currency_code": "USD",
+      "id": 459939,
+      "is_snoozed": false,
+      "key": "d09dcfae-451d-43a1-979d-c76990ac56e5",
+      "latitude": 25.8180361,
+      "listing_numbers": {
+        "Airbnb": "1052156283570567870"
+      },
+      "longitude": -80.1972257,
+      "max_guests": 4,
+      "max_pets": 0,
+      "name": "Design District Guesthouse - 2Bdrms",
+      "property_type": "guest_house",
+      "thumbnail_url": "https://uc.orez.io/i/0bdf2c5c38f74ef8aa9dce6f10de1813-Thumb",
+      "thumbnail_url_large": "https://uc.orez.io/i/0bdf2c5c38f74ef8aa9dce6f10de1813-Large",
+      "thumbnail_url_medium": "https://uc.orez.io/i/0bdf2c5c38f74ef8aa9dce6f10de1813-Medium"
+    }
+  ],
+  "timestamp": 1754312571040,
+  "expiresAt": 1754312871040
+}
