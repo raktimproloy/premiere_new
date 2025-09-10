@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authService } from '@/lib/auth';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
+import { cloudinaryService } from '@/lib/cloudinaryService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,26 +53,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'profiles');
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
-    }
+    // Upload to Cloudinary
+    const uploadResult = await cloudinaryService.uploadImage(
+      file,
+      'profiles', // folder name
+      {
+        quality: 80,
+        format: 'auto'
+      }
+    );
 
-    // Generate unique filename
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 15);
-    const fileExtension = file.name.split('.').pop();
-    const fileName = `profile_${result.user._id}_${timestamp}_${randomString}.${fileExtension}`;
-    const filePath = join(uploadsDir, fileName);
-
-    // Convert file to buffer and save
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
-
-    // Generate public URL
-    const publicUrl = `/uploads/profiles/${fileName}`;
+    // Use Cloudinary URL
+    const publicUrl = uploadResult.url;
 
     // Update user's profile image in MongoDB
     const client = await clientPromise;

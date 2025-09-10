@@ -1,65 +1,69 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { FiEye, FiGrid, FiList, FiChevronLeft, FiChevronRight, FiStar } from 'react-icons/fi';
-
-interface Review {
-  id: string;
-  propertyName: string;
-  type: string;
-  price: string;
-  listingDate: string;
-  rating: number;
-  reviewCount: string;
-  reviewerName: string;
-  reviewDate: string;
-  reviewText: string;
-  reviewerAvatar: string;
-}
+import { FiEye, FiGrid, FiList, FiChevronLeft, FiChevronRight, FiStar, FiRefreshCw, FiFilter } from 'react-icons/fi';
+import { UnifiedReview, ReviewsApiResponse } from '@/types/review';
 
 const PropertyReviewsPage = () => {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
+  const [reviews, setReviews] = useState<UnifiedReview[]>([]);
+  const [filteredReviews, setFilteredReviews] = useState<UnifiedReview[]>([]);
   const [viewType, setViewType] = useState<'list' | 'grid'>('list');
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+  const [selectedReview, setSelectedReview] = useState<UnifiedReview | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   
   const itemsPerPage = 8;
-  const totalPages = Math.ceil(filteredReviews.length / itemsPerPage);
 
-  const reviewImage = "/images/review.png";
+  // Fetch reviews from API
+  const fetchReviews = async (page: number = 1, status: string = 'all') => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch(`/api/reviews/superadmin?page=${page}&pageSize=${itemsPerPage}&status=${status}`);
+      const data: ReviewsApiResponse = await response.json();
+      
+      if (data.success) {
+        setReviews(data.reviews);
+        setFilteredReviews(data.reviews);
+        setTotalPages(data.totalPages);
+        setTotalCount(data.total);
+        setCurrentPage(page);
+      } else {
+        setError(data.error || 'Failed to fetch reviews');
+      }
+    } catch (err) {
+      setError('Failed to fetch reviews. Please try again.');
+      console.error('Error fetching reviews:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Mock data matching the images
   useEffect(() => {
-    const mockData: Review[] = [
-      { id: '1', propertyName: 'Urban Apartment', type: 'Apartment', price: '$85/night', listingDate: '2025-06-30', rating: 4.5, reviewCount: '2.3k Reviews', reviewerName: 'Cameron Williamson', reviewDate: 'July, 23 2020', reviewText: 'Our family stayed at the Wynwood Townhome and couldn\'t have been happier. The heated pool was a hit with the kids, and the spacious, modern interior had everything we needed.', reviewerAvatar: reviewImage },
-      { id: '2', propertyName: 'Urban Apartment', type: 'Apartment', price: '$85/night', listingDate: '2025-06-30', rating: 2.0, reviewCount: '2.3k Reviews', reviewerName: 'Cameron Williamson', reviewDate: 'July, 23 2020', reviewText: 'Our family stayed at the Wynwood Townhome and couldn\'t have been happier. The heated pool was a hit with the kids, and the spacious, modern interior had everything we needed.', reviewerAvatar: reviewImage },
-      { id: '3', propertyName: 'Cozy Lakeview Cabin', type: 'Cabin', price: '$70/night', listingDate: '2025-07-10', rating: 4.8, reviewCount: '1.7k Reviews', reviewerName: 'Cameron Williamson', reviewDate: 'July, 23 2020', reviewText: 'Our family stayed at the Wynwood Townhome and couldn\'t have been happier. The heated pool was a hit with the kids, and the spacious, modern interior had everything we needed.', reviewerAvatar: reviewImage },
-      { id: '4', propertyName: 'Luxury Beach Villa', type: 'Villa', price: '$200/night', listingDate: '2025-07-05', rating: 4.0, reviewCount: '15k Reviews', reviewerName: 'Cameron Williamson', reviewDate: 'July, 23 2020', reviewText: 'Our family stayed at the Wynwood Townhome and couldn\'t have been happier. The heated pool was a hit with the kids, and the spacious, modern interior had everything we needed.', reviewerAvatar: reviewImage },
-      { id: '5', propertyName: 'Urban Apartment', type: 'Apartment', price: '$85/night', listingDate: '2025-06-30', rating: 3.5, reviewCount: '1.6k Reviews', reviewerName: 'Cameron Williamson', reviewDate: 'July, 23 2020', reviewText: 'Our family stayed at the Wynwood Townhome and couldn\'t have been happier. The heated pool was a hit with the kids, and the spacious, modern interior had everything we needed.', reviewerAvatar: reviewImage },
-      { id: '6', propertyName: 'Rustic Mountain House', type: 'Duplex House', price: '$120/night', listingDate: '2025-07-01', rating: 3.0, reviewCount: '1.3k Reviews', reviewerName: 'Cameron Williamson', reviewDate: 'July, 23 2020', reviewText: 'Our family stayed at the Wynwood Townhome and couldn\'t have been happier. The heated pool was a hit with the kids, and the spacious, modern interior had everything we needed.', reviewerAvatar: reviewImage },
-      { id: '7', propertyName: 'Cozy Lakeview Cabin', type: 'Cabin', price: '$70/night', listingDate: '2025-07-10', rating: 3.4, reviewCount: '1.3k Reviews', reviewerName: 'Cameron Williamson', reviewDate: 'July, 23 2020', reviewText: 'Our family stayed at the Wynwood Townhome and couldn\'t have been happier. The heated pool was a hit with the kids, and the spacious, modern interior had everything we needed.', reviewerAvatar: reviewImage },
-      { id: '8', propertyName: 'Rustic Mountain House', type: 'Duplex House', price: '$120/night', listingDate: '2025-07-01', rating: 5.7, reviewCount: '1.3k Reviews', reviewerName: 'Cameron Williamson', reviewDate: 'July, 23 2020', reviewText: 'Our family stayed at the Wynwood Townhome and couldn\'t have been happier. The heated pool was a hit with the kids, and the spacious, modern interior had everything we needed.', reviewerAvatar: reviewImage },
-      { id: '9', propertyName: 'Luxury Beach Villa', type: 'Villa', price: '$200/night', listingDate: '2025-07-05', rating: 5.0, reviewCount: '1.3k Reviews', reviewerName: 'Cameron Williamson', reviewDate: 'July, 23 2020', reviewText: 'Our family stayed at the Wynwood Townhome and couldn\'t have been happier. The heated pool was a hit with the kids, and the spacious, modern interior had everything we needed.', reviewerAvatar: reviewImage },
-    ];
-    setReviews(mockData);
-    setFilteredReviews(mockData);
-  }, []);
-
-  // Pagination
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedReviews = filteredReviews.slice(startIndex, startIndex + itemsPerPage);
-
-  // Reset to first page when viewType or reviews change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [viewType, reviews]);
+    fetchReviews(1, statusFilter);
+  }, [statusFilter]);
 
   // Pagination controls (match payment-history style)
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+      fetchReviews(page, statusFilter);
     }
+  };
+
+  // Refresh reviews
+  const handleRefresh = () => {
+    fetchReviews(currentPage, statusFilter);
+  };
+
+  // Handle status filter change
+  const handleStatusFilterChange = (status: string) => {
+    setStatusFilter(status);
+    setCurrentPage(1);
   };
 
   // Render star rating
@@ -86,6 +90,8 @@ const PropertyReviewsPage = () => {
 
   // Render pagination buttons
   const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    
     const pages = [];
     const maxVisiblePages = 5;
     
@@ -111,6 +117,8 @@ const PropertyReviewsPage = () => {
         </button>
       );
     }
+    
+    const startIndex = (currentPage - 1) * itemsPerPage;
     
     return (
       <div className="flex items-center space-x-2 mt-6 justify-center">
@@ -140,14 +148,14 @@ const PropertyReviewsPage = () => {
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
         </button>
         <span className="text-sm text-gray-600 ml-2">
-          Showing {filteredReviews.length === 0 ? 0 : startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredReviews.length)} of {filteredReviews.length} reviews
+          Showing {totalCount === 0 ? 0 : startIndex + 1} - {Math.min(startIndex + itemsPerPage, totalCount)} of {totalCount} reviews
         </span>
       </div>
     );
   };
 
   // Modal handlers
-  const handleOpenModal = (review: Review) => {
+  const handleOpenModal = (review: UnifiedReview) => {
     setSelectedReview(review);
     setIsModalOpen(true);
   };
@@ -167,27 +175,35 @@ const PropertyReviewsPage = () => {
               <th className="px-6 py-5 text-left text-xs font-semibold text-black uppercase tracking-wider">Property Name</th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Type</th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Price</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Listing Date</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Review Date</th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Rating</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Reviews</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Reviewer</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-right text-xs font-semibold text-black uppercase tracking-wider">Action</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {paginatedReviews.length > 0 ? (
-              paginatedReviews.map((review) => (
+            {filteredReviews.length > 0 ? (
+              filteredReviews.map((review) => (
                 <tr key={review.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{review.propertyName}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{review.type}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{review.price}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{review.listingDate}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{review.reviewDate}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-1">
                       <span className="text-sm font-medium text-gray-700">{review.rating}</span>
                       <FiStar className="w-4 h-4 fill-orange-400 text-orange-400" />
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{review.reviewCount}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{review.reviewerName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      review.visible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {review.visible ? 'Visible' : 'Hidden'}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => handleOpenModal(review)}
@@ -201,7 +217,9 @@ const PropertyReviewsPage = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">No reviews found</td>
+                <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                  {loading ? 'Loading reviews...' : 'No reviews found'}
+                </td>
               </tr>
             )}
           </tbody>
@@ -213,28 +231,42 @@ const PropertyReviewsPage = () => {
   // Grid view component
   const GridView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {paginatedReviews.map((review) => (
-        <div key={review.id} className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
-          <div className="flex items-start space-x-4">
-            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-lg">
-              <img src={review.reviewerAvatar} alt="reviewer" className="w-full h-full object-cover rounded-full" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-gray-900">{review.reviewerName}</h3>
-                <div className="flex items-center space-x-1">
-                  <span className="text-sm font-medium text-gray-900">{review.rating}</span>
-                  <FiStar className="w-4 h-4 fill-orange-400 text-orange-400" />
+      {filteredReviews.length > 0 ? (
+        filteredReviews.map((review) => (
+          <div key={review.id} className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-start space-x-4">
+              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-lg">
+                <img src={review.reviewerAvatar} alt="reviewer" className="w-full h-full object-cover rounded-full" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-semibold text-gray-900">{review.reviewerName}</h3>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-sm font-medium text-gray-900">{review.rating}</span>
+                    <FiStar className="w-4 h-4 fill-orange-400 text-orange-400" />
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500 mb-3">{review.reviewDate}</p>
+                <p className="text-gray-700 text-sm leading-relaxed mb-4">
+                  {`"`}{review.reviewText}{`"`}
+                </p>
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <span>Property: {review.propertyName}</span>
+                  <span className={`px-2 py-1 rounded-full ${
+                    review.visible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    {review.visible ? 'Visible' : 'Hidden'}
+                  </span>
                 </div>
               </div>
-              <p className="text-sm text-gray-500 mb-3">{review.reviewDate}</p>
-              <p className="text-gray-700 text-sm leading-relaxed mb-4">
-                {`"`}{review.reviewText}{`"`}
-              </p>
             </div>
           </div>
+        ))
+      ) : (
+        <div className="col-span-2 text-center py-8 text-gray-500">
+          {loading ? 'Loading reviews...' : 'No reviews found'}
         </div>
-      ))}
+      )}
     </div>
   );
 
@@ -287,8 +319,8 @@ const PropertyReviewsPage = () => {
                     <p className="font-medium">{selectedReview.price}</p>
                   </div>
                   <div>
-                    <span className="text-gray-500">Listing Date:</span>
-                    <p className="font-medium">{selectedReview.listingDate}</p>
+                    <span className="text-gray-500">Review Date:</span>
+                    <p className="font-medium">{selectedReview.reviewDate}</p>
                   </div>
                 </div>
               </div>
@@ -296,10 +328,26 @@ const PropertyReviewsPage = () => {
               <div className="border-t pt-4">
                 <h4 className="font-semibold text-gray-900 mb-2">Review</h4>
                 <p className="text-gray-700 leading-relaxed">{selectedReview.reviewText}</p>
+                {selectedReview.response && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <h5 className="font-medium text-gray-900 mb-2">Response:</h5>
+                    <p className="text-gray-700">{selectedReview.response}</p>
+                  </div>
+                )}
               </div>
 
               <div className="border-t pt-4">
-                <p className="text-sm text-blue-600 font-medium">{selectedReview.reviewCount}</p>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">Status:</span>
+                  <span className={`px-2 py-1 rounded-full text-xs ${
+                    selectedReview.visible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    {selectedReview.visible ? 'Visible' : 'Hidden'}
+                  </span>
+                </div>
+                <div className="mt-2 text-sm text-gray-500">
+                  <span>Listing Site: {selectedReview.listingSite}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -314,8 +362,21 @@ const PropertyReviewsPage = () => {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Property Review List</h1>
+            {totalCount > 0 && (
+              <p className="text-sm text-gray-600 mt-1">
+                {totalCount} review{totalCount !== 1 ? 's' : ''} found
+              </p>
+            )}
           </div>
           <div className="mt-4 flex gap-3 md:mt-0">
+            <button
+              onClick={handleRefresh}
+              disabled={loading}
+              className="px-4 py-2 rounded-md flex items-center gap-2 bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+            >
+              <FiRefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              Refresh
+            </button>
             <button
               onClick={() => setViewType('list')}
               className={`px-4 py-2 rounded-md flex items-center gap-2 ${
@@ -341,11 +402,75 @@ const PropertyReviewsPage = () => {
           </div>
         </div>
 
+        {/* Status Filter */}
+        <div className="mb-6">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <FiFilter size={16} className="text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">Filter by status:</span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleStatusFilterChange('all')}
+                className={`px-3 py-1 rounded-md text-sm ${
+                  statusFilter === 'all'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => handleStatusFilterChange('visible')}
+                className={`px-3 py-1 rounded-md text-sm ${
+                  statusFilter === 'visible'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Visible
+              </button>
+              <button
+                onClick={() => handleStatusFilterChange('hidden')}
+                className={`px-3 py-1 rounded-md text-sm ${
+                  statusFilter === 'hidden'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Hidden
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="flex">
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Error</h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>{error}</p>
+                </div>
+                <div className="mt-4">
+                  <button
+                    onClick={() => fetchReviews(currentPage, statusFilter)}
+                    className="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main content */}
         {viewType === 'list' ? <ListView /> : <GridView />}
 
         {/* Pagination */}
-        {filteredReviews.length > itemsPerPage && (
+        {totalPages > 1 && (
           <div className="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
             {renderPagination()}
           </div>

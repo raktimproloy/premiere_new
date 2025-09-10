@@ -31,6 +31,7 @@
       "max_guests": 16,
       "max_pets": 0,
       "name": "Wynwood Townhomes w/Heated Pools",
+      "owner_id": 150913611,
       "property_type": "house",
       "thumbnail_url": "https://uc.orez.io/i/d53dc27e2ae84dba91d67039bcf54b40-Thumb",
       "thumbnail_url_large": "https://uc.orez.io/i/d53dc27e2ae84dba91d67039bcf54b40-Large",
@@ -68,6 +69,7 @@
       "max_guests": 10,
       "max_pets": 0,
       "name": "Modern Design District Wynwood TH w/Heated Pool",
+      "owner_id": 150913611,
       "property_type": "townhome",
       "thumbnail_url": "https://uc.orez.io/i/0f4ff9101bcb4f689633cee3c8eb5547-Thumb",
       "thumbnail_url_large": "https://uc.orez.io/i/0f4ff9101bcb4f689633cee3c8eb5547-Large",
@@ -105,6 +107,7 @@
       "max_guests": 10,
       "max_pets": 0,
       "name": "Wynwood/Design District TH w/heated Pool",
+      "owner_id": 150913611,
       "property_type": "house",
       "thumbnail_url": "https://uc.orez.io/i/e0995045a86a40728ccd7870684649bf-Thumb",
       "thumbnail_url_large": "https://uc.orez.io/i/e0995045a86a40728ccd7870684649bf-Large",
@@ -142,6 +145,7 @@
       "max_guests": 4,
       "max_pets": 0,
       "name": "Design District Guesthouse - 2Bdrms",
+      "owner_id": 150913611,
       "property_type": "guest_house",
       "thumbnail_url": "https://uc.orez.io/i/0bdf2c5c38f74ef8aa9dce6f10de1813-Thumb",
       "thumbnail_url_large": "https://uc.orez.io/i/0bdf2c5c38f74ef8aa9dce6f10de1813-Large",
@@ -149,6 +153,6 @@
       "localData": null
     }
   ],
-  "timestamp": 1757306355651,
-  "expiresAt": 1757306655651
+  "timestamp": 1757478845466,
+  "expiresAt": 1757479145466
 }

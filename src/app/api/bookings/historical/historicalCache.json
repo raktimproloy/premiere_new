@@ -1,5 +1,5 @@
 {
-  "timestamp": 1757306362349,
+  "timestamp": 1757479037569,
   "data": {
     "role": "admin",
     "previousRevenue": [
@@ -14,7 +14,7 @@
         "year": 2024
       },
       {
-        "amount": 11761.33,
+        "amount": 7886.33,
         "month": 12,
         "year": 2024
       },
@@ -78,7 +78,7 @@
       {
         "month": "Dec",
         "year": 2024,
-        "value": 6.77
+        "value": 5.48
       },
       {
         "month": "Jan",
@@ -127,11 +127,11 @@
       }
     ],
     "bookingSources": {
-      "total": 99,
+      "total": 98,
       "sources": [
         {
           "name": "Airbnb",
-          "count": 99
+          "count": 98
         }
       ]
     },
@@ -151,8 +151,8 @@
       {
         "monthName": "Dec",
         "year": 2024,
-        "totalNights": 21,
-        "ratePerNight": 560.06
+        "totalNights": 17,
+        "ratePerNight": 463.9
       },
       {
         "monthName": "Jan",
@@ -211,20 +211,128 @@
     ],
     "bookings": [
       {
+        "adults": 0,
+        "arrival": "2025-10-05",
+        "booked_utc": "2025-09-09T21:07:20Z",
+        "check_in": "15:00",
+        "check_out": "11:00",
+        "children": 0,
+        "created_utc": "2025-09-09T21:07:20Z",
+        "departure": "2025-10-06",
+        "form_key": "6ba2b5f75b9443f5b97b1e7de535c134",
+        "id": 14962023,
+        "infants": 0,
+        "is_block": true,
+        "notes": "Ida, Twill’s wife",
+        "pets": 0,
+        "property": {
+          "id": 459939,
+          "name": "Design District Guesthouse - 2Bdrms"
+        },
+        "property_id": 459939,
+        "status": "active",
+        "title": "Manual block",
+        "type": "block",
+        "updated_utc": "2025-09-09T21:07:21Z"
+      },
+      {
+        "adults": 2,
+        "arrival": "2025-10-16",
+        "booked_utc": "2025-09-09T01:49:56Z",
+        "charges": [
+          {
+            "amount": 598,
+            "commission_amount": 59.8,
+            "description": "Rent",
+            "is_channel_managed": true,
+            "is_commission_all": false,
+            "is_expense_all": false,
+            "is_taxable": true,
+            "owner_amount": 538.2,
+            "owner_commission_percent": 10,
+            "position": 0,
+            "rate": 598,
+            "rate_is_percent": false,
+            "type": "rent"
+          },
+          {
+            "amount": 29.9,
+            "commission_amount": 0,
+            "description": "Management",
+            "is_channel_managed": true,
+            "is_commission_all": false,
+            "is_expense_all": false,
+            "is_taxable": true,
+            "owner_amount": 29.9,
+            "owner_commission_percent": 0,
+            "position": 1,
+            "rate": 29.9,
+            "rate_is_percent": false,
+            "surcharge_id": 102666346,
+            "type": "surcharge"
+          },
+          {
+            "amount": 100,
+            "commission_amount": 0,
+            "description": "Cleaning Fee",
+            "is_channel_managed": true,
+            "is_commission_all": false,
+            "is_expense_all": false,
+            "is_taxable": true,
+            "owner_amount": 100,
+            "owner_commission_percent": 0,
+            "position": 2,
+            "rate": 100,
+            "rate_is_percent": false,
+            "surcharge_id": 102666340,
+            "type": "surcharge"
+          }
+        ],
+        "check_in": "15:00",
+        "check_out": "11:00",
+        "children": 0,
+        "created_utc": "2025-09-09T01:49:56Z",
+        "currency_code": "USD",
+        "departure": "2025-10-21",
+        "form_key": "6404fd76e141478b9c8dddfa1e3a7ef1",
+        "guest_id": 618443233,
+        "id": 14954151,
+        "infants": 0,
+        "is_block": false,
+        "listing_site": "Airbnb",
+        "owner_id": 150913611,
+        "pets": 0,
+        "platform_reservation_number": "HMJ9D4E3RQ",
+        "property": {
+          "id": 459939,
+          "name": "Design District Guesthouse - 2Bdrms"
+        },
+        "property_id": 459939,
+        "status": "active",
+        "thread_ids": [
+          8886680
+        ],
+        "total_amount": 727.9,
+        "total_host_fees": 21.84,
+        "total_paid": 727.9,
+        "type": "booking",
+        "updated_utc": "2025-09-09T02:02:14Z"
+      },
+      {
         "adults": 7,
         "arrival": "2025-09-24",
         "booked_utc": "2025-09-04T23:38:11Z",
         "charges": [
           {
             "amount": 1559,
-            "commission_amount": 0,
+            "commission_amount": 155.9,
             "description": "Rent",
             "is_channel_managed": true,
             "is_commission_all": false,
             "is_expense_all": false,
             "is_taxable": true,
-            "owner_amount": 1559,
-            "owner_commission_percent": 0,
+            "owner_amount": 1403.1,
+            "owner_commission_percent": 10,
             "position": 0,
             "rate": 1559,
             "rate_is_percent": false,
@@ -259,6 +367,7 @@
         "infants": 0,
         "is_block": false,
         "listing_site": "Airbnb",
+        "owner_id": 150913611,
         "pets": 0,
         "platform_reservation_number": "HMZZTDC4SR",
         "property": {
@@ -275,7 +384,7 @@
         "total_host_fees": 51,
         "total_paid": 1700,
         "type": "booking",
-        "updated_utc": "2025-09-04T23:50:31Z"
+        "updated_utc": "2025-09-08T19:17:12Z"
       },
       {
         "adults": 6,
@@ -284,14 +393,14 @@
         "charges": [
           {
             "amount": 1032,
-            "commission_amount": 0,
+            "commission_amount": 103.2,
             "description": "Rent",
             "is_channel_managed": true,
             "is_commission_all": false,
             "is_expense_all": false,
             "is_taxable": true,
-            "owner_amount": 1032,
-            "owner_commission_percent": 0,
+            "owner_amount": 928.8,
+            "owner_commission_percent": 10,
             "position": 0,
             "rate": 1032,
             "rate_is_percent": false,
@@ -342,6 +451,7 @@
         "infants": 0,
         "is_block": false,
         "listing_site": "Airbnb",
+        "owner_id": 150913611,
         "pets": 0,
         "platform_reservation_number": "HMY8RCTQP9",
         "property": {
@@ -357,7 +467,7 @@
         "total_host_fees": 40.01,
         "total_paid": 1333.6,
         "type": "booking",
-        "updated_utc": "2025-09-04T00:53:19Z"
+        "updated_utc": "2025-09-08T19:17:12Z"
       },
       {
         "adults": 4,
@@ -459,6 +569,7 @@
         "infants": 0,
         "is_block": false,
         "listing_site": "Airbnb",
+        "owner_id": 150913611,
         "pets": 0,
         "platform_reservation_number": "HMAMR4YHTH",
         "property": {
@@ -471,7 +582,7 @@
           8814337
         ],
         "type": "booking",
-        "updated_utc": "2025-08-28T14:29:06Z"
+        "updated_utc": "2025-09-08T19:17:11Z"
       },
       {
         "adults": 1,
@@ -562,14 +673,14 @@
         "charges": [
           {
             "amount": 913,
-            "commission_amount": 0,
+            "commission_amount": 91.3,
             "description": "Rent",
             "is_channel_managed": true,
             "is_commission_all": false,
             "is_expense_all": false,
             "is_taxable": true,
-            "owner_amount": 913,
-            "owner_commission_percent": 0,
+            "owner_amount": 821.7,
+            "owner_commission_percent": 10,
             "position": 0,
             "rate": 913,
             "rate_is_percent": false,
@@ -620,6 +731,7 @@
         "infants": 0,
         "is_block": false,
         "listing_site": "Airbnb",
+        "owner_id": 150913611,
         "pets": 0,
         "platform_reservation_number": "HMBPBZCBC9",
         "property": {
@@ -635,7 +747,7 @@
         "total_host_fees": 36.26,
         "total_paid": 1208.65,
         "type": "booking",
-        "updated_utc": "2025-08-25T00:45:53Z"
+        "updated_utc": "2025-09-08T19:17:12Z"
       },
       {
         "adults": 0,
@@ -668,14 +780,14 @@
         "charges": [
           {
             "amount": 425,
-            "commission_amount": 0,
+            "commission_amount": 42.5,
             "description": "Rent",
             "is_channel_managed": true,
             "is_commission_all": false,
             "is_expense_all": false,
             "is_taxable": true,
-            "owner_amount": 425,
-            "owner_commission_percent": 0,
+            "owner_amount": 382.5,
+            "owner_commission_percent": 10,
             "position": 0,
             "rate": 425,
             "rate_is_percent": false,
@@ -726,6 +838,7 @@
         "infants": 0,
         "is_block": false,
         "listing_site": "Airbnb",
+        "owner_id": 150913611,
         "pets": 0,
         "platform_reservation_number": "HMH2ZCZFQF",
         "property": {
@@ -741,7 +854,7 @@
         "total_host_fees": 16.39,
         "total_paid": 546.25,
         "type": "booking",
-        "updated_utc": "2025-08-19T20:04:10Z"
+        "updated_utc": "2025-09-08T19:17:11Z"
       },
       {
         "adults": 2,
@@ -1006,6 +1119,7 @@
         "infants": 0,
         "is_block": false,
         "listing_site": "Airbnb",
+        "owner_id": 150913611,
         "pets": 0,
         "platform_reservation_number": "HMTSFYXXQJ",
         "property": {
@@ -1018,7 +1132,7 @@
           8689675
         ],
         "type": "booking",
-        "updated_utc": "2025-08-29T03:27:09Z"
+        "updated_utc": "2025-09-08T19:17:11Z"
       },
       {
         "adults": 6,
@@ -1118,6 +1232,7 @@
         "infants": 0,
         "is_block": false,
         "listing_site": "Airbnb",
+        "owner_id": 150913611,
         "pets": 0,
         "platform_reservation_number": "HMTJRXSQDY",
         "property": {
@@ -1130,7 +1245,7 @@
           8685678
         ],
         "type": "booking",
-        "updated_utc": "2025-08-10T23:50:07Z"
+        "updated_utc": "2025-09-08T19:17:11Z"
       },
       {
         "adults": 5,
@@ -1199,6 +1314,7 @@
         "infants": 0,
         "is_block": false,
         "listing_site": "Airbnb",
+        "owner_id": 150913611,
         "pets": 0,
         "platform_reservation_number": "HMJCKF3EBH",
         "property": {
@@ -1211,7 +1327,7 @@
           8681075
         ],
         "type": "booking",
-        "updated_utc": "2025-08-28T18:13:58Z"
+        "updated_utc": "2025-09-08T19:17:11Z"
       },
       {
         "adults": 8,
@@ -1220,14 +1336,14 @@
         "charges": [
           {
             "amount": 411,
-            "commission_amount": 0,
+            "commission_amount": 41.1,
             "description": "Rent",
             "is_channel_managed": true,
             "is_commission_all": false,
             "is_expense_all": false,
             "is_taxable": true,
-            "owner_amount": 411,
-            "owner_commission_percent": 0,
+            "owner_amount": 369.9,
+            "owner_commission_percent": 10,
             "position": 0,
             "rate": 411,
             "rate_is_percent": false,
@@ -1246,6 +1362,7 @@
         "infants": 0,
         "is_block": false,
         "listing_site": "Airbnb",
+        "owner_id": 150913611,
         "pets": 0,
         "platform_reservation_number": "HM9HMZFJ2K",
         "property": {
@@ -1261,7 +1378,7 @@
         "total_host_fees": 12.33,
         "total_paid": 411,
         "type": "booking",
-        "updated_utc": "2025-08-10T13:25:33Z"
+        "updated_utc": "2025-09-08T19:17:11Z"
       },
       {
         "adults": 10,
@@ -1280,6 +1397,7 @@
         "infants": 0,
         "is_block": false,
         "listing_site": "Airbnb",
+        "owner_id": 150913611,
         "pets": 0,
         "platform_reservation_number": "HMWPWEW9Y4",
         "property": {
@@ -1292,7 +1410,7 @@
           8680044
         ],
         "type": "booking",
-        "updated_utc": "2025-08-12T17:30:12Z"
+        "updated_utc": "2025-09-08T19:17:11Z"
       },
       {
         "adults": 1,
@@ -1301,14 +1419,14 @@
         "charges": [
           {
             "amount": 646,
-            "commission_amount": 0,
+            "commission_amount": 64.6,
             "description": "Rent",
             "is_channel_managed": true,
             "is_commission_all": false,
             "is_expense_all": false,
             "is_taxable": true,
-            "owner_amount": 646,
-            "owner_commission_percent": 0,
+            "owner_amount": 581.4,
+            "owner_commission_percent": 10,
             "position": 0,
             "rate": 646,
             "rate_is_percent": false,
@@ -1327,6 +1445,7 @@
         "infants": 0,
         "is_block": false,
         "listing_site": "Airbnb",
+        "owner_id": 150913611,
         "pets": 0,
         "platform_reservation_number": "HMHTEJWZNB",
         "property": {
@@ -1342,7 +1461,7 @@
         "total_host_fees": 19.38,
         "total_paid": 646,
         "type": "booking",
-        "updated_utc": "2025-08-10T13:25:25Z"
+        "updated_utc": "2025-09-09T08:12:43Z"
       },
       {
         "adults": 4,
@@ -6063,102 +6182,6 @@
         "total_paid": 1000,
         "type": "booking",
         "updated_utc": "2025-08-10T13:23:31Z"
-      },
-      {
-        "adults": 12,
-        "arrival": "2024-12-27",
-        "booked_utc": "2024-12-13T22:24:10Z",
-        "charges": [
-          {
-            "amount": 3875,
-            "commission_amount": 0,
-            "description": "Rent",
-            "is_channel_managed": true,
-            "is_commission_all": false,
-            "is_expense_all": false,
-            "is_taxable": true,
-            "owner_amount": 3875,
-            "owner_commission_percent": 0,
-            "position": 0,
-            "rate": 3875,
-            "rate_is_percent": false,
-            "type": "rent"
-          },
-          {
-            "amount": 400,
-            "commission_amount": 0,
-            "description": "Cleaning fee",
-            "is_channel_managed": true,
-            "is_commission_all": false,
-            "is_expense_all": false,
-            "is_taxable": true,
-            "owner_amount": 400,
-            "owner_commission_percent": 0,
-            "position": 1,
-            "rate": 400,
-            "rate_is_percent": false,
-            "type": "surcharge_other"
-          }
-        ],
-        "check_in": "15:00",
-        "check_out": "11:00",
-        "children": 0,
-        "created_utc": "2025-08-07T15:07:02Z",
-        "currency_code": "USD",
-        "departure": "2024-12-29",
-        "form_key": "3e71d368a2dc4c35a08a140746d01ade",
-        "guest_id": 617949060,
-        "id": 14637103,
-        "infants": 0,
-        "is_block": false,
-        "listing_site": "Airbnb",
-        "pets": 0,
-        "platform_reservation_number": "HMHHPJZ8Q9",
-        "property": {
-          "id": 460000,
-          "name": "Wynwood Townhomes w/Heated Pools"
-        },
-        "property_id": 460000,
-        "status": "active",
-        "thread_ids": [
-          8669088
-        ],
-        "total_amount": 4275,
-        "total_host_fees": 128.25,
-        "total_paid": 4275,
-        "type": "booking",
-        "updated_utc": "2025-08-10T13:21:51Z"
-      },
-      {
-        "adults": 12,
-        "arrival": "2024-12-20",
-        "booked_utc": "2024-09-11T21:00:59Z",
-        "canceled_utc": "2025-08-07T15:07:01Z",
-        "check_in": "15:00",
-        "check_out": "11:00",
-        "children": 0,
-        "created_utc": "2025-08-07T15:07:01Z",
-        "currency_code": "USD",
-        "departure": "2024-12-22",
-        "form_key": "5b8bd309cd8b49eaae65ad3fcb281991",
-        "guest_id": 617949059,
-        "id": 14637101,
-        "infants": 0,
-        "is_block": false,
-        "listing_site": "Airbnb",
-        "pets": 0,
-        "platform_reservation_number": "HMJHQHKW3T",
-        "property": {
-          "id": 460000,
-          "name": "Wynwood Townhomes w/Heated Pools"
-        },
-        "property_id": 460000,
-        "status": "canceled",
-        "thread_ids": [
-          8669087
-        ],
-        "type": "booking",
-        "updated_utc": "2025-08-10T13:21:50Z"
       }
     ]
   }

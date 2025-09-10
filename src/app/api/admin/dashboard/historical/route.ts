@@ -1,9 +1,11 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { startOfMonth, endOfMonth, subMonths, addMonths, parseISO, differenceInDays, getDaysInMonth } from 'date-fns';
-import { promises as fs } from 'fs';
-import path from 'path';
 import { authService } from '@/lib/auth';
 import clientPromise from '@/lib/mongodb';
+
+// In-memory cache for admin historical data
+let adminHistoricalCache: { timestamp: number; data: any } | null = null;
+const CACHE_DURATION_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 const TOTAL_PROPERTIES = 10; // Should come from environment/config
 
@@ -192,25 +194,10 @@ function processHistoricalData(bookings: Booking[]) {
 }
 
 export async function GET(request: NextRequest) {
-  const CACHE_DIR = path.join(process.cwd(), 'src', 'app', 'api', 'admin', 'dashboard', 'historical');
-  const CACHE_FILE = path.join(CACHE_DIR, 'historicalCache.json');
-  const CACHE_DURATION_MS = 6 * 60 * 60 * 1000; // 6 hours
   try {
-    // Try to read cache
-    let cacheValid = false;
-    let cachedData: any = null;
-    try {
-      const cacheContent = await fs.readFile(CACHE_FILE, 'utf-8');
-      const parsed = JSON.parse(cacheContent);
-      if (parsed.timestamp && Date.now() - parsed.timestamp < CACHE_DURATION_MS) {
-        cacheValid = true;
-        cachedData = parsed.data;
-      }
-    } catch (err) {
-      // Cache file does not exist or is invalid, ignore
-    }
-    if (cacheValid) {
-      return NextResponse.json(cachedData);
+    // Check in-memory cache
+    if (adminHistoricalCache && Date.now() - adminHistoricalCache.timestamp < CACHE_DURATION_MS) {
+      return NextResponse.json(adminHistoricalCache.data);
     }
     // Auth and role
     const token = request.cookies.get('authToken')?.value || '';
@@ -254,19 +241,11 @@ export async function GET(request: NextRequest) {
       nightlyRates: role === 'admin' ? data.nightlyRateData : [],
       bookings: data.rawBookings
     };
-    // Save to cache
-    try {
-      // Ensure the cache directory exists
-      await fs.mkdir(CACHE_DIR, { recursive: true });
-      await fs.writeFile(
-        CACHE_FILE,
-        JSON.stringify({ timestamp: Date.now(), data: responseData }, null, 2),
-        'utf-8'
-      );
-    } catch (err) {
-      // Log cache write error but don't fail the request
-      console.error('Failed to write cache:', err);
-    }
+    // Save to in-memory cache
+    adminHistoricalCache = {
+      timestamp: Date.now(),
+      data: responseData
+    };
     return NextResponse.json(responseData);
   } catch (error) {
     console.error('Historical data error:', error);

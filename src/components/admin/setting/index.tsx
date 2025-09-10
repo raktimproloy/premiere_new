@@ -221,6 +221,7 @@ const Setting: React.FC = () => {
     }
   };
 
+  const defaultImage = '/images/default_profile.png';
   const handlePersonalInfoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -367,7 +368,7 @@ const Setting: React.FC = () => {
         <div className="flex-shrink-0 mb-6">
           <div className="w-28 h-28 relative bg-gray-200 rounded-full flex items-center justify-center">
             <img 
-              src={user.profileImage || "/images/profile2.jpg"} 
+              src={user.profileImage || defaultImage} 
               alt="Profile" 
               className="w-full h-full object-cover rounded-full"
             />
