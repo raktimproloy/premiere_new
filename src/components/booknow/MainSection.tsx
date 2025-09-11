@@ -315,22 +315,22 @@ export default function MainSection(props: MainSectionProps) {
             socialMedia.linkedin
           );
           
-          if (!hasBillingAddress || !hasPropertyPreferences || !hasSocialMedia) {
-            // Show toast message and redirect to settings
-            const missingFields = [];
-            if (!hasBillingAddress) missingFields.push('billing address');
-            if (!hasPropertyPreferences) missingFields.push('property preferences');
-            if (!hasSocialMedia) missingFields.push('social media profiles');
+          // if (!hasBillingAddress || !hasPropertyPreferences || !hasSocialMedia) {
+          //   // Show toast message and redirect to settings
+          //   const missingFields = [];
+          //   if (!hasBillingAddress) missingFields.push('billing address');
+          //   if (!hasPropertyPreferences) missingFields.push('property preferences');
+          //   if (!hasSocialMedia) missingFields.push('social media profiles');
             
-            // Show toast message and redirect to settings
-            showToastFunction(`Please complete your ${missingFields.join(', ')} in your account settings before proceeding.`, 'warning');
+          //   // Show toast message and redirect to settings
+          //   showToastFunction(`Please complete your ${missingFields.join(', ')} in your account settings before proceeding.`, 'warning');
             
-            // Redirect to settings page after a short delay
-            // setTimeout(() => {
-            //   router.push('/settings');
-            // }, 2000);
-            return;
-          }
+          //   // Redirect to settings page after a short delay
+          //   // setTimeout(() => {
+          //   //   router.push('/settings');
+          //   // }, 2000);
+          //   return;
+          // }
         }
         
         // All settings are complete, proceed to checkout
