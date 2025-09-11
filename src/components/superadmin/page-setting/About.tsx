@@ -245,10 +245,10 @@ export default function About() {
                 </div>
             )}
             
-            <div className="space-y-6">
+            <div className="space-y-8">
                 {/* Main Media Section */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
+                    <label className="block text-sm font-medium text-gray-700 mb-4">
                         Main About Media
                     </label>
                     
@@ -278,73 +278,123 @@ export default function About() {
                         </button>
                     </div>
                     
-                    <div className="flex items-center gap-4">
-                        <div className="w-32 h-32 relative bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                            {uploadingMedia === 'main' ? (
-                                <div className="w-full h-full bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-                                </div>
-                            ) : mainMedia ? (
-                                <div className="relative w-full h-full">
-                                    {mainMediaType === 'image' ? (
-                                        <img 
-                                            src={mainMedia} 
-                                            alt="Main About" 
-                                            className={`w-full h-full object-cover rounded-lg ${
-                                                uploadedMedia.has('main') ? 'ring-2 ring-green-500' : ''
-                                            }`}
-                                            onError={(e) => {
-                                                e.currentTarget.src = '';
-                                            }}
-                                        />
-                                    ) : (
-                                        <video 
-                                            src={mainMedia} 
-                                            className={`w-full h-full object-cover rounded-lg ${
-                                                uploadedMedia.has('main') ? 'ring-2 ring-green-500' : ''
-                                            }`}
-                                            controls
-                                            muted
-                                        />
-                                    )}
-                                    {uploadedMedia.has('main') && (
-                                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center">
-                                            <span className="text-xs">✓</span>
+                    <div className="space-y-4">
+                        {/* Image Display Section */}
+                        <div className="flex-shrink-0">
+                            <div className="w-48 h-48 relative bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 overflow-hidden">
+                                {uploadingMedia === 'main' ? (
+                                    <div className="w-full h-full bg-blue-50 rounded-lg flex items-center justify-center">
+                                        <div className="text-center">
+                                            <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-2" />
+                                            <span className="text-xs text-blue-600">Uploading...</span>
                                         </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="w-full h-full bg-gray-300 rounded-lg flex items-center justify-center">
-                                    <span className="text-gray-500 text-xs">No {mainMediaType}</span>
-                                </div>
-                            )}
-                            
-                            {/* Upload Button */}
-                            <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
+                                    </div>
+                                ) : mainMedia ? (
+                                    <div className="relative w-full h-full">
+                                        {mainMediaType === 'image' ? (
+                                            <img 
+                                                src={mainMedia} 
+                                                alt="Main About" 
+                                                className={`w-full h-full object-contain rounded-lg ${
+                                                    uploadedMedia.has('main') ? 'ring-2 ring-green-500' : ''
+                                                }`}
+                                                onError={(e) => {
+                                                    console.error('Image failed to load:', mainMedia);
+                                                    e.currentTarget.style.display = 'none';
+                                                    const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                                                    if (placeholder) {
+                                                        placeholder.style.display = 'flex';
+                                                    }
+                                                }}
+                                                onLoad={(e) => {
+                                                    e.currentTarget.style.display = 'block';
+                                                    const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                                                    if (placeholder) {
+                                                        placeholder.style.display = 'none';
+                                                    }
+                                                }}
+                                            />
+                                        ) : (
+                                            <video 
+                                                src={mainMedia} 
+                                                className={`w-full h-full object-contain rounded-lg ${
+                                                    uploadedMedia.has('main') ? 'ring-2 ring-green-500' : ''
+                                                }`}
+                                                controls
+                                                muted
+                                                onError={(e) => {
+                                                    console.error('Video failed to load:', mainMedia);
+                                                    e.currentTarget.style.display = 'none';
+                                                    const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                                                    if (placeholder) {
+                                                        placeholder.style.display = 'flex';
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                        {/* Fallback placeholder */}
+                                        <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center" style={{ display: 'none' }}>
+                                            <div className="text-center">
+                                                <span className="text-gray-500 text-sm">Failed to load</span>
+                                            </div>
+                                        </div>
+                                        {/* Success indicator */}
+                                        {uploadedMedia.has('main') && (
+                                            <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg">
+                                                <span className="text-xs font-bold">✓</span>
+                                            </div>
+                                        )}
+                                        {/* Remove media button */}
+                                        <button
+                                            onClick={() => removeImage('main')}
+                                            className="absolute -top-2 -left-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+                                        <div className="text-center">
+                                            <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                                            <span className="text-gray-500 text-sm">No {mainMediaType}</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Upload Controls Section */}
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-3">
                                 <button
                                     onClick={() => triggerFileInput('main')}
                                     disabled={uploadingMedia === 'main'}
-                                    className="opacity-0 hover:opacity-100 transition-opacity p-2 bg-white rounded-full shadow-lg disabled:opacity-50"
+                                    className="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 >
                                     {uploadingMedia === 'main' ? (
-                                        <Loader2 className="w-4 h-4 text-gray-700 animate-spin" />
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Uploading...
+                                        </>
                                     ) : (
-                                        <Upload className="w-4 h-4 text-gray-700" />
+                                        <>
+                                            <Upload className="w-4 h-4" />
+                                            {mainMedia ? `Change ${mainMediaType}` : `Upload ${mainMediaType}`}
+                                        </>
                                     )}
                                 </button>
+                                
+                                {mainMedia && (
+                                    <button
+                                        onClick={() => removeImage('main')}
+                                        className="px-3 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
+                                    >
+                                        <X className="w-4 h-4" />
+                                        Remove
+                                    </button>
+                                )}
                             </div>
-
-                            {/* Remove Media Button */}
-                            {mainMedia && (
-                                <button
-                                    onClick={() => removeImage('main')}
-                                    className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                                >
-                                    <X className="w-3 h-3" />
-                                </button>
-                            )}
-                        </div>
-                        <div className="flex-1">
+                            
                             <p className="text-sm text-gray-600">
                                 {mainMediaType === 'image' 
                                     ? 'Upload a high-quality image for the main about section. Recommended size: 800x600px or larger.'
@@ -356,77 +406,127 @@ export default function About() {
                 </div>
 
                 {/* Small Images Section */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
+                    <label className="block text-sm font-medium text-gray-700 mb-4">
                         Small About Images (3 images)
                     </label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {smallImages.map((image, index) => (
-                            <div key={index} className="flex flex-col items-center gap-2">
-                                <div className="w-24 h-24 relative bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
-                                    {uploadingMedia === `small-${index}` ? (
-                                        <div className="w-full h-full bg-blue-100 rounded-lg flex items-center justify-center">
-                                            <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
-                                        </div>
-                                    ) : image ? (
-                                        <div className="relative w-full h-full">
-                                            <img 
-                                                src={image} 
-                                                alt={`Small About ${index + 1}`} 
-                                                className={`w-full h-full object-cover rounded-lg ${
-                                                    uploadedMedia.has(`small-${index}`) ? 'ring-2 ring-green-500' : ''
-                                                }`}
-                                                onError={(e) => {
-                                                    e.currentTarget.src = '';
-                                                }}
-                                            />
-                                            {uploadedMedia.has(`small-${index}`) && (
-                                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center">
-                                                    <span className="text-xs">✓</span>
+                            <div key={index} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h4 className="text-sm font-medium text-gray-700">
+                                        Image {index + 1}
+                                    </h4>
+                                </div>
+                                
+                                <div className="space-y-3">
+                                    {/* Image Display Section */}
+                                    <div className="flex-shrink-0">
+                                        <div className="w-32 h-32 relative bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 overflow-hidden">
+                                            {uploadingMedia === `small-${index}` ? (
+                                                <div className="w-full h-full bg-blue-50 rounded-lg flex items-center justify-center">
+                                                    <div className="text-center">
+                                                        <Loader2 className="w-6 h-6 text-blue-500 animate-spin mx-auto mb-2" />
+                                                        <span className="text-xs text-blue-600">Uploading...</span>
+                                                    </div>
+                                                </div>
+                                            ) : image ? (
+                                                <div className="relative w-full h-full">
+                                                    <img 
+                                                        src={image} 
+                                                        alt={`Small About ${index + 1}`} 
+                                                        className={`w-full h-full object-contain rounded-lg ${
+                                                            uploadedMedia.has(`small-${index}`) ? 'ring-2 ring-green-500' : ''
+                                                        }`}
+                                                        onError={(e) => {
+                                                            console.error('Image failed to load:', image);
+                                                            e.currentTarget.style.display = 'none';
+                                                            const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                                                            if (placeholder) {
+                                                                placeholder.style.display = 'flex';
+                                                            }
+                                                        }}
+                                                        onLoad={(e) => {
+                                                            e.currentTarget.style.display = 'block';
+                                                            const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                                                            if (placeholder) {
+                                                                placeholder.style.display = 'none';
+                                                            }
+                                                        }}
+                                                    />
+                                                    {/* Fallback placeholder */}
+                                                    <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center" style={{ display: 'none' }}>
+                                                        <div className="text-center">
+                                                            <span className="text-gray-500 text-sm">Failed to load</span>
+                                                        </div>
+                                                    </div>
+                                                    {/* Success indicator */}
+                                                    {uploadedMedia.has(`small-${index}`) && (
+                                                        <div className="absolute -top-2 -right-2 w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg">
+                                                            <span className="text-xs font-bold">✓</span>
+                                                        </div>
+                                                    )}
+                                                    {/* Remove image button */}
+                                                    <button
+                                                        onClick={() => removeImage('small', index)}
+                                                        className="absolute -top-2 -left-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
+                                                    >
+                                                        <X className="w-3 h-3" />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+                                                    <div className="text-center">
+                                                        <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                                                        <span className="text-gray-500 text-sm">No Image</span>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
-                                    ) : (
-                                        <div className="w-full h-full bg-gray-300 rounded-lg flex items-center justify-center">
-                                            <span className="text-gray-500 text-xs">No Image</span>
-                                        </div>
-                                    )}
-                                    
-                                    {/* Upload Button */}
-                                    <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
-                                        <button
-                                            onClick={() => triggerFileInput('small', index)}
-                                            disabled={uploadingMedia === `small-${index}`}
-                                            className="opacity-0 hover:opacity-100 transition-opacity p-1 bg-white rounded-full shadow-lg disabled:opacity-50"
-                                        >
-                                            {uploadingMedia === `small-${index}` ? (
-                                                <Loader2 className="w-3 h-3 text-gray-700 animate-spin" />
-                                            ) : (
-                                                <Upload className="w-3 h-3 text-gray-700" />
-                                            )}
-                                        </button>
                                     </div>
 
-                                    {/* Remove Image Button */}
-                                    {image && (
-                                        <button
-                                            onClick={() => removeImage('small', index)}
-                                            className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                                        >
-                                            <X className="w-3 h-3" />
-                                        </button>
-                                    )}
+                                    {/* Upload Controls Section */}
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => triggerFileInput('small', index)}
+                                                disabled={uploadingMedia === `small-${index}`}
+                                                className="px-3 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                            >
+                                                {uploadingMedia === `small-${index}` ? (
+                                                    <>
+                                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                                        Uploading...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Upload className="w-3 h-3" />
+                                                        {image ? 'Change' : 'Upload'}
+                                                    </>
+                                                )}
+                                            </button>
+                                            
+                                            {image && (
+                                                <button
+                                                    onClick={() => removeImage('small', index)}
+                                                    className="px-2 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors flex items-center gap-1"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                    Remove
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
-                                <span className="text-xs text-gray-500">Image {index + 1}</span>
                             </div>
                         ))}
                     </div>
-                    <p className="text-sm text-gray-600 mt-2">
+                    <p className="text-sm text-gray-600 mt-4">
                         Upload 3 small images for the about section. Recommended size: 400x300px or larger.
                     </p>
                 </div>
 
-                <div>
+                <div className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         Title
                     </label>
@@ -439,7 +539,7 @@ export default function About() {
                     />
                 </div>
 
-                <div>
+                <div className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         About Text
                     </label>
@@ -455,7 +555,7 @@ export default function About() {
                     </p>
                 </div>
 
-                <div>
+                <div className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         About Items
                     </label>

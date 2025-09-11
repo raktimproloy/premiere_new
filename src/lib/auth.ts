@@ -254,7 +254,7 @@ export const authService = {
         isActive: true
       });
 
-      return user as User | null;
+      return user as unknown as User | null;
     } catch (error) {
       console.error("Get user error:", error);
       return null;

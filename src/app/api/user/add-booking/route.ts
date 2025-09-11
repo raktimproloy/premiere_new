@@ -23,7 +23,10 @@ export async function POST(request: NextRequest) {
     // Push bookingId to bookingIds array (create array if not exists)
     await db.collection('users').updateOne(
       { _id: new ObjectId(user._id) },
-      { $push: { bookingIds: bookingId }, $set: { updatedAt: new Date() } }
+      { 
+        $push: { bookingIds: bookingId }, 
+        $set: { updatedAt: new Date() } 
+      } as any
     );
     return NextResponse.json({ success: true, message: 'Booking ID added to user' });
   } catch (error) {

@@ -24,6 +24,20 @@ export default function Testimonial() {
         loadTestimonialsSettings();
     }, []);
 
+    // Function to validate image URL
+    const isValidImageUrl = (url: string): boolean => {
+        if (!url || url.trim() === '') return false;
+        
+        // Check if it's a valid URL
+        try {
+            new URL(url);
+            return true;
+        } catch {
+            // Check if it's a relative path starting with /
+            return url.startsWith('/');
+        }
+    };
+
     const loadTestimonialsSettings = async () => {
         try {
             setLoading(true);
@@ -206,31 +220,31 @@ export default function Testimonial() {
   return (
     <div>
         <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-medium text-gray-800">Testimonials</h2>
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={saveTestimonialsSettings}
-                        disabled={saving}
-                        className="px-4 py-2 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    >
-                        {saving ? (
-                            <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                Saving...
-                            </>
-                        ) : (
-                            'Save All Testimonials'
-                        )}
-                    </button>
-        <button
-            onClick={addTestimonial}
-            className="px-4 py-2 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors flex items-center gap-2"
-        >
-            <Plus className="w-4 h-4" />
-            Add Testimonial
-        </button>
-        </div>
+            <h2 className="text-lg font-medium text-gray-800">Testimonials Management</h2>
+            <div className="flex items-center gap-3">
+                <button
+                    onClick={saveTestimonialsSettings}
+                    disabled={saving}
+                    className="px-4 py-2 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                    {saving ? (
+                        <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Saving...
+                        </>
+                    ) : (
+                        'Save All Testimonials'
+                    )}
+                </button>
+                <button
+                    onClick={addTestimonial}
+                    className="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                >
+                    <Plus className="w-4 h-4" />
+                    Add Testimonial
+                </button>
             </div>
+        </div>
 
             {message && (
                 <div className={`mb-4 p-3 rounded-md ${
@@ -257,130 +271,186 @@ export default function Testimonial() {
             />
         
         <div className="grid gap-6">
-        {testimonials.map((testimonial) => (
-            <div key={testimonial.id} className="border border-gray-200 rounded-lg p-6">
-            <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                                <div className="w-16 h-16 relative bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                                    {uploadingImage === testimonial.id ? (
-                                        <div className="w-full h-full bg-blue-100 rounded-full flex items-center justify-center">
-                                            <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
-                                        </div>
-                                    ) : testimonial.profileImage && testimonial.profileImage !== '/images/profile2.jpg' ? (
-                                        <div className="relative w-full h-full">
-                    <img 
-                    src={testimonial.profileImage} 
-                    alt="Profile" 
-                                                className={`w-full h-full object-cover rounded-full ${
-                                                    uploadedImages.has(testimonial.id) ? 'ring-2 ring-green-500' : ''
-                                                }`}
-                                                onError={(e) => {
-                                                    console.error('Image failed to load:', testimonial.profileImage);
-                                                    e.currentTarget.src = '/images/profile2.jpg';
-                                                }}
-                                                onLoad={() => {
-                                                    console.log('Image loaded successfully:', testimonial.profileImage);
-                                                }}
-                                            />
-                                            {uploadedImages.has(testimonial.id) && (
-                                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center">
-                                                    <span className="text-xs">✓</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="w-full h-full bg-gray-300 rounded-full flex items-center justify-center">
-                                            <span className="text-gray-500 text-xs">No Image</span>
-                                        </div>
-                                    )}
-                                    <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
-                                        <button
-                                            onClick={() => triggerFileInput(testimonial.id)}
-                                            disabled={uploadingImage === testimonial.id}
-                                            className="opacity-0 hover:opacity-100 transition-opacity p-1 bg-white rounded-full shadow-lg disabled:opacity-50"
-                                        >
-                                            {uploadingImage === testimonial.id ? (
-                                                <Loader2 className="w-3 h-3 text-gray-700 animate-spin" />
-                                            ) : (
-                                                <Upload className="w-3 h-3 text-gray-700" />
-                                            )}
-                                        </button>
-                                    </div>
-                                    {testimonial.profileImage !== '/images/profile2.jpg' && testimonial.profileImage && (
-                                        <button
-                                            onClick={() => removeImage(testimonial.id)}
-                                            className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                                        >
-                                            <X className="w-3 h-3" />
-                                        </button>
-                                    )}
-                </div>
-                <div className="flex-1">
-                    <input
-                    type="text"
-                    placeholder="Name"
-                    value={testimonial.name}
-                    onChange={(e) => updateTestimonial(testimonial.id, 'name', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-2"
-                    />
-                    <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Rating:</span>
-                    <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                            key={star}
-                            onClick={() => updateTestimonial(testimonial.id, 'rating', star)}
-                            className="text-gray-300 hover:text-yellow-400 transition-colors"
-                        >
-                            <Star className={`w-4 h-4 ${star <= testimonial.rating ? 'text-yellow-400 fill-current' : ''}`} />
-                        </button>
-                        ))}
-                    </div>
-                    </div>
-                                    {testimonial.profileImage && testimonial.profileImage !== '/images/profile2.jpg' && (
-                                        <div className="mt-2 text-xs text-gray-500">
-                                            <span className="font-medium">Image URL:</span>
-                                            <div className="truncate max-w-xs" title={testimonial.profileImage}>
-                                                {testimonial.profileImage}
-                                            </div>
-                                        </div>
-                                    )}
-                </div>
-                </div>
-                <button
-                onClick={() => removeTestimonial(testimonial.id)}
-                className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
-                >
-                <Trash2 className="w-4 h-4" />
-                </button>
-            </div>
-            
-            <div className="space-y-4">
-                <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Testimonial
-                </label>
-                <textarea
-                    rows={3}
-                    placeholder="Enter testimonial content..."
-                    value={testimonial.description}
-                    onChange={(e) => updateTestimonial(testimonial.id, 'description', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 resize-vertical"
-                />
+        {testimonials.map((testimonial, index) => (
+            <div key={testimonial.id} className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-sm font-medium text-gray-700">
+                        Testimonial {index + 1}
+                    </h4>
+                    <button
+                        onClick={() => removeTestimonial(testimonial.id)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
                 </div>
                 
-                <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Publish Date
-                </label>
-                <input
-                    type="date"
-                    value={testimonial.publishDate}
-                    onChange={(e) => updateTestimonial(testimonial.id, 'publishDate', e.target.value)}
-                    className="px-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                <div className="flex items-start gap-6">
+                    {/* Profile Image Display Section */}
+                    <div className="flex-shrink-0">
+                        <div className="w-24 h-24 relative bg-gray-100 rounded-full border-2 border-dashed border-gray-300 overflow-hidden">
+                            {uploadingImage === testimonial.id ? (
+                                <div className="w-full h-full bg-blue-50 rounded-full flex items-center justify-center">
+                                    <div className="text-center">
+                                        <Loader2 className="w-6 h-6 text-blue-500 animate-spin mx-auto mb-1" />
+                                        <span className="text-xs text-blue-600">Uploading...</span>
+                                    </div>
+                                </div>
+                            ) : testimonial.profileImage && testimonial.profileImage !== '/images/profile2.jpg' && isValidImageUrl(testimonial.profileImage) ? (
+                                <div className="relative w-full h-full">
+                                    <img 
+                                        src={testimonial.profileImage} 
+                                        alt="Profile" 
+                                        className={`w-full h-full object-contain rounded-full ${
+                                            uploadedImages.has(testimonial.id) ? 'ring-2 ring-green-500' : ''
+                                        }`}
+                                        onError={(e) => {
+                                            console.error('Image failed to load:', testimonial.profileImage);
+                                            e.currentTarget.style.display = 'none';
+                                            const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                                            if (placeholder) {
+                                                placeholder.style.display = 'flex';
+                                            }
+                                        }}
+                                        onLoad={(e) => {
+                                            e.currentTarget.style.display = 'block';
+                                            const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                                            if (placeholder) {
+                                                placeholder.style.display = 'none';
+                                            }
+                                            console.log('Image loaded successfully:', testimonial.profileImage);
+                                        }}
+                                    />
+                                    {/* Fallback placeholder */}
+                                    <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center" style={{ display: 'none' }}>
+                                        <div className="text-center">
+                                            <span className="text-gray-500 text-xs">Failed to load</span>
+                                        </div>
+                                    </div>
+                                    {/* Success indicator */}
+                                    {uploadedImages.has(testimonial.id) && (
+                                        <div className="absolute -top-2 -right-2 w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg">
+                                            <span className="text-xs font-bold">✓</span>
+                                        </div>
+                                    )}
+                                    {/* Remove image button */}
+                                    <button
+                                        onClick={() => removeImage(testimonial.id)}
+                                        className="absolute -top-2 -left-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
+                                    <div className="text-center">
+                                        <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1" />
+                                        <span className="text-gray-500 text-xs">No Image</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Upload Controls and Details Section */}
+                    <div className="flex-1 space-y-4">
+                        {/* Upload Controls */}
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => triggerFileInput(testimonial.id)}
+                                disabled={uploadingImage === testimonial.id}
+                                className="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                                {uploadingImage === testimonial.id ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Uploading...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Upload className="w-4 h-4" />
+                                        {testimonial.profileImage && testimonial.profileImage !== '/images/profile2.jpg' ? 'Change Image' : 'Upload Image'}
+                                    </>
+                                )}
+                            </button>
+                            
+                            {testimonial.profileImage && testimonial.profileImage !== '/images/profile2.jpg' && (
+                                <button
+                                    onClick={() => removeImage(testimonial.id)}
+                                    className="px-3 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
+                                >
+                                    <X className="w-4 h-4" />
+                                    Remove
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Name Input */}
+                        <div>
+                            <input
+                                type="text"
+                                placeholder="Name"
+                                value={testimonial.name}
+                                onChange={(e) => updateTestimonial(testimonial.id, 'name', e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+
+                        {/* Rating */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">Rating:</span>
+                            <div className="flex gap-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                        key={star}
+                                        onClick={() => updateTestimonial(testimonial.id, 'rating', star)}
+                                        className="text-gray-300 hover:text-yellow-400 transition-colors"
+                                    >
+                                        <Star className={`w-4 h-4 ${star <= testimonial.rating ? 'text-yellow-400 fill-current' : ''}`} />
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Image URL Display */}
+                        {testimonial.profileImage && testimonial.profileImage !== '/images/profile2.jpg' && (
+                            <div className="text-xs text-gray-500">
+                                <span className="font-medium">Image URL:</span>
+                                <div className="truncate max-w-xs" title={testimonial.profileImage}>
+                                    {testimonial.profileImage}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
+                
+                {/* Testimonial Content Section */}
+                <div className="mt-6 space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Testimonial Content
+                        </label>
+                        <textarea
+                            rows={3}
+                            placeholder="Enter testimonial content..."
+                            value={testimonial.description}
+                            onChange={(e) => updateTestimonial(testimonial.id, 'description', e.target.value)}
+                            className="w-full px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 resize-vertical"
+                        />
+                    </div>
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Publish Date
+                        </label>
+                        <input
+                            type="date"
+                            value={testimonial.publishDate}
+                            onChange={(e) => updateTestimonial(testimonial.id, 'publishDate', e.target.value)}
+                            className="px-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+                </div>
             </div>
         ))}
         </div>

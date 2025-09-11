@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
 import Header from "./Header";
 import RoleProtection from '@/components/common/RoleProtection';
+import AuthDebugger from '@/components/common/AuthDebugger';
 
 interface UserData {
   _id: string;
@@ -29,14 +30,17 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
   // Check authentication and role
   useEffect(() => {
+    // Only redirect if we're not loading
     if (!loading) {
       if (!isAuthenticated) {
+        console.log('SuperAdminLayout: User not authenticated, redirecting to login');
         router.replace('/login');
         return;
       }
 
       // Check if user has superadmin role
       if (role !== 'superadmin') {
+        console.log(`SuperAdminLayout: User role (${role}) is not superadmin, redirecting to home`);
         router.replace('/');
         return;
       }
@@ -60,12 +64,17 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   }, []);
 
   // Show loading while checking authentication
-  if (loading || !isAuthenticated || role !== 'superadmin') {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#F7B730]"></div>
       </div>
     );
+  }
+
+  // If not authenticated or wrong role, don't render the layout
+  if (!isAuthenticated || role !== 'superadmin') {
+    return null;
   }
 
   // Convert auth user to UserData format for Header
@@ -94,6 +103,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   return (
     <RoleProtection requiredRole="superadmin">
       <div className="flex h-screen bg-gray-50">
+        <AuthDebugger />
         {/* Mobile sidebar overlay */}
         {sidebarOpen && isMobile && (
           <div 

@@ -202,8 +202,8 @@ const CalendarPage = ({ bookings = sampleBookings }: CalendarPageProps) => {
       
       try {
         const [currentMonthRes, historicalRes] = await Promise.all([
-          fetch('/api/bookings/current-month'),
-          fetch('/api/bookings/historical')
+          fetch('/api/admin/dashboard/current-month'),
+          fetch('/api/admin/dashboard/historical')
         ]);
 
         // Handle API errors

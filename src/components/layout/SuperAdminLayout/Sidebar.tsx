@@ -60,7 +60,7 @@ export default function Sidebar({
     { title: 'Manage Property', link: '/superadmin/properties', icon: <PropertyIcon /> },
     // { title: 'Property Request', link: '/superadmin/property-request', icon: <PropertyIcon /> },
     { title: 'Bookings', link: '/superadmin/bookings', icon: <BookingIcon /> },
-    { title: 'Payment History', link: '/superadmin/payment-history', icon: <PaymentHistoryIcon /> },
+    // { title: 'Payment History', link: '/superadmin/payment-history', icon: <PaymentHistoryIcon /> },
     { title: 'Calendar', link: '/superadmin/calendar', icon: <CalendarIcon /> },
     { title: 'Reviews', link: '/superadmin/reviews', icon: <ReviewsIcon /> },
     { title: 'Users', link: '/superadmin/users', icon: <ProfileIcon /> },

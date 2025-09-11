@@ -49,7 +49,11 @@ export default function PropertyPreferencesSection({ propertyPreferences, onUpda
       setSaving(true);
       setError(null);
 
-      const result = await onUpdate(form);
+      const formData = {
+        ...form
+      };
+
+      const result = await onUpdate(formData);
 
       if (result.success) {
         setSuccess(result.message);
@@ -68,7 +72,8 @@ export default function PropertyPreferencesSection({ propertyPreferences, onUpda
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     if (type === 'number') {
-      setForm({ ...form, [name]: Number(value) });
+      // Convert to number, use 0 for empty strings
+      setForm({ ...form, [name]: value === '' ? 0 : Number(value) });
     } else {
       setForm({ ...form, [name]: value });
     }
@@ -126,6 +131,7 @@ export default function PropertyPreferencesSection({ propertyPreferences, onUpda
                 >
                   <option value="">Select property type</option>
                   <option value="apartment">Apartment</option>
+                  <option value="townhouse">Townhouse</option>
                   <option value="house">House</option>
                   <option value="villa">Villa</option>
                   <option value="condo">Condo</option>
@@ -139,11 +145,9 @@ export default function PropertyPreferencesSection({ propertyPreferences, onUpda
                 <input
                   type="number"
                   name="maxPrice"
-                  value={form.maxPrice}
+                  value={form.maxPrice === 0 ? '' : form.maxPrice}
                   onChange={handleChange}
-                  min="0"
                   step="10"
-                  placeholder="0"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>

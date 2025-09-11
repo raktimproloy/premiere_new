@@ -7,6 +7,7 @@ import Sidebar from './Sidebar';
 import Header from "./Header";
 import RoleProtection from '@/components/common/RoleProtection';
 import CrispChat from '@/components/common/CrispChat';
+import AuthDebugger from '@/components/common/AuthDebugger';
 
 interface UserData {
   _id: string;
@@ -32,14 +33,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // Check authentication and role
   useEffect(() => {
+    // Only redirect if we're not loading
     if (!loading) {
       if (!isAuthenticated) {
+        console.log('AdminLayout: User not authenticated, redirecting to login');
         router.replace('/login');
         return;
       }
 
       // Check if user has admin role
       if (role !== 'admin') {
+        console.log(`AdminLayout: User role (${role}) is not admin, redirecting to home`);
         router.replace('/');
         return;
       }
@@ -63,12 +67,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   // Show loading while checking authentication
-  if (loading || !isAuthenticated || role !== 'admin') {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#F7B730]"></div>
       </div>
     );
+  }
+
+  // If not authenticated or wrong role, don't render the layout
+  if (!isAuthenticated || role !== 'admin') {
+    return null;
   }
 
   // Convert auth user to UserData format for Header
@@ -98,6 +107,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <RoleProtection requiredRole="admin">
       <div className="relative flex h-screen bg-gray-50">
         <CrispChat />
+        <AuthDebugger />
         {/* Mobile sidebar overlay */}
         {sidebarOpen && isMobile && (
           <div 

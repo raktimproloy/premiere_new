@@ -193,7 +193,7 @@ const FooterSection = () => {
       <footer className="bg-[#100A55] text-white pt-44 sm:pt-50 md:pt-64 pb-8 sm:pb-12 relative">
 
         {
-          pathname !== "/book-now" ? 
+          !pathname.includes("/book-now") ? 
 
         <div className="absolute top-0 left-0 right-0 z-10 max-w-7xl mx-auto px-4 pt-4 sm:px-6 lg:px-8 -mt-40 sm:-mt-36 md:-mt-32">
           <div className="bg-[#586DF7] rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden">

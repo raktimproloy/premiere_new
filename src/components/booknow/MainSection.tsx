@@ -499,7 +499,7 @@ export default function MainSection(props: MainSectionProps) {
                   </div>
                 )}
               </div>
-              <div className="border-t border-gray-200 pt-4 mt-4 mb-4 border-dashed">
+              {/* <div className="border-t border-gray-200 pt-4 mt-4 mb-4 border-dashed">
                 <div className="font-semibold mb-2">Extra Services</div>
                 <div className="space-y-2">
                   {[{ id: 'breakfast', label: 'Breakfast', price: 9.00 }, { id: 'lunch', label: 'Lunch', price: 12.00 }, { id: 'driver', label: 'Dinner', price: 12.00 }].map((service) => (
@@ -515,7 +515,7 @@ export default function MainSection(props: MainSectionProps) {
                     </label>
                   ))}
                 </div>
-              </div>
+              </div> */}
               
               {/* Pricing Information */}
               {!checkIn || !checkOut ? (
@@ -591,14 +591,14 @@ export default function MainSection(props: MainSectionProps) {
                     <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
                 </button>
-                <div className="flex items-center justify-center gap-4 mt-2">
+                {/* <div className="flex items-center justify-center gap-4 mt-2">
                   <button className="p-2 rounded-full border border-gray-200 hover:bg-gray-100">
                     <HeartIcon/>
                   </button>
                   <button className="p-2 rounded-full border border-gray-200 hover:bg-gray-100">
                     <ShareIcon/>
                   </button>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

@@ -33,26 +33,40 @@ const Bookings = () => {
   const [requests, setRequests] = useState<BookingRequest[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<BookingRequest[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('active');
-  const [currentOffset, setCurrentOffset] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalBookings, setTotalBookings] = useState<number>(0);
   const [selectedRequest, setSelectedRequest] = useState<BookingRequest | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paginationLoading, setPaginationLoading] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
   console.log(requests)
   const itemsPerPage = 8;
 
   // Fetch bookings from API with pagination
-  const fetchBookings = async (offset: number = 0) => {
+  const fetchBookings = async (page: number = 1) => {
     setLoading(true);
     setError(null);
     
     try {
       const limit = 8;
       const sinceDate = '2024-01-01T00:00:00Z';
+      const offset = (page - 1) * limit; // Convert page to offset (page 1 = offset 0)
       
-      const response = await fetch(`/api/bookings/all?limit=${limit}&offset=${offset}&since=${sinceDate}`);
+      // Build query parameters
+      const params = new URLSearchParams({
+        limit: limit.toString(),
+        offset: offset.toString(),
+        since: sinceDate
+      });
+      
+      // Add status filter if not 'active' (which means all bookings)
+      if (statusFilter !== 'active') {
+        params.append('status', statusFilter);
+      }
+      
+      const response = await fetch(`/api/bookings/all?${params.toString()}`);
       
       if (!response.ok) {
         const data = await response.json();
@@ -75,35 +89,41 @@ const Bookings = () => {
       setError(err instanceof Error ? err.message : 'Failed to fetch bookings');
     } finally {
       setLoading(false);
+      setStatusLoading(false);
+      setPaginationLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchBookings(currentOffset);
-  }, [currentOffset]);
+    fetchBookings(currentPage);
+  }, [currentPage, statusFilter]);
 
-  // Filter requests based on status
+  // Handle status filter change with loading
+  const handleStatusChange = (newStatus: string) => {
+    setStatusLoading(true);
+    setStatusFilter(newStatus);
+    setCurrentPage(1);
+  };
+
+  // Reset to page 1 when status filter changes
   useEffect(() => {
-    let result = [...requests];
-    if (statusFilter !== 'active') {
-      result = result.filter(request => request.status === statusFilter);
-    }
-    setFilteredRequests(result);
-  }, [statusFilter, requests]);
+    setCurrentPage(1);
+  }, [statusFilter]);
+
+  // Since we're now filtering on the server side, we don't need client-side filtering
+  useEffect(() => {
+    setFilteredRequests(requests);
+  }, [requests]);
 
   // Status badge styling
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Pending':
+      case 'pending':
         return 'bg-[#F7B730] text-white';
-      case 'Occupied':
-        return 'bg-[#586DF7] text-white';
-      case 'Approved':
+      case 'active':
         return 'bg-green-500 text-white';
-      case 'Cancelled':
+      case 'canceled':
         return 'bg-red-500 text-white';
-      case 'Completed':
-        return 'bg-green-400 text-white';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -112,31 +132,24 @@ const Bookings = () => {
   // Pagination controls
   const handleNext = async () => {
     setPaginationLoading(true);
-    const newOffset = currentOffset + itemsPerPage;
-    setCurrentOffset(newOffset);
-    setPaginationLoading(false);
+    const newPage = currentPage + 1;
+    setCurrentPage(newPage);
   };
 
   const handlePrevious = async () => {
     setPaginationLoading(true);
-    const newOffset = Math.max(0, currentOffset - itemsPerPage);
-    setCurrentOffset(newOffset);
-    setPaginationLoading(false);
+    const newPage = Math.max(1, currentPage - 1);
+    setCurrentPage(newPage);
   };
 
   // Check if next button should be enabled
   const canGoNext = () => {
-    return requests.length === itemsPerPage ;
+    return requests.length === itemsPerPage;
   };
 
   // Check if previous button should be enabled
   const canGoPrevious = () => {
-    return currentOffset >= itemsPerPage;
-  };
-
-  // Calculate current page for display
-  const getCurrentPage = () => {
-    return Math.floor(currentOffset / itemsPerPage) + 1;
+    return currentPage > 1;
   };
 
   // Calculate total pages for display
@@ -146,7 +159,6 @@ const Bookings = () => {
   
   // Render pagination buttons
   const renderPagination = () => {
-    const currentPage = getCurrentPage();
     const totalPages = getTotalPages();
     
     return (
@@ -168,7 +180,7 @@ const Bookings = () => {
         </button>
         
         <span className="px-3 py-1 text-sm text-gray-700">
-          Page {currentPage} of {totalPages}
+          Page No: {currentPage}
         </span>
         
         <button
@@ -187,9 +199,9 @@ const Bookings = () => {
           )}
         </button>
         
-        <span className="text-sm text-gray-600 ml-2">
-          Showing {currentOffset + 1} - {Math.min(currentOffset + requests.length, totalBookings)} of {totalBookings} bookings
-        </span>
+        {/* <span className="text-sm text-gray-600 ml-2">
+          Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalBookings)} of {totalBookings} bookings
+        </span> */}
       </div>
     );
   };
@@ -233,30 +245,32 @@ const Bookings = () => {
                 type="radio"
                 name="statusFilter"
                 checked={statusFilter === 'active'}
-                onChange={() => setStatusFilter('active')}
+                onChange={() => handleStatusChange('active')}
                 className="sr-only"
+                disabled={statusLoading || paginationLoading}
                 />
                 <span className={`px-5 py-2 rounded-full text-sm font-medium ${
                 statusFilter === 'active' 
                     ? 'bg-green-500 text-white ' 
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}>
-                All Bookings
+                } ${(statusLoading || paginationLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                Active
                 </span>
             </label>
             <label className="flex items-center cursor-pointer">
                 <input
                 type="radio"
                 name="statusFilter"
-                checked={statusFilter === 'Pending'}
-                onChange={() => setStatusFilter('Pending')}
+                checked={statusFilter === 'pending'}
+                onChange={() => handleStatusChange('pending')}
                 className="sr-only"
+                disabled={statusLoading || paginationLoading}
                 />
                 <span className={`px-5 py-2 rounded-full text-sm font-medium ${
-                statusFilter === 'Pending' 
+                statusFilter === 'pending' 
                     ? 'bg-[#F7B730] text-white ' 
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}>
+                } ${(statusLoading || paginationLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 Pending
                 </span>
             </label>
@@ -264,37 +278,22 @@ const Bookings = () => {
                 <input
                 type="radio"
                 name="statusFilter"
-                checked={statusFilter === 'Approved'}
-                onChange={() => setStatusFilter('Approved')}
+                checked={statusFilter === 'canceled'}
+                onChange={() => handleStatusChange('canceled')}
                 className="sr-only"
+                disabled={statusLoading || paginationLoading}
                 />
                 <span className={`px-5 py-2 rounded-full text-sm font-medium ${
-                statusFilter === 'Approved' 
-                    ? 'bg-green-500 text-white ' 
+                statusFilter === 'canceled' 
+                    ? 'bg-red-500 text-white ' 
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}>
-                Approved
-                </span>
-            </label>
-            <label className="flex items-center cursor-pointer">
-                <input
-                type="radio"
-                name="statusFilter"
-                checked={statusFilter === 'Completed'}
-                onChange={() => setStatusFilter('Completed')}
-                className="sr-only"
-                />
-                <span className={`px-5 py-2 rounded-full text-sm font-medium ${
-                statusFilter === 'Completed' 
-                    ? 'bg-green-400 text-white ' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}>
-                Completed
+                } ${(statusLoading || paginationLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                Canceled
                 </span>
             </label>
           </div>
         </div>
-        {loading && <div className="p-8 text-center text-gray-500">Loading bookings...</div>}
+        {(loading || statusLoading || paginationLoading) && <div className="p-8 text-center text-gray-500">Loading bookings...</div>}
         {error && <div className="p-8 text-center text-red-500">{error}</div>}
         {/* Booking Request Table */}
         <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -314,7 +313,16 @@ const Bookings = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredRequests.length > 0 ? (
+                {(statusLoading || paginationLoading) ? (
+                  <tr>
+                    <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                      <div className="flex items-center justify-center">
+                        <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin mr-2"></div>
+                        Loading bookings...
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredRequests.length > 0 ? (
                   filteredRequests.map((request) => (
                     <tr key={request.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{request.personName}</td>

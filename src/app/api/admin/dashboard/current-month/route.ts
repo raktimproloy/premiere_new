@@ -13,6 +13,9 @@ interface Booking {
   listing_site?: string;
   total_amount?: number;
   total_owed?: number;
+  type: string; // Added type property
+  property_id?: number;
+  property?: { id: number; name?: string };
   [key: string]: any;
 }
 
@@ -136,7 +139,25 @@ export async function GET(request: NextRequest) {
     const start = startOfMonth(now).toISOString();
     const end = endOfMonth(addMonths(now, 3)).toISOString();
 
-    const bookings = await fetchBookings(start, end, propertyIds);
+    let bookings = await fetchBookings(start, end, propertyIds);
+    
+    // Extra guard: post-filter by propertyIds if present
+    if (Array.isArray(propertyIds) && propertyIds.length > 0) {
+      const idSet = new Set(propertyIds);
+      bookings = bookings.filter(b => {
+        const pid = typeof b.property_id === 'number' ? b.property_id : (typeof b.property?.id === 'number' ? b.property.id : undefined);
+        return typeof pid === 'number' ? idSet.has(pid) : false;
+      });
+    } else if (role === 'admin' && (!propertyIds || propertyIds.length === 0)) {
+      // If admin has no properties, return empty data
+      return NextResponse.json({
+        role,
+        totalBookings: 0,
+        totalRevenue: 0,
+        occupancyRate: 0
+      });
+    }
+    
     const currentMonthData = calculateMonthlyData(bookings, now);
 
     // Filter bookings for response

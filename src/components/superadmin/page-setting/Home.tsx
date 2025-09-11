@@ -23,12 +23,37 @@ export default function Home() {
     const [message, setMessage] = useState('');
     const [uploadingImage, setUploadingImage] = useState<string | null>(null);
     const [uploadedImages, setUploadedImages] = useState<Set<string>>(new Set());
+    const [loadingImages, setLoadingImages] = useState<Set<string>>(new Set());
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Load data on component mount
     useEffect(() => {
         loadHomeSettings();
     }, []);
+
+    // Function to validate image URL
+    const isValidImageUrl = (url: string): boolean => {
+        if (!url || url.trim() === '') return false;
+        
+        // Check if it's a valid URL
+        try {
+            new URL(url);
+            return true;
+        } catch {
+            // Check if it's a relative path starting with /
+            return url.startsWith('/');
+        }
+    };
+
+    // Function to test image URL
+    const testImageUrl = async (url: string): Promise<boolean> => {
+        try {
+            const response = await fetch(url, { method: 'HEAD' });
+            return response.ok;
+        } catch {
+            return false;
+        }
+    };
 
     const loadHomeSettings = async () => {
         try {
@@ -37,6 +62,7 @@ export default function Home() {
             const result = await response.json();
             
             if (result.success) {
+                console.log('Loaded home settings:', result.data);
                 setPartners(result.data.partners || []);
                 setFeatures(result.data.features || []);
             }
@@ -65,7 +91,7 @@ export default function Home() {
             });
 
             const result = await response.json();
-            
+            console.log(result);
             if (result.success) {
                 setMessage('Home page settings saved successfully!');
                 setTimeout(() => setMessage(''), 3000);
@@ -163,6 +189,7 @@ export default function Home() {
                 setMessage('Uploading image...');
                 
                 const imageUrl = await uploadImageToCloudinary(file);
+                console.log('Image uploaded successfully:', imageUrl);
                 
                 // Update the partner with the new image URL
                 updatePartner(id, 'image', imageUrl);
@@ -272,68 +299,140 @@ export default function Home() {
                     </button>
                 </div>
 
-                <div className="grid gap-4">
+                <div className="grid gap-6">
                     {partners.map((partner) => (
-                        <div key={partner.id} className="border border-gray-200 rounded-lg p-4">
-                            <div className="flex items-start gap-4">
-                                {/* Partner Image */}
-                                <div className="w-20 h-20 relative bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <div key={partner.id} className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between mb-4">
+                                <h4 className="text-sm font-medium text-gray-700">
+                                    Partner {partners.indexOf(partner) + 1}
+                                </h4>
+                                <button
+                                    onClick={() => removePartner(partner.id)}
+                                    className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                            <div className="flex items-start gap-6">
+                                {/* Image Display Section */}
+                                <div className="flex-shrink-0">
+                                    <div className="w-32 h-32 relative bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 overflow-hidden">
                                     {uploadingImage === partner.id ? (
-                                        <div className="w-full h-full bg-blue-100 rounded-lg flex items-center justify-center">
-                                            <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+                                            <div className="w-full h-full bg-blue-50 rounded-lg flex items-center justify-center">
+                                                <div className="text-center">
+                                                    <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-2" />
+                                                    <span className="text-xs text-blue-600">Uploading...</span>
+                                                </div>
                                         </div>
-                                    ) : partner.image ? (
+                                        ) : partner.image && isValidImageUrl(partner.image) ? (
                                         <div className="relative w-full h-full">
                                             <img 
                                                 src={partner.image} 
                                                 alt="Partner" 
-                                                className={`w-full h-full object-cover rounded-lg ${
+                                                className={`w-full h-full object-contain rounded-lg ${
                                                     uploadedImages.has(partner.id) ? 'ring-2 ring-green-500' : ''
                                                 }`}
                                                 onError={(e) => {
-                                                    e.currentTarget.src = '';
-                                                }}
-                                            />
-                                            {uploadedImages.has(partner.id) && (
-                                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center">
-                                                    <span className="text-xs">✓</span>
+                                                        console.error('Image failed to load:', partner.image);
+                                                        e.currentTarget.style.display = 'none';
+                                                        const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                                                        if (placeholder) {
+                                                            placeholder.style.display = 'flex';
+                                                        }
+                                                        setLoadingImages(prev => {
+                                                            const newSet = new Set(prev);
+                                                            newSet.delete(partner.id);
+                                                            return newSet;
+                                                        });
+                                                    }}
+                                                    onLoad={(e) => {
+                                                        e.currentTarget.style.display = 'block';
+                                                        const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                                                        if (placeholder) {
+                                                            placeholder.style.display = 'none';
+                                                        }
+                                                        setLoadingImages(prev => {
+                                                            const newSet = new Set(prev);
+                                                            newSet.delete(partner.id);
+                                                            return newSet;
+                                                        });
+                                                    }}
+                                                    onLoadStart={() => {
+                                                        setLoadingImages(prev => new Set([...prev, partner.id]));
+                                                    }}
+                                                />
+                                                {/* Loading indicator */}
+                                                {loadingImages.has(partner.id) && (
+                                                    <div className="absolute inset-0 bg-gray-200 rounded-lg flex items-center justify-center">
+                                                        <Loader2 className="w-6 h-6 text-gray-500 animate-spin" />
+                                                    </div>
+                                                )}
+                                                {/* Fallback placeholder */}
+                                                <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center" style={{ display: 'none' }}>
+                                                    <div className="text-center">
+                                                        <span className="text-gray-500 text-sm">Failed to load</span>
+                                                    </div>
+                                                </div>
+                                                {/* Success indicator */}
+                                                {uploadedImages.has(partner.id) && (
+                                                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg">
+                                                        <span className="text-xs font-bold">✓</span>
                                                 </div>
                                             )}
+                                                {/* Remove image button */}
+                                                <button
+                                                    onClick={() => removeImage(partner.id)}
+                                                    className="absolute -top-2 -left-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
                                         </div>
                                     ) : (
-                                        <div className="w-full h-full bg-gray-300 rounded-lg flex items-center justify-center">
-                                            <span className="text-gray-500 text-xs">No Image</span>
+                                            <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+                                                <div className="text-center">
+                                                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                                                    <span className="text-gray-500 text-sm">No Image</span>
+                                                </div>
                                         </div>
                                     )}
+                                    </div>
+                                </div>
                                     
+                                {/* Upload Controls Section */}
+                                <div className="flex-1 space-y-4">
                                     {/* Upload Button */}
-                                    <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
+                                    <div className="flex items-center gap-3">
                                         <button
                                             onClick={() => triggerFileInput(partner.id)}
                                             disabled={uploadingImage === partner.id}
-                                            className="opacity-0 hover:opacity-100 transition-opacity p-1 bg-white rounded-full shadow-lg disabled:opacity-50"
+                                            className="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                         >
                                             {uploadingImage === partner.id ? (
-                                                <Loader2 className="w-3 h-3 text-gray-700 animate-spin" />
+                                                <>
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                    Uploading...
+                                                </>
                                             ) : (
-                                                <Upload className="w-3 h-3 text-gray-700" />
+                                                <>
+                                                    <Upload className="w-4 h-4" />
+                                                    {partner.image ? 'Change Image' : 'Upload Image'}
+                                                </>
                                             )}
                                         </button>
-                                    </div>
 
-                                    {/* Remove Image Button */}
                                     {partner.image && (
                                         <button
                                             onClick={() => removeImage(partner.id)}
-                                            className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                                                className="px-3 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
                                         >
-                                            <X className="w-3 h-3" />
+                                                <X className="w-4 h-4" />
+                                                Remove
                                         </button>
                                     )}
                                 </div>
 
                                 {/* Partner Details */}
-                                <div className="flex-1 space-y-3">
+                                    <div className="space-y-3">
                                     <input
                                         type="text"
                                         placeholder="Partner Name"
@@ -348,15 +447,8 @@ export default function Home() {
                                         onChange={(e) => updatePartner(partner.id, 'website', e.target.value)}
                                         className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                     />
+                                    </div>
                                 </div>
-
-                                {/* Remove Partner Button */}
-                                <button
-                                    onClick={() => removePartner(partner.id)}
-                                    className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors flex-shrink-0"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
                             </div>
                         </div>
                     ))}

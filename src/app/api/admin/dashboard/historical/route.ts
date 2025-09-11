@@ -3,9 +3,6 @@ import { startOfMonth, endOfMonth, subMonths, addMonths, parseISO, differenceInD
 import { authService } from '@/lib/auth';
 import clientPromise from '@/lib/mongodb';
 
-// In-memory cache for admin historical data
-let adminHistoricalCache: { timestamp: number; data: any } | null = null;
-const CACHE_DURATION_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 const TOTAL_PROPERTIES = 10; // Should come from environment/config
 
@@ -195,16 +192,13 @@ function processHistoricalData(bookings: Booking[]) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Check in-memory cache
-    if (adminHistoricalCache && Date.now() - adminHistoricalCache.timestamp < CACHE_DURATION_MS) {
-      return NextResponse.json(adminHistoricalCache.data);
-    }
     // Auth and role
     const token = request.cookies.get('authToken')?.value || '';
     const result = token ? await authService.verifyToken(token) : { valid: false } as any;
     const role = result?.user?.role || 'user';
     const email = result?.user?.email || '';
     let propertyIds: number[] | undefined = undefined;
+    
     if (role === 'admin' && email) {
       try {
         const client = await clientPromise;
@@ -231,6 +225,16 @@ export async function GET(request: NextRequest) {
         const pid = typeof b.property_id === 'number' ? b.property_id : (typeof b.property?.id === 'number' ? b.property.id : undefined);
         return typeof pid === 'number' ? idSet.has(pid) : false;
       });
+    } else if (role === 'admin' && (!propertyIds || propertyIds.length === 0)) {
+      // If admin has no properties, return empty data
+      return NextResponse.json({
+        role,
+        previousRevenue: [],
+        occupancyTrends: [],
+        bookingSources: { total: 0, sources: [] },
+        nightlyRates: [],
+        bookings: []
+      });
     }
     const data = processHistoricalData(bookings);
     const responseData = {
@@ -240,11 +244,6 @@ export async function GET(request: NextRequest) {
       bookingSources: data.bookingSources,
       nightlyRates: role === 'admin' ? data.nightlyRateData : [],
       bookings: data.rawBookings
-    };
-    // Save to in-memory cache
-    adminHistoricalCache = {
-      timestamp: Date.now(),
-      data: responseData
     };
     return NextResponse.json(responseData);
   } catch (error) {

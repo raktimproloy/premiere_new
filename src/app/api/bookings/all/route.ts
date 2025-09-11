@@ -58,7 +58,7 @@ interface TransformedBooking {
   guest?: Guest;
 }
 
-async function fetchAllBookings(limit: number = 50, offset: number = 0, sinceDate?: string, propertyIds?: number[]) {
+async function fetchAllBookings(limit: number = 50, offset: number = 0, sinceDate?: string, propertyIds?: number[], status?: string) {
   if (!username || !password || !v2Url) {
     throw new Error('API credentials not configured');
   }
@@ -68,7 +68,29 @@ async function fetchAllBookings(limit: number = 50, offset: number = 0, sinceDat
   const propertyParam = Array.isArray(propertyIds) && propertyIds.length > 0
     ? `&property_ids=${propertyIds.join(',')}`
     : '';
-  const url = `${v2Url}/bookings?limit=${limit}&offset=${offset}${sinceParam}${propertyParam}`;
+  // Map our status values to OwnerRez API expected values
+  const mapStatusToOwnerRez = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'pending';
+      case 'canceled':
+        return 'canceled';
+      default:
+        return status;
+    }
+  };
+  
+  // Only add status parameter if it's not 'active' (which means all bookings)
+  const statusParam = status && status !== 'active' ? `&status=${mapStatusToOwnerRez(status)}` : '&status=active';
+  const url = `${v2Url}/bookings?limit=${limit}&offset=${offset}${sinceParam}${propertyParam}${statusParam}`;
+  
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('API Request:', {
+      status: status,
+      statusParam: statusParam,
+      url: url
+    });
+  }
 
   const response = await fetch(url, {
     method: 'GET',
@@ -160,6 +182,7 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
     const offset = parseInt(searchParams.get('offset') || '0');
     const sinceDate = searchParams.get('since') || '2024-01-01T00:00:00Z';
+    const status = searchParams.get('status');
     // Authenticate to determine role and filter
     const token = request.cookies.get('authToken')?.value || '';
     const authResult = token ? await authService.verifyToken(token) : { valid: false } as any;
@@ -184,14 +207,15 @@ export async function GET(request: NextRequest) {
 
     // guestSince is no longer used since we fetch guests by ID only
     const pidKey = propertyIds && propertyIds.length > 0 ? `&pids=${propertyIds.join(',')}` : '';
-    const cacheKey = `limit=${limit}&offset=${offset}&since=${sinceDate}${pidKey}`;
+    const statusKey = status ? `&status=${status}` : '';
+    const cacheKey = `limit=${limit}&offset=${offset}&since=${sinceDate}${pidKey}${statusKey}`;
     const cached = bookingsCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
       return NextResponse.json(cached.payload, { headers: { 'X-Cache': 'HIT' } });
     }
 
     // Fetch bookings first (filtered for admins)
-    const bookingsData = await fetchAllBookings(limit, offset, sinceDate, propertyIds);
+    const bookingsData = await fetchAllBookings(limit, offset, sinceDate, propertyIds, status || undefined);
 
     if (process.env.NODE_ENV !== 'production') {
       console.log("bookings-meta", { items: Array.isArray(bookingsData?.items) ? bookingsData.items.length : 0, role, filtered: Array.isArray(propertyIds) && propertyIds.length > 0 });

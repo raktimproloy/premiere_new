@@ -84,7 +84,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const authCheckInProgress = useRef(false);
   const lastAuthCheck = useRef<number>(0);
   const signupInProgress = useRef(false);
-  const AUTH_CHECK_INTERVAL = 30000; // 30 seconds
+  const redirectInProgress = useRef(false);
+  const lastSuccessfulAuth = useRef<number>(0);
+  const AUTH_CHECK_INTERVAL = 30000; // Increased to 30 seconds to prevent rate limiting
+  const SUCCESSFUL_AUTH_CACHE_TIME = 300000; // 5 minutes cache for successful auth
 
   // Check authentication status on mount
   useEffect(() => {
@@ -95,6 +98,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     return () => clearTimeout(timer);
   }, []);
+
+  // Periodic authentication check to prevent session loss
+  useEffect(() => {
+    if (isAuthenticated) {
+      const interval = setInterval(() => {
+        // Only check if we're not already checking and not in the middle of auth operations
+        if (!authCheckInProgress.current && !signupInProgress.current && !redirectInProgress.current) {
+          checkAuthStatus();
+        }
+      }, 120000); // Check every 2 minutes to prevent rate limiting
+
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
 
   const checkAuthStatus = async () => {
     console.log('checkAuthStatus called'); // Debug log
@@ -119,29 +136,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
+    // If we have a recent successful auth, use cached result
+    if (isAuthenticated && now - lastSuccessfulAuth.current < SUCCESSFUL_AUTH_CACHE_TIME) {
+      console.log('Using cached successful auth result'); // Debug log
+      setLoading(false);
+      return;
+    }
+
     try {
       authCheckInProgress.current = true;
       setLoading(true);
       lastAuthCheck.current = now;
       
-      console.log('Checking server-side authentication...'); // Debug log
-      
-      // Check server-side authentication (for regular users with HTTP-only cookies)
-      const response = await fetch('/api/auth/me');
-      const data = await response.json();
-
-      console.log('Auth check response:', data); // Debug log
-
-      if (data.success && data.user) {
-        console.log('User authenticated via server'); // Debug log
-        setUser(data.user);
-        setIsAuthenticated(true);
-        setRole(data.user.role);
-        setLoading(false);
-        return;
-      }
-
-      // If server-side auth fails, check localStorage for dummy admin/superadmin users only
+      // First check localStorage for dummy admin/superadmin users
       const storedUser = localStorage.getItem('user');
       
       if (storedUser) {
@@ -154,6 +161,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setIsAuthenticated(true);
             setRole(userData.role);
             setLoading(false);
+            setError(null); // Clear any previous errors
+            lastSuccessfulAuth.current = now; // Update successful auth timestamp
+            authCheckInProgress.current = false;
             return;
           }
         } catch (error) {
@@ -161,6 +171,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Clear invalid data
           localStorage.removeItem('user');
         }
+      }
+      
+      console.log('Checking server-side authentication...'); // Debug log
+      
+      // Check server-side authentication (for regular users with HTTP-only cookies)
+      const response = await fetch('/api/auth/me');
+      const data = await response.json();
+
+      console.log('Auth check response:', data); // Debug log
+
+      // Handle rate limiting gracefully
+      if (response.status === 429) {
+        console.log('Rate limited, using cached auth state if available'); // Debug log
+        // If we're already authenticated, keep the current state
+        if (isAuthenticated) {
+          setLoading(false);
+          authCheckInProgress.current = false;
+          return;
+        }
+        // If not authenticated, fall back to not authenticated
+      } else if (data.success && data.user) {
+        console.log('User authenticated via server'); // Debug log
+        setUser(data.user);
+        setIsAuthenticated(true);
+        setRole(data.user.role);
+        setLoading(false);
+        setError(null); // Clear any previous errors
+        lastSuccessfulAuth.current = now; // Update successful auth timestamp
+        authCheckInProgress.current = false;
+        return;
       }
 
       console.log('No authentication found'); // Debug log
@@ -181,6 +221,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const handleSuccessfulAuth = (userData: User) => {
     console.log('handleSuccessfulAuth called with:', userData); // Debug log
     
+    // Prevent multiple redirects
+    if (redirectInProgress.current) {
+      console.log('Redirect already in progress, skipping'); // Debug log
+      return;
+    }
+    
     setUser(userData);
     setIsAuthenticated(true);
     setRole(userData.role);
@@ -190,6 +236,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Add a small delay to ensure state updates are processed
     setTimeout(() => {
+      if (redirectInProgress.current) {
+        console.log('Redirect already in progress, skipping'); // Debug log
+        return;
+      }
+      
+      redirectInProgress.current = true;
       console.log('Executing redirect logic...'); // Debug log
       
       // Check for booking path redirect
@@ -227,6 +279,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           window.location.href = redirectPath;
         }
       }
+      
+      // Reset redirect flag after a delay
+      setTimeout(() => {
+        redirectInProgress.current = false;
+      }, 1000);
     }, 500); // Increased delay to ensure state updates
   };
 
@@ -380,10 +437,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsAuthenticated(false);
     setUser(null);
     setRole(null);
+    setError(null);
     localStorage.removeItem('user');
     
     // Reset auth check timestamp to allow immediate re-check if needed
     lastAuthCheck.current = 0;
+    
+    // Reset all progress flags
+    authCheckInProgress.current = false;
+    signupInProgress.current = false;
+    redirectInProgress.current = false;
     
     // Redirect to home page
     router.push('/');
@@ -407,6 +470,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     role,
     testRedirect
   }), [isAuthenticated, user, loading, error, role]);
+
+  // Debug logging for authentication state changes
+  useEffect(() => {
+    console.log('AuthContext State Update:', {
+      isAuthenticated,
+      role,
+      loading,
+      hasUser: !!user,
+      userId: user?._id,
+      userRole: user?.role
+    });
+  }, [isAuthenticated, role, loading, user]);
 
   return (
     <AuthContext.Provider value={contextValue}>

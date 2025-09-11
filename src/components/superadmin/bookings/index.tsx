@@ -38,7 +38,7 @@ const Bookings = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   
   const itemsPerPage = 8;
-  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredRequests.length / itemsPerPage));
 
   
   // Mock data - matches the image
@@ -64,9 +64,17 @@ const Bookings = () => {
     setCurrentPage(1);
   }, [statusFilter, requests]);
 
+  // Reset to page 1 if current page exceeds total pages
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [totalPages]);
+
   // Pagination
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedRequests = filteredRequests.slice(startIndex, startIndex + itemsPerPage);
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredRequests.length);
+  const paginatedRequests = filteredRequests.slice(startIndex, endIndex);
 
   // Status badge styling
   const getStatusBadge = (status: string) => {
@@ -82,9 +90,8 @@ const Bookings = () => {
 
   // Pagination controls
   const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    const validPage = Math.max(1, Math.min(page, totalPages));
+    setCurrentPage(validPage);
   };
   
   // Render pagination buttons
@@ -143,9 +150,6 @@ const Bookings = () => {
           <FiChevronRight size={20} />
         </button>
         
-        <span className="text-sm text-gray-600 ml-2">
-          Showing {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredRequests.length)} of {filteredRequests.length} properties
-        </span>
       </div>
     );
   };
@@ -279,7 +283,7 @@ const Bookings = () => {
           
           {/* Pagination */}
           {filteredRequests.length > itemsPerPage && (
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-center items-center">
               {renderPagination()}
             </div>
           )}
