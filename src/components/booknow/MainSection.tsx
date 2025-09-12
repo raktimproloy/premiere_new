@@ -8,6 +8,11 @@ import { getSearchSession, saveBookingPath } from '@/utils/cookies';
 import { useAuth } from '@/components/common/AuthContext';
 import PricingSkeleton from './PricingSkeleton';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import AboutSection from './AboutSection';
+import AvailabilitySection from './AvailabilitySection';
+import MapSection from './MapSection';
+import ReviewsSection from './ReviewsSection';
+import PropertiesList from "./Properties_list"  
 
 const images = [
   '/images/booknow/image1.png',
@@ -130,6 +135,9 @@ export default function MainSection(props: MainSectionProps) {
       }
     }, [isAuthenticated, user]);
 
+    console.log(
+      property
+    )
     // Use property medium thumbnail if available, otherwise fallback
     const mainImage = property?.thumbnail_url_medium || images[0];
     const [checkInDate, setCheckInDate] = useState<Date | null>(null);
@@ -657,6 +665,11 @@ export default function MainSection(props: MainSectionProps) {
           </div>
         </div>
       </section>
+      <AboutSection property={property}/>
+      {/* <AvailabilitySection/> */}
+      <MapSection property={property}/>
+      <ReviewsSection id={id}/>
+      <PropertiesList/>
       </>
     );
 }

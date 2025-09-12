@@ -27,7 +27,6 @@
         "Airbnb": "1052117495221241968"
       },
       "longitude": -80.2007511,
-      "max_children": 0,
       "max_guests": 16,
       "max_pets": 0,
       "name": "Wynwood Townhomes w/Heated Pools",
@@ -153,6 +152,6 @@
       "localData": null
     }
   ],
-  "timestamp": 1757580588817,
-  "expiresAt": 1757580888817
+  "timestamp": 1757668349059,
+  "expiresAt": 1757668649059
 }

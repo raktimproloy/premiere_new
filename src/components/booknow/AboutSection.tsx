@@ -1,7 +1,63 @@
 'use client'
 import React, { useState } from 'react';
 
-const AboutSection = () => {
+interface Property {
+  id?: number;
+  name?: string;
+  description?: string;
+  property_type?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  bathrooms_full?: number;
+  bathrooms_half?: number;
+  max_guests?: number;
+  max_pets?: number;
+  check_in?: string;
+  check_out?: string;
+  address?: {
+    street1?: string;
+    street2?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postal_code?: string;
+  };
+  localData?: {
+    description?: string;
+    amenities?: Array<{
+      id: string;
+      name: string;
+      category: string;
+      icon?: string;
+    }>;
+    rules?: Array<{
+      id: string;
+      name: string;
+      description?: string;
+      isAllowed: boolean;
+    }>;
+    policies?: {
+      cancellationPolicy?: string;
+      houseRules?: string[];
+      petPolicy?: string;
+      smokingPolicy?: string;
+    };
+    owner?: {
+      id: string;
+      name: string;
+      email: string;
+      phone?: string;
+    };
+    availability?: {
+      checkInTime?: string;
+      checkOutTime?: string;
+      minStay?: number;
+      maxStay?: number;
+    };
+  };
+}
+
+const AboutSection = ({ property }: { property: Property | null }) => {
   const [activeTab, setActiveTab] = useState('about');
   
   const tabs = [
@@ -9,8 +65,116 @@ const AboutSection = () => {
     { id: 'details', label: 'DETAILS' },
     { id: 'features', label: 'FEATURES' },
     { id: 'terms', label: 'TERMS & RULES' },
-    { id: 'contact', label: 'CONTACT THE HOST' },
+    // { id: 'contact', label: 'CONTACT THE HOST' },
   ];
+
+  // Helper functions to get property data with fallbacks
+  const getPropertyName = () => property?.name || 'Property';
+  
+  const getPropertyDescription = () => {
+    return property?.localData?.description || 
+           property?.description || 
+           'Experience a comfortable and well-appointed stay at this beautiful property. Our space is designed to provide you with all the amenities and comfort you need for a memorable visit.';
+  };
+
+  const getPropertyType = () => {
+    return property?.property_type || 'Private Room / Apartment';
+  };
+
+  const getBedrooms = () => {
+    return property?.bedrooms || 'N/A';
+  };
+
+  const getBathrooms = () => {
+    if (property?.bathrooms_full && property?.bathrooms_half) {
+      return `${property.bathrooms_full} Full, ${property.bathrooms_half} Half Baths`;
+    }
+    return property?.bathrooms ? `${property.bathrooms} Bathrooms` : 'N/A';
+  };
+
+  const getMaxGuests = () => {
+    return property?.max_guests ? `${property.max_guests}+ Guests` : 'N/A';
+  };
+
+  const getCheckInTime = () => {
+    return property?.localData?.availability?.checkInTime || 
+           property?.check_in || 
+           '3:00 PM';
+  };
+
+  const getCheckOutTime = () => {
+    return property?.localData?.availability?.checkOutTime || 
+           property?.check_out || 
+           '11:00 AM';
+  };
+
+  const getAmenities = () => {
+    if (property?.localData?.amenities && property.localData.amenities.length > 0) {
+      return property.localData.amenities.map(amenity => amenity.name);
+    }
+    // Default amenities if none provided
+    return [
+      'High-Speed WiFi',
+      'Air Conditioning',
+      'Fully Equipped Kitchen',
+      'Luxury Bathrooms',
+      'Spacious Living Areas',
+      'Secure Parking'
+    ];
+  };
+
+  const getHouseRules = () => {
+    if (property?.localData?.policies?.houseRules && property.localData.policies.houseRules.length > 0) {
+      return property.localData.policies.houseRules;
+    }
+    // Default house rules
+    return [
+      'No parties or events without prior approval',
+      'No smoking inside the property',
+      'Pets allowed with prior approval (additional fee applies)',
+      'Quiet hours from 10:00 PM to 8:00 AM',
+      'Maximum occupancy must not exceed the number of booked guests'
+    ];
+  };
+
+  const getCancellationPolicy = () => {
+    return property?.localData?.policies?.cancellationPolicy || 
+           'Free cancellation up to 30 days before check-in. 50% refund if canceled between 15-30 days before check-in. No refund if canceled less than 15 days before check-in.';
+  };
+
+  const getSmokingPolicy = () => {
+    return property?.localData?.policies?.smokingPolicy || 
+           'Smoking is allowed outside only. Smoking of any substance is not allowed in the apartment. Guest will be held responsible for all damage caused by smoking including, but not limited to, stains, burns, odors, and removal of debris.';
+  };
+
+  const getPetPolicy = () => {
+    return property?.localData?.policies?.petPolicy || 
+           'Pets are welcome with prior approval. Additional cleaning fees may apply. Please inform us about your pet when booking.';
+  };
+
+  const getOwnerInfo = () => {
+    if (property?.localData?.owner) {
+      return {
+        name: property.localData.owner.name,
+        email: property.localData.owner.email,
+        phone: property.localData.owner.phone
+      };
+    }
+    // Default owner info
+    return {
+      name: 'Property Host',
+      email: 'contact@premierestays.com',
+      phone: '+1 (555) 123-4567'
+    };
+  };
+
+  const getLocationInfo = () => {
+    if (property?.address) {
+      const { city, state, country } = property.address;
+      return `${city || 'Miami'}, ${state || 'FL'}, ${country || 'USA'}`;
+    }
+    return 'Miami, FL, USA';
+  };
 
   return (
     <section className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8 my-8 sm:my-10">
@@ -43,36 +207,39 @@ const AboutSection = () => {
             <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2 sm:mb-3">About this space</h3>
             <div className="space-y-3 sm:space-y-4 text-gray-700 text-sm sm:text-base">
               <p>
-                Enjoy a stylish experience at this centrally-located place in Miami's Design District/Wynwood. 
-                Each side has 3B/2.5BA (6 bedrooms, 4 baths, 2 half baths) with an amazing heated pool. 
-                Ideal for large gatherings. Pick your feel. Located just a short walk away from the Design 
-                District Shops, Wynwood and Midtown.
+                {getPropertyDescription()}
               </p>
-              <p>
-                Feel Free to Come and Go as you please. We have 2 awesome Grills to throw a BBQ and will 
-                provide any assistance to help you have the Miami Vacation of your dreams.
-              </p>
+              
+              {/* Location Info */}
+              {property?.address && (
+                <p className="text-blue-600 font-medium">
+                  Located in {getLocationInfo()}
+                </p>
+              )}
               
               <div className="pt-3 sm:pt-4 mt-4 sm:mt-6">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">Smoking Policy</h3>
                 <p>
-                  Smoking is allowed outside only. Smoking of any substance is not allowed in the apartment. 
-                  Guest will be held responsible for all damage caused by smoking including, but not limited to, 
-                  stains, burns, odors, and removal of debris. Guest acknowledges that in order to remove odor 
-                  caused by smoking, the Host may need to replace blinds, drapes and paint the interior walls 
-                  regardless of when these items were last cleaned, replaced, or repainted.
+                  {getSmokingPolicy()}
+                </p>
+              </div>
+              
+              <div className="pt-3 sm:pt-4 mt-4 sm:mt-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">Pet Policy</h3>
+                <p>
+                  {getPetPolicy()}
                 </p>
               </div>
               
               <div className="pt-3 sm:pt-4 mt-4 sm:mt-6">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">Guest access</h3>
                 <p>
-                  Upon request: Outside guests are more than welcome to come join you to enjoy the property, 
-                  backyard/pool area for small get togethers.
+                  Feel free to come and go as you please. We provide all necessary access information 
+                  and will assist you with any questions about the property or local area.
                 </p>
                 <p className="mt-2">
-                  Upon checkout: please leave gate key/opener on the glass table at the entryway. 
-                  Failure to do so will result in a $100 replacement fee.
+                  Upon checkout: please ensure all doors are locked and keys are returned as instructed. 
+                  Failure to follow checkout procedures may result in additional fees.
                 </p>
               </div>
             </div>
@@ -88,49 +255,42 @@ const AboutSection = () => {
                 <ul className="space-y-2 text-gray-700 text-sm sm:text-base">
                   <li className="flex flex-col sm:flex-row">
                     <span className="font-medium w-full sm:w-32 mb-1 sm:mb-0">Property Type:</span>
-                    <span>Private Room / Apartment</span>
+                    <span>{getPropertyType()}</span>
                   </li>
                   <li className="flex flex-col sm:flex-row">
                     <span className="font-medium w-full sm:w-32 mb-1 sm:mb-0">Accommodates:</span>
-                    <span>16+ Guests</span>
+                    <span>{getMaxGuests()}</span>
                   </li>
                   <li className="flex flex-col sm:flex-row">
                     <span className="font-medium w-full sm:w-32 mb-1 sm:mb-0">Bedrooms:</span>
-                    <span>6 Bedrooms</span>
-                  </li>
-                  <li className="flex flex-col sm:flex-row">
-                    <span className="font-medium w-full sm:w-32 mb-1 sm:mb-0">Beds:</span>
-                    <span>8 Beds</span>
+                    <span>{getBedrooms()} {getBedrooms() !== 'N/A' ? 'Bedrooms' : ''}</span>
                   </li>
                   <li className="flex flex-col sm:flex-row">
                     <span className="font-medium w-full sm:w-32 mb-1 sm:mb-0">Bathrooms:</span>
-                    <span>4 Full, 1 Half Baths</span>
+                    <span>{getBathrooms()}</span>
                   </li>
+                  {property?.max_pets !== undefined && (
+                    <li className="flex flex-col sm:flex-row">
+                      <span className="font-medium w-full sm:w-32 mb-1 sm:mb-0">Max Pets:</span>
+                      <span>{property.max_pets} {property.max_pets === 0 ? 'No pets allowed' : 'Pets allowed'}</span>
+                    </li>
+                  )}
                 </ul>
               </div>
               <div>
                 <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">Amenities</h3>
                 <ul className="space-y-2 text-gray-700 text-sm sm:text-base">
-                  <li className="flex items-center">
-                    <div className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-500">✓</div>
-                    <span>Heated Pool</span>
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-500">✓</div>
-                    <span>BBQ Grills (2)</span>
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-500">✓</div>
-                    <span>Central Location</span>
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-500">✓</div>
-                    <span>Design District Access</span>
-                  </li>
-                  <li className="flex items-center">
-                    <div className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-500">✓</div>
-                    <span>Keyless Entry</span>
-                  </li>
+                  {getAmenities().slice(0, 6).map((amenity, index) => (
+                    <li key={index} className="flex items-center">
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-500">✓</div>
+                      <span>{amenity}</span>
+                    </li>
+                  ))}
+                  {getAmenities().length > 6 && (
+                    <li className="text-gray-500 text-sm">
+                      +{getAmenities().length - 6} more amenities
+                    </li>
+                  )}
                 </ul>
               </div>
             </div>
@@ -141,20 +301,7 @@ const AboutSection = () => {
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Property Features</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {[
-                "Heated Swimming Pool",
-                "BBQ Grill Area",
-                "Designer Furniture",
-                "Smart Home System",
-                "High-Speed WiFi",
-                "Air Conditioning",
-                "Fully Equipped Kitchen",
-                "Luxury Bathrooms",
-                "Spacious Living Areas",
-                "Private Balcony",
-                "Secure Parking",
-                "Laundry Facilities"
-              ].map((feature, index) => (
+              {getAmenities().map((feature, index) => (
                 <div key={index} className="flex items-center p-2 sm:p-3 bg-gray-50 rounded-lg">
                   <div className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-blue-600">✓</div>
                   <span className="text-gray-700 text-sm sm:text-base">{feature}</span>
@@ -171,29 +318,25 @@ const AboutSection = () => {
               <div>
                 <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">Check-in/Check-out</h3>
                 <ul className="list-disc pl-4 sm:pl-5 space-y-1 text-gray-700 text-sm sm:text-base">
-                  <li>Check-in: After 3:00 PM</li>
-                  <li>Check-out: Before 11:00 AM</li>
+                  <li>Check-in: After {getCheckInTime()}</li>
+                  <li>Check-out: Before {getCheckOutTime()}</li>
                   <li>Early check-in/late check-out may be available upon request</li>
                 </ul>
               </div>
               
               <div>
                 <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">Cancellation Policy</h3>
-                <ul className="list-disc pl-4 sm:pl-5 space-y-1 text-gray-700 text-sm sm:text-base">
-                  <li>Free cancellation up to 30 days before check-in</li>
-                  <li>50% refund if canceled between 15-30 days before check-in</li>
-                  <li>No refund if canceled less than 15 days before check-in</li>
-                </ul>
+                <div className="text-gray-700 text-sm sm:text-base">
+                  <p>{getCancellationPolicy()}</p>
+                </div>
               </div>
               
               <div>
                 <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">House Rules</h3>
                 <ul className="list-disc pl-4 sm:pl-5 space-y-1 text-gray-700 text-sm sm:text-base">
-                  <li>No parties or events without prior approval</li>
-                  <li>No smoking inside the property</li>
-                  <li>Pets allowed with prior approval (additional fee applies)</li>
-                  <li>Quiet hours from 10:00 PM to 8:00 AM</li>
-                  <li>Maximum occupancy must not exceed the number of booked guests</li>
+                  {getHouseRules().map((rule, index) => (
+                    <li key={index}>{rule}</li>
+                  ))}
                 </ul>
               </div>
             </div>
@@ -205,10 +348,14 @@ const AboutSection = () => {
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Contact the Host</h2>
             <div className="bg-gray-50 rounded-xl p-4 sm:p-6">
               <div className="flex items-center mb-4 sm:mb-6">
-                <div className="bg-gray-200 border-2 border-dashed rounded-xl w-12 h-12 sm:w-16 sm:h-16" />
+                <div className="bg-gray-200 border-2 border-dashed rounded-xl w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center">
+                  <span className="text-gray-500 text-lg font-bold">
+                    {getOwnerInfo().name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
                 <div className="ml-3 sm:ml-4">
-                  <h3 className="font-bold text-base sm:text-lg">Michael Johnson</h3>
-                  <p className="text-gray-600 text-sm sm:text-base">Superhost · 4.98 ⭐ (128 reviews)</p>
+                  <h3 className="font-bold text-base sm:text-lg">{getOwnerInfo().name}</h3>
+                  <p className="text-gray-600 text-sm sm:text-base">Property Host · Available 24/7</p>
                 </div>
               </div>
               
@@ -248,6 +395,15 @@ const AboutSection = () => {
                 <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-300 text-sm sm:text-base">
                   Send Message
                 </button>
+              </div>
+              
+              {/* Contact Information */}
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Direct Contact</h4>
+                <div className="space-y-1 text-sm text-gray-600">
+                  <p>Email: {getOwnerInfo().email}</p>
+                  {getOwnerInfo().phone && <p>Phone: {getOwnerInfo().phone}</p>}
+                </div>
               </div>
             </div>
           </div>

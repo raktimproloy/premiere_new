@@ -1,70 +1,87 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const ReviewsSection = () => {
+interface Review {
+  body: string;
+  date: string;
+  display_name: string;
+  property: {
+    id: number;
+    name: string;
+  };
+  property_id: number;
+  response: string;
+  reviewer: string;
+  stars: number;
+  status: string;
+}
+
+interface ReviewStats {
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: {
+    5: number;
+    4: number;
+    3: number;
+    2: number;
+    1: number;
+  };
+  averageRatingText: string;
+}
+
+const ReviewsSection = ({ id }: { id: string }) => {
   const [sortOption, setSortOption] = useState('newest');
-  const [reviewsToShow, setReviewsToShow] = useState(3);
+  const [reviewsToShow, setReviewsToShow] = useState(4);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [stats, setStats] = useState<ReviewStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [reviewForm, setReviewForm] = useState({
-    name: 'Zahidul Islami',
-    email: 'zahidulislam@example.com',
+    name: '',
+    email: '',
     rating: 5,
-    content: 'This property is...'
+    content: ''
   });
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
  
   const profileImage1 = '/images/profile.jpg'
   const profileImage2 = '/images/profile2.jpg'
   
-  // Mock reviews data
-  const reviews = [
-    {
-      id: 1,
-      name: 'Cameron Williamson',
-      date: 'July, 23 2020',
-      profileImage: profileImage1,
-      content: 'Our family stayed at the Wynwood Townhome and couldn’t have been happier. The heated pool was a hit with the kids, and the spacious, modern interior had everything we needed.',
-      rating: 5
-    },
-    {
-      id: 2,
-      name: 'Floyd Miles',
-      date: 'July, 23 2020',
-      profileImage: profileImage2,
-      content: 'Our family stayed at the Wynwood Townhome and couldn’t have been happier. The heated pool was a hit with the kids, and the spacious, modern interior had everything we needed.',
-      rating: 5
-    },
-    {
-      id: 3,
-      name: 'Kathryn Murphy',
-      date: 'July, 23 2020',
-      profileImage: profileImage1,
-      content: 'Our family stayed at the Wynwood Townhome and couldn’t have been happier. The heated pool was a hit with the kids, and the spacious, modern interior had everything we needed.',
-      rating: 5
-    },
-    {
-      id: 4,
-      name: 'Jenny Wilson',
-      date: 'June, 15 2020',
-      profileImage: profileImage2,
-      content: 'The location was perfect for exploring Miami. The heated pool was amazing and the property was even better than the photos. Would definitely stay again!',
-      rating: 4
-    },
-    {
-      id: 5,
-      name: 'Robert Fox',
-      date: 'May, 30 2020',
-      profileImage: profileImage1,
-      content: 'We had a wonderful time at the townhome. The management was very responsive and the property was clean and well-maintained. Highly recommend!',
-      rating: 5
-    },
-    {
-      id: 6,
-      name: 'Dianne Russell',
-      date: 'May, 12 2020',
-      profileImage: profileImage2,
-      content: 'Perfect for our large family gathering. Plenty of space for everyone and the pool area was fantastic. The design district location was very convenient.',
-      rating: 5
+  // Toast functions
+  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 5000);
+  };
+
+  const closeToast = () => {
+    setToast(null);
+  };
+  
+  // Fetch reviews and statistics
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/reviews/public?property_id=${id}&limit=10&page=1`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setReviews(data.data.reviews);
+          setStats(data.data.statistics);
+        }
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchReviews();
     }
-  ];
+  }, [id]);
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSortOption(e.target.value);
@@ -89,11 +106,57 @@ const ReviewsSection = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Review submitted:', reviewForm);
-    // Here you would typically send the review to your backend
-    alert('Review submitted successfully!');
+    
+    if (!reviewForm.name || !reviewForm.email || !reviewForm.content) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const response = await fetch('/api/reviews/public', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          body: reviewForm.content,
+          display_name: reviewForm.name,
+          property_id: parseInt(id),
+          stars: reviewForm.rating,
+          reviewer: 'guest'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        // Show success toast
+        showToast('Review submitted successfully! It will be reviewed before being published.', 'success');
+        setReviewForm({
+          name: '',
+          email: '',
+          rating: 5,
+          content: ''
+        });
+        // Refresh reviews
+        const refreshResponse = await fetch(`/api/reviews/public?property_id=${id}&limit=10&page=1`);
+        const refreshData = await refreshResponse.json();
+        if (refreshData.success) {
+          setReviews(refreshData.data.reviews);
+          setStats(refreshData.data.statistics);
+        }
+      } else {
+        showToast(data.message || 'Failed to submit review', 'error');
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      showToast('Failed to submit review. Please try again.', 'error');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Sort reviews based on selected option
@@ -101,9 +164,9 @@ const ReviewsSection = () => {
     if (sortOption === 'newest') {
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     } else if (sortOption === 'highest') {
-      return b.rating - a.rating;
+      return b.stars - a.stars;
     } else {
-      return a.rating - b.rating;
+      return a.stars - b.stars;
     }
   });
 
@@ -123,7 +186,7 @@ const ReviewsSection = () => {
             <div className="flex items-center">
               <div className="">
                 <p className="text-gray-600 mt-1 flex items-center font-semibold gap-2">
-                  4.9 OUT OF 5 
+                  {loading ? 'Loading...' : stats ? `${stats.averageRating} OUT OF 5` : '0 OUT OF 5'}
                   <span className="flex text-yellow-400 ml-2">
                     {[...Array(5)].map((_, i) => (
                       <svg key={i} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -131,19 +194,19 @@ const ReviewsSection = () => {
                       </svg>
                     ))}
                   </span>
-                    6 REVIEWS</p>
+                  {loading ? '...' : stats ? `${stats.totalReviews} REVIEWS` : '0 REVIEWS'}</p>
               </div>
             </div>
-              <p className=" text-gray-600">
+              {/* <p className=" text-gray-600">
                 (68%) People Recommended this Property
-              </p>
+              </p> */}
           </div>
         </div>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
               <h2 className="text-xl font-bold text-gray-900 mb-4 sm:mb-0">
-                ALL COMMENTS (2,100)
+                ALL COMMENTS ({loading ? '...' : stats ? stats.totalReviews : 0})
               </h2>
-              <div className="flex items-center">
+              {/* <div className="flex items-center">
                 <span className="text-gray-600 mr-3">Sort by :</span>
                 <select 
                   value={sortOption}
@@ -154,37 +217,62 @@ const ReviewsSection = () => {
                   <option value="highest">Highest Rating</option>
                   <option value="lowest">Lowest Rating</option>
                 </select>
-              </div>
+              </div> */}
             </div>
 
             <div className="space-y-8">
-              {sortedReviews.slice(0, reviewsToShow).map((review) => (
-                <div key={review.id} className="bg-white rounded-xl p-6 shadow-sm">
-                  <div className="flex items-center mb-4">
-                    <div className="bg-gray-200 rounded-full w-14 h-14 mr-4" style={{backgroundImage: `url(${review.profileImage})`, backgroundSize: 'cover', backgroundPosition: 'center'}} />
-                    <div>
-                      <h3 className="font-bold text-gray-900">{review.name}</h3>
-                      <p className="text-gray-500 text-sm">{review.date}</p>
-                    </div>
-                  </div>
-                  <div className="flex text-yellow-400 mb-3">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <svg key={i} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </div>
-                  <p className="text-gray-700">{review.content}</p>
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                  <p className="text-gray-500 mt-4">Loading reviews...</p>
                 </div>
-              ))}
+              ) : sortedReviews.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No reviews yet. Be the first to review this property!</p>
+                </div>
+              ) : (
+                <>
+                  {sortedReviews.slice(0, reviewsToShow).map((review, index) => (
+                    <div key={`${review.property_id}-${index}`} className="bg-white rounded-xl p-6 shadow-sm">
+                      <div className="flex items-center mb-4">
+                        <div className="bg-gray-200 rounded-full w-14 h-14 mr-4 flex items-center justify-center text-gray-600 font-semibold">
+                          {review.display_name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-gray-900">{review.display_name}</h3>
+                          <p className="text-gray-500 text-sm">{new Date(review.date).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                          })}</p>
+                        </div>
+                      </div>
+                      <div className="flex text-yellow-400 mb-3">
+                        {[...Array(review.stars)].map((_, i) => (
+                          <svg key={i} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                      </div>
+                      <p className="text-gray-700">{review.body}</p>
+                      {review.response && (
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                          <p className="text-sm text-gray-600 font-medium mb-1">Property Response:</p>
+                          <p className="text-gray-700">{review.response}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
 
-              {reviewsToShow < reviews.length && (
-                <button 
-                  onClick={handleLoadMore}
-                  className="w-full py-3 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors duration-300"
-                >
-                  Load more reviews
-                </button>
+                  {reviewsToShow < sortedReviews.length && (
+                    <button 
+                      onClick={handleLoadMore}
+                      className="w-full py-3 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors duration-300"
+                    >
+                      Load more reviews
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -195,10 +283,9 @@ const ReviewsSection = () => {
             <div className="bg-white rounded-xl p-6 shadow-sm mb-8">
               <div className="mb-4">
                 {[5, 4, 3, 2, 1].map((star, idx) => {
-                  const counts = [45, 162, 34, 25, 12];
-                  const total = 45 + 162 + 34 + 25 + 12;
-                  const count = counts[5 - star];
-                  const percent = (count / total) * 100;
+                  const count = stats ? stats.ratingDistribution[star as keyof typeof stats.ratingDistribution] : 0;
+                  const total = stats ? stats.totalReviews : 1;
+                  const percent = total > 0 ? (count / total) * 100 : 0;
                   return (
                     <div key={star} className="flex items-center mb-2">
                       <span className="w-6 text-sm flex items-center gap-1 font-medium text-gray-700">{star} <span className="text-yellow-400">★</span></span>
@@ -223,7 +310,7 @@ const ReviewsSection = () => {
               <form onSubmit={handleSubmit}>
                 <div className="mb-5">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Your name
+                    Your name *
                   </label>
                   <input
                     type="text"
@@ -231,13 +318,14 @@ const ReviewsSection = () => {
                     value={reviewForm.name}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter your name"
                     required
                   />
                 </div>
                 
                 <div className="mb-5">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email address
+                    Email address *
                   </label>
                   <input
                     type="email"
@@ -245,13 +333,14 @@ const ReviewsSection = () => {
                     value={reviewForm.email}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter your email"
                     required
                   />
                 </div>
                 
                 <div className="mb-5">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Choose rating
+                    Choose rating *
                   </label>
                   <select
                     name="rating"
@@ -259,18 +348,17 @@ const ReviewsSection = () => {
                     onChange={(e) => handleRatingChange(Number(e.target.value))}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                   >
-                    <option value="">Select a rating</option>
-                    <option value="5">⭐ 5 stars</option>
-                    <option value="4">⭐ 4 stars</option>
-                    <option value="3">⭐ 3 stars</option>
-                    <option value="2">⭐ 2 stars</option>
-                    <option value="1">⭐ 1 star</option>
+                    <option value="5">⭐ 5 stars - Excellent</option>
+                    <option value="4">⭐ 4 stars - Very Good</option>
+                    <option value="3">⭐ 3 stars - Good</option>
+                    <option value="2">⭐ 2 stars - Fair</option>
+                    <option value="1">⭐ 1 star - Poor</option>
                   </select>
                 </div>
                 
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Your review
+                    Your review *
                   </label>
                   <textarea
                     name="content"
@@ -278,24 +366,73 @@ const ReviewsSection = () => {
                     onChange={handleInputChange}
                     rows={4}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Share your experience with this property..."
                     required
                   ></textarea>
                 </div>
                 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-[#F7B730] hover:bg-[#9c834d] rounded-full text-white font-semibold transition-colors duration-300 flex items-center justify-center gap-2"
+                  disabled={submitting}
+                  className="w-full py-3 bg-[#F7B730] hover:bg-[#9c834d] disabled:bg-gray-400 disabled:cursor-not-allowed rounded-full text-white font-semibold transition-colors duration-300 flex items-center justify-center gap-2"
                 >
-                  View All Services
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
+                  {submitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      Submit Review
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </>
+                  )}
                 </button>
               </form>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 max-w-sm">
+          <div className={`rounded-lg shadow-lg p-4 flex items-center justify-between ${
+            toast.type === 'success' ? 'bg-green-500 text-white' :
+            toast.type === 'error' ? 'bg-red-500 text-white' :
+            'bg-blue-500 text-white'
+          }`}>
+            <div className="flex items-center">
+              {toast.type === 'success' && (
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              )}
+              {toast.type === 'error' && (
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              )}
+              {toast.type === 'info' && (
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              )}
+              <span className="text-sm font-medium">{toast.message}</span>
+            </div>
+            <button
+              onClick={closeToast}
+              className="ml-4 text-white hover:text-gray-200 focus:outline-none"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

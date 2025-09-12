@@ -1,22 +1,65 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { FiEye, FiGrid, FiList, FiChevronLeft, FiChevronRight, FiStar, FiRefreshCw, FiFilter } from 'react-icons/fi';
-import { UnifiedReview, ReviewsApiResponse } from '@/types/review';
+import { FiEye, FiGrid, FiList, FiChevronLeft, FiChevronRight, FiStar, FiRefreshCw, FiFilter, FiEdit, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
+
+interface Review {
+  _id: string;
+  body: string;
+  date: string;
+  display_name: string;
+  property: {
+    id: number;
+    name: string;
+  };
+  property_id: number;
+  response: string;
+  reviewer: string;
+  stars: number;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  updated_at: string;
+  rejection_reason?: string;
+}
+
+interface ReviewStats {
+  pending: number;
+  approved: number;
+  rejected: number;
+  total: number;
+}
+
+interface ReviewsApiResponse {
+  success: boolean;
+  data: {
+    reviews: Review[];
+    statistics: ReviewStats;
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalReviews: number;
+      limit: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  };
+}
 
 const PropertyReviewsPage = () => {
-  const [reviews, setReviews] = useState<UnifiedReview[]>([]);
-  const [filteredReviews, setFilteredReviews] = useState<UnifiedReview[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
   const [viewType, setViewType] = useState<'list' | 'grid'>('list');
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [selectedReview, setSelectedReview] = useState<UnifiedReview | null>(null);
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedReviews, setSelectedReviews] = useState<string[]>([]);
+  const [stats, setStats] = useState<ReviewStats>({ pending: 0, approved: 0, rejected: 0, total: 0 });
   
-  const itemsPerPage = 8;
+  const itemsPerPage = 20;
 
   // Fetch reviews from API
   const fetchReviews = async (page: number = 1, status: string = 'all') => {
@@ -24,17 +67,24 @@ const PropertyReviewsPage = () => {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`/api/reviews/superadmin?page=${page}&pageSize=${itemsPerPage}&status=${status}`);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        pageSize: itemsPerPage.toString(),
+        ...(status !== 'all' && { status })
+      });
+
+      const response = await fetch(`/api/reviews/superadmin?${params}`);
       const data: ReviewsApiResponse = await response.json();
       
       if (data.success) {
-        setReviews(data.reviews);
-        setFilteredReviews(data.reviews);
-        setTotalPages(data.totalPages);
-        setTotalCount(data.total);
+        setReviews(data.data.reviews);
+        setFilteredReviews(data.data.reviews);
+        setTotalPages(data.data.pagination.totalPages);
+        setTotalCount(data.data.pagination.totalReviews);
+        setStats(data.data.statistics);
         setCurrentPage(page);
       } else {
-        setError(data.error || 'Failed to fetch reviews');
+        setError('Failed to fetch reviews');
       }
     } catch (err) {
       setError('Failed to fetch reviews. Please try again.');
@@ -65,6 +115,88 @@ const PropertyReviewsPage = () => {
     setStatusFilter(status);
     setCurrentPage(1);
   };
+
+  // Handle bulk actions
+  const handleBulkAction = async (action: 'approve' | 'reject') => {
+    if (selectedReviews.length === 0) return;
+
+    try {
+      const response = await fetch('/api/reviews/superadmin/approve', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reviewIds: selectedReviews,
+          newStatus: action === 'approve' ? 'approved' : 'rejected'
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert(`${data.modifiedCount} review(s) ${action}d successfully`);
+        setSelectedReviews([]);
+        fetchReviews(currentPage, statusFilter);
+      } else {
+        alert(data.message || 'Failed to update reviews');
+      }
+    } catch (error) {
+      console.error('Error updating reviews:', error);
+      alert('Failed to update reviews');
+    }
+  };
+
+  // Handle individual review update
+  const handleUpdateReview = async (reviewId: string, updates: Partial<Review>) => {
+    try {
+      const response = await fetch(`/api/reviews/superadmin/${reviewId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates)
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert('Review updated successfully');
+        fetchReviews(currentPage, statusFilter);
+      } else {
+        alert(data.message || 'Failed to update review');
+      }
+    } catch (error) {
+      console.error('Error updating review:', error);
+      alert('Failed to update review');
+    }
+  };
+
+  // Handle review deletion
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!confirm('Are you sure you want to delete this review?')) return;
+
+    try {
+      const response = await fetch(`/api/reviews/superadmin/${reviewId}`, {
+        method: 'DELETE'
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert('Review deleted successfully');
+        fetchReviews(currentPage, statusFilter);
+      } else {
+        alert(data.message || 'Failed to delete review');
+      }
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      alert('Failed to delete review');
+    }
+  };
+
+  // Handle edit review - navigate to edit page
+  const handleEditReview = (review: Review) => {
+    window.location.href = `/superadmin/reviews/edit/${review._id}`;
+  };
+
 
   // Render star rating
   // const renderStarRating = (rating: number) => {
@@ -155,7 +287,7 @@ const PropertyReviewsPage = () => {
   };
 
   // Modal handlers
-  const handleOpenModal = (review: UnifiedReview) => {
+  const handleOpenModal = (review: Review) => {
     setSelectedReview(review);
     setIsModalOpen(true);
   };
@@ -172,46 +304,93 @@ const PropertyReviewsPage = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-white">
             <tr>
-              <th className="px-6 py-5 text-left text-xs font-semibold text-black uppercase tracking-wider">Property Name</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Type</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Price</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Review Date</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Rating</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">
+                <input
+                  type="checkbox"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedReviews(filteredReviews.map(r => r._id));
+                    } else {
+                      setSelectedReviews([]);
+                    }
+                  }}
+                  className="rounded"
+                />
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Property Name</th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Reviewer</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Rating</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Review</th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-right text-xs font-semibold text-black uppercase tracking-wider">Action</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Date</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold text-black uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredReviews.length > 0 ? (
               filteredReviews.map((review) => (
-                <tr key={review.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{review.propertyName}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{review.type}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{review.price}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{review.reviewDate}</td>
+                <tr key={review._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      checked={selectedReviews.includes(review._id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedReviews([...selectedReviews, review._id]);
+                        } else {
+                          setSelectedReviews(selectedReviews.filter(id => id !== review._id));
+                        }
+                      }}
+                      className="rounded"
+                    />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{review.property.name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{review.display_name}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-1">
-                      <span className="text-sm font-medium text-gray-700">{review.rating}</span>
+                      <span className="text-sm font-medium text-gray-700">{review.stars}</span>
                       <FiStar className="w-4 h-4 fill-orange-400 text-orange-400" />
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{review.reviewerName}</td>
+                  <td className="px-6 py-4 max-w-xs">
+                    <div className="text-sm text-gray-700 truncate">{review.body}</div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 rounded-full text-xs ${
-                      review.visible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      review.status === 'approved' ? 'bg-green-100 text-green-800' :
+                      review.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
                     }`}>
-                      {review.visible ? 'Visible' : 'Hidden'}
+                      {review.status}
                     </span>
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(review.created_at).toLocaleDateString()}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleOpenModal(review)}
-                      className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
-                      title="View Details"
-                    >
-                      <FiEye size={18} />
-                    </button>
+                    <div className="flex items-center justify-end space-x-2">
+                      <button
+                        onClick={() => handleOpenModal(review)}
+                        className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
+                        title="View Details"
+                      >
+                        <FiEye size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleEditReview(review)}
+                        className="text-gray-600 hover:text-green-600 transition-colors cursor-pointer"
+                        title="Edit Review"
+                      >
+                        <FiEdit size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteReview(review._id)}
+                        className="text-gray-600 hover:text-red-600 transition-colors cursor-pointer"
+                        title="Delete Review"
+                      >
+                        <FiTrash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -233,30 +412,55 @@ const PropertyReviewsPage = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {filteredReviews.length > 0 ? (
         filteredReviews.map((review) => (
-          <div key={review.id} className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+          <div key={review._id} className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
             <div className="flex items-start space-x-4">
-              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-lg">
-                <img src={review.reviewerAvatar} alt="reviewer" className="w-full h-full object-cover rounded-full" />
+              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-lg font-semibold text-gray-600">
+                {review.display_name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-gray-900">{review.reviewerName}</h3>
+                  <h3 className="font-semibold text-gray-900">{review.display_name}</h3>
                   <div className="flex items-center space-x-1">
-                    <span className="text-sm font-medium text-gray-900">{review.rating}</span>
+                    <span className="text-sm font-medium text-gray-900">{review.stars}</span>
                     <FiStar className="w-4 h-4 fill-orange-400 text-orange-400" />
                   </div>
                 </div>
-                <p className="text-sm text-gray-500 mb-3">{review.reviewDate}</p>
+                <p className="text-sm text-gray-500 mb-3">{new Date(review.created_at).toLocaleDateString()}</p>
                 <p className="text-gray-700 text-sm leading-relaxed mb-4">
-                  {`"`}{review.reviewText}{`"`}
+                  {`"`}{review.body}{`"`}
                 </p>
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>Property: {review.propertyName}</span>
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                  <span>Property: {review.property.name}</span>
                   <span className={`px-2 py-1 rounded-full ${
-                    review.visible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    review.status === 'approved' ? 'bg-green-100 text-green-800' :
+                    review.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
                   }`}>
-                    {review.visible ? 'Visible' : 'Hidden'}
+                    {review.status}
                   </span>
+                </div>
+                <div className="flex items-center justify-end space-x-2">
+                  <button
+                    onClick={() => handleOpenModal(review)}
+                    className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
+                    title="View Details"
+                  >
+                    <FiEye size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleEditReview(review)}
+                    className="text-gray-600 hover:text-green-600 transition-colors cursor-pointer"
+                    title="Edit Review"
+                  >
+                    <FiEdit size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteReview(review._id)}
+                    className="text-gray-600 hover:text-red-600 transition-colors cursor-pointer"
+                    title="Delete Review"
+                  >
+                    <FiTrash2 size={16} />
+                  </button>
                 </div>
               </div>
             </div>
@@ -290,15 +494,15 @@ const PropertyReviewsPage = () => {
             
             <div className="space-y-4">
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-xl">
-                  <img src={selectedReview.reviewerAvatar} alt="reviewer" className="w-full h-full object-cover rounded-full" />
+                <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-xl font-semibold text-gray-600">
+                  {selectedReview.display_name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 text-lg">{selectedReview.reviewerName}</h3>
-                  <p className="text-gray-500">{selectedReview.reviewDate}</p>
+                  <h3 className="font-semibold text-gray-900 text-lg">{selectedReview.display_name}</h3>
+                  <p className="text-gray-500">{new Date(selectedReview.created_at).toLocaleDateString()}</p>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <span className="text-lg font-medium text-gray-900">{selectedReview.rating}</span>
+                  <span className="text-lg font-medium text-gray-900">{selectedReview.stars}</span>
                   <FiStar className="w-4 h-4 fill-orange-400 text-orange-400" />
                 </div>
               </div>
@@ -308,26 +512,26 @@ const PropertyReviewsPage = () => {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-500">Property:</span>
-                    <p className="font-medium">{selectedReview.propertyName}</p>
+                    <p className="font-medium">{selectedReview.property.name}</p>
                   </div>
                   <div>
-                    <span className="text-gray-500">Type:</span>
-                    <p className="font-medium">{selectedReview.type}</p>
+                    <span className="text-gray-500">Property ID:</span>
+                    <p className="font-medium">{selectedReview.property_id}</p>
                   </div>
                   <div>
-                    <span className="text-gray-500">Price:</span>
-                    <p className="font-medium">{selectedReview.price}</p>
+                    <span className="text-gray-500">Reviewer Type:</span>
+                    <p className="font-medium">{selectedReview.reviewer}</p>
                   </div>
                   <div>
                     <span className="text-gray-500">Review Date:</span>
-                    <p className="font-medium">{selectedReview.reviewDate}</p>
+                    <p className="font-medium">{new Date(selectedReview.date).toLocaleDateString()}</p>
                   </div>
                 </div>
               </div>
 
               <div className="border-t pt-4">
                 <h4 className="font-semibold text-gray-900 mb-2">Review</h4>
-                <p className="text-gray-700 leading-relaxed">{selectedReview.reviewText}</p>
+                <p className="text-gray-700 leading-relaxed">{selectedReview.body}</p>
                 {selectedReview.response && (
                   <div className="mt-4 p-3 bg-gray-50 rounded-lg">
                     <h5 className="font-medium text-gray-900 mb-2">Response:</h5>
@@ -340,13 +544,18 @@ const PropertyReviewsPage = () => {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-500">Status:</span>
                   <span className={`px-2 py-1 rounded-full text-xs ${
-                    selectedReview.visible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    selectedReview.status === 'approved' ? 'bg-green-100 text-green-800' :
+                    selectedReview.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
                   }`}>
-                    {selectedReview.visible ? 'Visible' : 'Hidden'}
+                    {selectedReview.status}
                   </span>
                 </div>
                 <div className="mt-2 text-sm text-gray-500">
-                  <span>Listing Site: {selectedReview.listingSite}</span>
+                  <span>Created: {new Date(selectedReview.created_at).toLocaleString()}</span>
+                </div>
+                <div className="mt-1 text-sm text-gray-500">
+                  <span>Updated: {new Date(selectedReview.updated_at).toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -356,12 +565,13 @@ const PropertyReviewsPage = () => {
     );
   };
 
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Property Review List</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Review Management</h1>
             {totalCount > 0 && (
               <p className="text-sm text-gray-600 mt-1">
                 {totalCount} review{totalCount !== 1 ? 's' : ''} found
@@ -402,6 +612,51 @@ const PropertyReviewsPage = () => {
           </div>
         </div>
 
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white p-4 rounded-lg shadow">
+            <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
+            <div className="text-sm text-gray-600">Total Reviews</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+            <div className="text-sm text-gray-600">Pending</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <div className="text-2xl font-bold text-green-600">{stats.approved}</div>
+            <div className="text-sm text-gray-600">Approved</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow">
+            <div className="text-2xl font-bold text-red-600">{stats.rejected}</div>
+            <div className="text-sm text-gray-600">Rejected</div>
+          </div>
+        </div>
+
+        {/* Bulk Actions */}
+        {selectedReviews.length > 0 && (
+          <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-600">
+                {selectedReviews.length} review(s) selected
+              </span>
+              <button
+                onClick={() => handleBulkAction('approve')}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+              >
+                <FiCheck size={16} />
+                Approve Selected
+              </button>
+              <button
+                onClick={() => handleBulkAction('reject')}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+              >
+                <FiX size={16} />
+                Reject Selected
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Status Filter */}
         <div className="mb-6">
           <div className="flex items-center gap-4">
@@ -421,24 +676,34 @@ const PropertyReviewsPage = () => {
                 All
               </button>
               <button
-                onClick={() => handleStatusFilterChange('visible')}
+                onClick={() => handleStatusFilterChange('pending')}
                 className={`px-3 py-1 rounded-md text-sm ${
-                  statusFilter === 'visible'
+                  statusFilter === 'pending'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Visible
+                Pending
               </button>
               <button
-                onClick={() => handleStatusFilterChange('hidden')}
+                onClick={() => handleStatusFilterChange('approved')}
                 className={`px-3 py-1 rounded-md text-sm ${
-                  statusFilter === 'hidden'
+                  statusFilter === 'approved'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Hidden
+                Approved
+              </button>
+              <button
+                onClick={() => handleStatusFilterChange('rejected')}
+                className={`px-3 py-1 rounded-md text-sm ${
+                  statusFilter === 'rejected'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Rejected
               </button>
             </div>
           </div>
@@ -476,7 +741,7 @@ const PropertyReviewsPage = () => {
           </div>
         )}
 
-        {/* Modal */}
+        {/* Modals */}
         <ReviewModal />
       </div>
     </div>
