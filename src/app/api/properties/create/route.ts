@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cloudinaryService } from '@/lib/cloudinaryService';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { notifySuperadminNewProperty, getSuperadminUsers } from '@/lib/notificationService';
 import { authService } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
@@ -248,6 +249,7 @@ export async function POST(request: NextRequest) {
       })),
       amenities: [],
       rules: [],
+      services: propertyData.services || [],
       pricing: {
         baseRate: 0,
         currency: 'USD',
@@ -306,6 +308,24 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Property creation completed successfully!');
+
+    // Create notification for superadmins about new property submission
+    try {
+      const superadmins = await getSuperadminUsers();
+      const adminName = authResult.user.fullName || authResult.user.email || 'An admin';
+      
+      for (const superadmin of superadmins) {
+        await notifySuperadminNewProperty(
+          mongoResult.insertedId.toString(),
+          propertyData.name,
+          adminName,
+          superadmin._id
+        );
+      }
+    } catch (notificationError) {
+      console.error('Failed to create new property notification:', notificationError);
+      // Don't fail the property creation if notification fails
+    }
 
     return NextResponse.json({
       success: true,

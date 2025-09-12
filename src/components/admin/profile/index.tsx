@@ -76,7 +76,10 @@ const ProfilePage = ({role}: {role: string}) => {
       const data = await response.json();
 
       if (response.ok) {
-        setUser(prev => prev ? { ...prev, profileImage: data.profileImage } : null);
+        setUser(prev => {
+          if (!prev) return null;
+          return { ...prev, profileImage: data.imageUrl };
+        });
         setSuccess('Profile image updated successfully!');
         setTimeout(() => setSuccess(null), 3000);
       } else {

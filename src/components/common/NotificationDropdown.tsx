@@ -2,18 +2,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, Check, X, Trash2 } from 'lucide-react';
 import { useNotifications } from './NotificationContext';
+import toast from 'react-hot-toast';
 
 interface Notification {
-  id: string;
+  _id: string;
   title: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
-  timestamp: Date;
+  createdAt: string;
   read: boolean;
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
+  actionUrl?: string;
+  actionLabel?: string;
+  relatedId?: string;
+  relatedType?: 'booking' | 'property' | 'review' | 'contact';
 }
 
 interface NotificationDropdownProps {
@@ -34,11 +35,42 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   className = ''
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [notificationsList, setNotificationsList] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
   // Use notification context if no props are provided
   const contextNotifications = useNotifications();
   const hasContext = !onMarkAsRead && !onDelete && !onMarkAllAsRead && !onClearAll;
+
+  // Fetch notifications from API
+  const fetchNotifications = async () => {
+    if (hasContext) return; // Don't fetch if using context
+    
+    setLoading(true);
+    try {
+      const response = await fetch('/api/notifications?limit=20');
+      const data = await response.json();
+      
+      if (data.success) {
+        setNotificationsList(data.notifications || []);
+      } else {
+        toast.error('Failed to fetch notifications');
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      toast.error('Failed to fetch notifications');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch notifications when dropdown opens
+  useEffect(() => {
+    if (isOpen && !hasContext) {
+      fetchNotifications();
+    }
+  }, [isOpen, hasContext]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -55,95 +87,95 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   }, []);
 
   // Sample notifications (you can replace with real data)
-  const sampleNotifications: Notification[] = [
-    {
-      id: '1',
-      title: 'New Booking Request',
-      message: 'You have a new booking request for Property #123 from John Doe',
-      type: 'success',
-      timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
-      read: false,
-      action: {
-        label: 'View Details',
-        onClick: () => console.log('View booking details')
-      }
-    },
-    {
-      id: '2',
-      title: 'Payment Received',
-      message: 'Payment of $1,200 has been received for booking #456',
-      type: 'success',
-      timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-      read: false,
-      action: {
-        label: 'View Receipt',
-        onClick: () => console.log('View receipt')
-      }
-    },
-    {
-      id: '3',
-      title: 'Maintenance Alert',
-      message: 'Scheduled maintenance for Property #789 tomorrow at 10:00 AM',
-      type: 'warning',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-      read: true
-    },
-    {
-      id: '4',
-      title: 'System Update',
-      message: 'Your account has been updated with new features and improvements',
-      type: 'info',
-      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-      read: true
-    },
-    {
-      id: '5',
-      title: 'Guest Review',
-      message: 'New 5-star review received for Property #456 from Sarah Wilson',
-      type: 'success',
-      timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
-      read: false,
-      action: {
-        label: 'Read Review',
-        onClick: () => console.log('Read review')
-      }
-    },
-    {
-      id: '6',
-      title: 'Property Inquiry',
-      message: 'New inquiry received for Property #789 from Mike Johnson',
-      type: 'info',
-      timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
-      read: false,
-      action: {
-        label: 'Respond',
-        onClick: () => console.log('Respond to inquiry')
-      }
-    },
-    {
-      id: '7',
-      title: 'Booking Cancelled',
-      message: 'Booking #123 has been cancelled by the guest',
-      type: 'error',
-      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
-      read: true
-    },
-    {
-      id: '8',
-      title: 'Monthly Report',
-      message: 'Your monthly property management report is ready for review',
-      type: 'info',
-      timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-      read: true,
-      action: {
-        label: 'View Report',
-        onClick: () => console.log('View monthly report')
-      }
-    }
-  ];
+  // const sampleNotifications: Notification[] = [
+  //   {
+  //     id: '1',
+  //     title: 'New Booking Request',
+  //     message: 'You have a new booking request for Property #123 from John Doe',
+  //     type: 'success',
+  //     timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
+  //     read: false,
+  //     action: {
+  //       label: 'View Details',
+  //       onClick: () => console.log('View booking details')
+  //     }
+  //   },
+  //   {
+  //     id: '2',
+  //     title: 'Payment Received',
+  //     message: 'Payment of $1,200 has been received for booking #456',
+  //     type: 'success',
+  //     timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+  //     read: false,
+  //     action: {
+  //       label: 'View Receipt',
+  //       onClick: () => console.log('View receipt')
+  //     }
+  //   },
+  //   {
+  //     id: '3',
+  //     title: 'Maintenance Alert',
+  //     message: 'Scheduled maintenance for Property #789 tomorrow at 10:00 AM',
+  //     type: 'warning',
+  //     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+  //     read: true
+  //   },
+  //   {
+  //     id: '4',
+  //     title: 'System Update',
+  //     message: 'Your account has been updated with new features and improvements',
+  //     type: 'info',
+  //     timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+  //     read: true
+  //   },
+  //   {
+  //     id: '5',
+  //     title: 'Guest Review',
+  //     message: 'New 5-star review received for Property #456 from Sarah Wilson',
+  //     type: 'success',
+  //     timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
+  //     read: false,
+  //     action: {
+  //       label: 'Read Review',
+  //       onClick: () => console.log('Read review')
+  //     }
+  //   },
+  //   {
+  //     id: '6',
+  //     title: 'Property Inquiry',
+  //     message: 'New inquiry received for Property #789 from Mike Johnson',
+  //     type: 'info',
+  //     timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
+  //     read: false,
+  //     action: {
+  //       label: 'Respond',
+  //       onClick: () => console.log('Respond to inquiry')
+  //     }
+  //   },
+  //   {
+  //     id: '7',
+  //     title: 'Booking Cancelled',
+  //     message: 'Booking #123 has been cancelled by the guest',
+  //     type: 'error',
+  //     timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
+  //     read: true
+  //   },
+  //   {
+  //     id: '8',
+  //     title: 'Monthly Report',
+  //     message: 'Your monthly property management report is ready for review',
+  //     type: 'info',
+  //     timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+  //     read: true,
+  //     action: {
+  //       label: 'View Report',
+  //       onClick: () => console.log('View monthly report')
+  //     }
+  //   }
+  // ];
 
-  // Always use sample notifications for now since context might be empty
-  const displayNotifications = sampleNotifications;
+  // Use real notifications or context notifications
+  const displayNotifications = hasContext ? (Array.isArray(contextNotifications) ? contextNotifications : []) : notificationsList;
   const unreadCount = displayNotifications.filter((n: Notification) => !n.read).length;
 
   const getNotificationIcon = (type: Notification['type']) => {
@@ -172,9 +204,10 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     }
   };
 
-  const formatTimeAgo = (timestamp: Date) => {
+  const formatTimeAgo = (timestamp: string) => {
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - timestamp.getTime()) / (1000 * 60));
+    const notificationDate = new Date(timestamp);
+    const diffInMinutes = Math.floor((now.getTime() - notificationDate.getTime()) / (1000 * 60));
     
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
@@ -185,28 +218,69 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 7) return `${diffInDays}d ago`;
     
-    return timestamp.toLocaleDateString();
+    return notificationDate.toLocaleDateString();
   };
 
-  // For sample notifications, we'll just log the actions
-  const handleMarkAsRead = (id: string) => {
-    console.log('Mark as read:', id);
-    // In a real implementation, you would update the notification state
+  // Real notification handlers
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      const response = await fetch(`/api/notifications/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ read: true })
+      });
+      
+      if (response.ok) {
+        setNotificationsList(prev => 
+          prev.map(n => n._id === id ? { ...n, read: true } : n)
+        );
+        if (onMarkAsRead) onMarkAsRead(id);
+      } else {
+        toast.error('Failed to mark notification as read');
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      toast.error('Failed to mark notification as read');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    console.log('Delete notification:', id);
-    // In a real implementation, you would remove the notification
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/notifications/${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        setNotificationsList(prev => prev.filter(n => n._id !== id));
+        if (onDelete) onDelete(id);
+      } else {
+        toast.error('Failed to delete notification');
+      }
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      toast.error('Failed to delete notification');
+    }
   };
 
-  const handleMarkAllAsRead = () => {
-    console.log('Mark all as read');
-    // In a real implementation, you would mark all notifications as read
+  const handleMarkAllAsRead = async () => {
+    try {
+      const unreadNotifications = displayNotifications.filter(n => !n.read);
+      await Promise.all(unreadNotifications.map(n => handleMarkAsRead(n._id)));
+      if (onMarkAllAsRead) onMarkAllAsRead();
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+      toast.error('Failed to mark all notifications as read');
+    }
   };
 
-  const handleClearAll = () => {
-    console.log('Clear all notifications');
-    // In a real implementation, you would clear all notifications
+  const handleClearAll = async () => {
+    try {
+      await Promise.all(displayNotifications.map(n => handleDelete(n._id)));
+      if (onClearAll) onClearAll();
+    } catch (error) {
+      console.error('Error clearing all notifications:', error);
+      toast.error('Failed to clear all notifications');
+    }
   };
 
   return (
@@ -254,16 +328,21 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 
           {/* Notifications List */}
           <div className="max-h-64 overflow-y-auto">
-            {displayNotifications.length === 0 ? (
+            {loading ? (
+              <div className="p-6 text-center text-gray-500">
+                <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin mx-auto mb-2"></div>
+                <p>Loading notifications...</p>
+              </div>
+            ) : displayNotifications.length === 0 ? (
               <div className="p-6 text-center text-gray-500">
                 <Bell size={24} className="mx-auto mb-2 text-gray-300" />
                 <p>No notifications</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
-                                 {displayNotifications.map((notification: Notification) => (
+                {displayNotifications.map((notification: Notification) => (
                   <div
-                    key={notification.id}
+                    key={notification._id}
                     className={`p-4 hover:bg-gray-50 transition-colors duration-200 border-l-4 ${getNotificationColor(notification.type)} ${
                       !notification.read ? 'bg-blue-50' : ''
                     }`}
@@ -287,33 +366,33 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                           </p>
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-gray-400">
-                              {formatTimeAgo(notification.timestamp)}
+                              {formatTimeAgo(notification.createdAt)}
                             </span>
                             <div className="flex items-center gap-1">
-                              {/* {notification.action && (
-                                <button
-                                  onClick={notification.action.onClick}
+                              {notification.actionUrl && notification.actionLabel && (
+                                <a
+                                  href={notification.actionUrl}
                                   className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                                 >
-                                  {notification.action.label}
-                                </button>
-                              )} */}
-                              {/* {!notification.read && (
+                                  {notification.actionLabel}
+                                </a>
+                              )}
+                              {!notification.read && (
                                 <button
-                                  onClick={() => handleMarkAsRead(notification.id)}
+                                  onClick={() => handleMarkAsRead(notification._id)}
                                   className="p-1 text-gray-400 hover:text-gray-600"
                                   title="Mark as read"
                                 >
                                   <Check size={12} />
                                 </button>
-                              )} */}
-                              {/* <button
-                                onClick={() => handleDelete(notification.id)}
+                              )}
+                              <button
+                                onClick={() => handleDelete(notification._id)}
                                 className="p-1 text-gray-400 hover:text-red-600"
                                 title="Delete notification"
                               >
                                 <Trash2 size={12} />
-                              </button> */}
+                              </button>
                             </div>
                           </div>
                         </div>

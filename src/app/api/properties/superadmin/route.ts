@@ -17,6 +17,7 @@ interface UnifiedProperty {
   active?: boolean;
   listingDate?: string | null;
   address?: any;
+  services?: Array<{name: string, price: string}>;
   owner?: { name?: string; email?: string, phone?: string } | null;
 }
 
@@ -66,6 +67,7 @@ export async function GET(request: NextRequest) {
       active: property.status === 'active',
       listingDate: property.createdAt ? new Date(property.createdAt).toISOString() : null,
       address: property.address,
+      services: property.services || [],
       owner: property.owner ? { name: property.owner.name, email: property.owner.email, phone: property.owner.phone } : null,
     }));
 
@@ -107,6 +109,7 @@ export async function GET(request: NextRequest) {
             active: !!p.active,
             listingDate: null,
             address: p.address || null,
+            services: [], // OwnerRez properties don't have services in our system
             owner: null,
           }));
         } else {

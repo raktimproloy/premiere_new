@@ -4,6 +4,7 @@ import { FiEye, FiPlus, FiChevronLeft, FiChevronRight, FiSearch, FiCheck, FiX } 
 import PropertyDetailModal from '@/components/common/PropertyDetailModal';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 interface Property {
   id: string;
@@ -66,16 +67,19 @@ const PropertyRequestList = ({role}: {role: string}) => {
       const data = await response.json();
       console.log("data",data)
       if (data.success) {
-        setSuccess('Property approved successfully!');
-        setTimeout(() => setSuccess(null), 3000);
+        toast.success('Property approved successfully!');
         // Refresh properties list
         fetchProperties();
       } else {
-        setError(data.message || 'Failed to approve property');
+        const errorMessage = data.message || 'Failed to approve property';
+        toast.error(errorMessage);
+        setError(errorMessage);
         setTimeout(() => setError(null), 5000);
       }
     } catch (error) {
-      setError('Failed to approve property');
+      const errorMessage = 'Failed to approve property';
+      toast.error(errorMessage);
+      setError(errorMessage);
       setTimeout(() => setError(null), 5000);
     } finally {
       setActionLoading(null);
@@ -100,16 +104,19 @@ const PropertyRequestList = ({role}: {role: string}) => {
       const data = await response.json();
 
       if (data.success) {
-        setSuccess('Property rejected successfully!');
-        setTimeout(() => setSuccess(null), 3000);
+        toast.success('Property rejected successfully!');
         // Refresh properties list
         fetchProperties();
       } else {
-        setError(data.message || 'Failed to reject property');
+        const errorMessage = data.message || 'Failed to reject property';
+        toast.error(errorMessage);
+        setError(errorMessage);
         setTimeout(() => setError(null), 5000);
       }
     } catch (error) {
-      setError('Failed to reject property');
+      const errorMessage = 'Failed to reject property';
+      toast.error(errorMessage);
+      setError(errorMessage);
       setTimeout(() => setError(null), 5000);
     } finally {
       setActionLoading(null);
@@ -140,7 +147,9 @@ const PropertyRequestList = ({role}: {role: string}) => {
       const response = await fetch(`${basePath}?page=${currentPage}&pageSize=${itemsPerPage}&status=${statusParam}`);
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || data.message || 'Failed to fetch properties');
+        const errorMessage = data.error || data.message || 'Failed to fetch properties';
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
       }
       const data = await response.json();
       console.log("data",data)
@@ -150,10 +159,18 @@ const PropertyRequestList = ({role}: {role: string}) => {
         setUserRole(data.userRole || '');
         setCanManageAllProperties(data.canManageAllProperties || false);
       } else {
-        setError(data.message || 'Failed to fetch properties');
+        const errorMessage = data.message || 'Failed to fetch properties';
+        toast.error(errorMessage);
+        setError(errorMessage);
       }
     } catch (err: any) {
-      setError(err.message);
+      const errorMessage = err.message;
+      // Only set error state if this is the first load (no existing data)
+      if (properties.length === 0) {
+        setError(errorMessage);
+      }
+      // Always show toast for errors
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -410,7 +427,7 @@ const PropertyRequestList = ({role}: {role: string}) => {
           <div className="overflow-x-auto">
             {loading ? (
               <div className="p-8 text-center text-gray-500">Loading properties...</div>
-            ) : error ? (
+            ) : error && properties.length === 0 ? (
               <div className="p-8 text-center text-red-500">{error}</div>
             ) : (
               <table className="min-w-full divide-y divide-gray-200">

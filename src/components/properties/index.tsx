@@ -4,6 +4,10 @@ import { BathroomIcon, BedIcon, GuestIcon, LocationFillIcon, PropertyIcon2 } fro
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import AboutSection from '../booknow/AboutSection';
+import MapSection from '../booknow/MapSection';
+import ReviewsSection from '../booknow/ReviewsSection';
+import PropertiesList from '../booknow/Properties_list';
 
 const images = [
   '/images/booknow/image1.png',
@@ -75,6 +79,7 @@ export default function MainSection(props: MainSectionProps) {
     }
     
     return (
+      <>
       <section className="max-w-7xl mx-auto p-2 md:p-6 lg:p-8">
         {/* Breadcrumb */}
         <div className="flex justify-between items-center mb-6">
@@ -183,5 +188,11 @@ export default function MainSection(props: MainSectionProps) {
           </div>
         </div>
       </section>
+      <AboutSection property={property}/>
+      {/* <AvailabilitySection/> */}
+      <MapSection property={property}/>
+      <ReviewsSection id={id}/>
+      <PropertiesList/>
+      </>
     );
 }

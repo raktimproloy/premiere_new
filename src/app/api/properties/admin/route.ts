@@ -101,6 +101,7 @@ export async function GET(request: NextRequest) {
       images: property.images || [],
       amenities: property.amenities || [],
       rules: property.rules || [],
+      services: property.services || [],
       owner: property.owner,
       createdAt: property.createdAt,
       updatedAt: property.updatedAt

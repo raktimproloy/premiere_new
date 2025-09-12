@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { notifyPropertyOwnerBooking, getPropertyOwnerId } from '@/lib/notificationService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,6 +53,27 @@ export async function POST(request: NextRequest) {
         message: data.message || 'Failed to create booking', 
         details: data 
       }, { status: response.status });
+    }
+    
+    // Create notification for property owner
+    try {
+      const ownerId = await getPropertyOwnerId(body.property_id.toString());
+      if (ownerId) {
+        // Get guest name from the request body or use a default
+        const guestName = body.guest_name || 'A guest';
+        const propertyName = body.property_name || 'Property';
+        
+        await notifyPropertyOwnerBooking(
+          body.property_id.toString(),
+          data.id?.toString() || 'unknown',
+          guestName,
+          propertyName,
+          ownerId
+        );
+      }
+    } catch (notificationError) {
+      console.error('Failed to create booking notification:', notificationError);
+      // Don't fail the booking creation if notification fails
     }
     
     return NextResponse.json({ success: true, booking: data });

@@ -188,6 +188,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       if (typeof body.max_guests === 'number') localUpdate.maxGuests = body.max_guests;
       if (typeof body.editorValue === 'string') localUpdate.description = body.editorValue;
       if (typeof body.details === 'string') localUpdate.description = body.details;
+      if (Array.isArray(body.services)) localUpdate.services = body.services;
 
       if (body.address) {
         localUpdate.address = {

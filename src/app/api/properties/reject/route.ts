@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authService } from '@/lib/auth';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { notifyAdminPropertyStatus } from '@/lib/notificationService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -229,6 +230,21 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Property successfully updated in local database');
+
+    // Create notification for property owner (admin)
+    try {
+      if (property.owner?._id) {
+        await notifyAdminPropertyStatus(
+          property._id.toString(),
+          property.name || 'Property',
+          property.owner._id.toString(),
+          'rejected'
+        );
+      }
+    } catch (notificationError) {
+      console.error('Failed to create rejection notification:', notificationError);
+      // Don't fail the rejection if notification fails
+    }
 
     return NextResponse.json({
       success: true,

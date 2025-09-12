@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 const RichTextEditor = dynamic(() => import('@/components/common/Editor'), { ssr: false });
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { FiPlus } from 'react-icons/fi';
 
 export default function CreatePropertyPage() {
   const router = useRouter();
@@ -22,6 +23,10 @@ export default function CreatePropertyPage() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [fileUrls, setFileUrls] = useState<string[]>([]);
   const [editorValue, setEditorValue] = useState('');
+  const [services, setServices] = useState<Array<{name: string, price: string}>>([
+    { name: 'Breakfast', price: '4' },
+    { name: 'WiFi', price: '0' }
+  ]);
 
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -55,6 +60,7 @@ export default function CreatePropertyPage() {
       capacity: capacity,
       details: details,
       editorValue: editorValue,
+      services: services,
     };
 
     try {
@@ -99,6 +105,10 @@ export default function CreatePropertyPage() {
       setUploadedFiles([]);
       setFileUrls([]);
       setEditorValue("");
+      setServices([
+        { name: 'Breakfast', price: '4' },
+        { name: 'WiFi', price: '0' }
+      ]);
       setIsModalOpen(true);
     } catch (err: any) {
       setError(err.message || 'Failed to create property');
@@ -133,6 +143,21 @@ export default function CreatePropertyPage() {
     if (uploadedFiles.length <= 1) {
       setFileUploaded(false);
     }
+  };
+
+  // Service management functions
+  const addService = () => {
+    setServices(prev => [...prev, { name: '', price: '0' }]);
+  };
+
+  const removeService = (index: number) => {
+    setServices(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateService = (index: number, field: 'name' | 'price', value: string) => {
+    setServices(prev => prev.map((service, i) => 
+      i === index ? { ...service, [field]: value } : service
+    ));
   };
 
   return (
@@ -341,6 +366,73 @@ export default function CreatePropertyPage() {
               required
             />
           </div> */}
+
+          {/* Services Section */}
+          <div className="bg-white shadow rounded-lg p-6 sm:p-8 mb-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Property Services</h3>
+              <button
+                type="button"
+                onClick={addService}
+                className="px-4 py-2 bg-[#586DF7] text-white rounded-lg hover:bg-[#586DF7]/80 transition-colors flex items-center gap-2"
+              >
+                <FiPlus size={16} />
+                Add Service
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {services.map((service, index) => (
+                <div key={index} className="flex gap-4 items-center p-4 border border-gray-200 rounded-lg">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Service Name
+                    </label>
+                    <input
+                      type="text"
+                      value={service.name}
+                      onChange={(e) => updateService(index, 'name', e.target.value)}
+                      placeholder="e.g., Breakfast, WiFi, Parking"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  <div className="w-32">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Price ($)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={service.price}
+                      onChange={(e) => updateService(index, 'price', e.target.value)}
+                      placeholder="0"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <button
+                      type="button"
+                      onClick={() => removeService(index)}
+                      className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                      disabled={services.length <= 1}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {services.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <p>No services added yet. Click "Add Service" to get started.</p>
+              </div>
+            )}
+          </div>
+
           <RichTextEditor onChange={setEditorValue} />
 
           

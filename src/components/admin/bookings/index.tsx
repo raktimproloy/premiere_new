@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FiEye, FiPlus, FiChevronLeft, FiChevronRight, FiSearch } from 'react-icons/fi';
 import PropertyDetailModal from '@/components/common/PropertyDetailModal';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 // Define Property interface locally for modal compatibility
 interface Property {
@@ -66,11 +67,13 @@ const Bookings = () => {
         params.append('status', statusFilter);
       }
       
-      const response = await fetch(`/api/bookings/all?${params.toString()}`);
+      const response = await fetch(`/api/admin/bookings?${params.toString()}`);
       
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Failed to fetch bookings');
+        const errorMessage = data.error || 'Failed to fetch bookings';
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
       }
       
       const data = await response.json();
@@ -82,11 +85,24 @@ const Bookings = () => {
         // Update total bookings from the API response
         const total = data.pagination?.total || data.bookings.length;
         setTotalBookings(total);
+        
+        // Log admin info for debugging
+        if (data.adminInfo) {
+          console.log('Admin Info:', data.adminInfo);
+        }
       } else {
-        throw new Error('Invalid response format');
+        const errorMessage = 'Invalid response format';
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch bookings');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch bookings';
+      // Only set error state if this is the first load (no existing data)
+      if (requests.length === 0) {
+        setError(errorMessage);
+      }
+      // Always show toast for errors
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
       setStatusLoading(false);
@@ -294,7 +310,7 @@ const Bookings = () => {
           </div>
         </div>
         {(loading || statusLoading || paginationLoading) && <div className="p-8 text-center text-gray-500">Loading bookings...</div>}
-        {error && <div className="p-8 text-center text-red-500">{error}</div>}
+        {error && requests.length === 0 && <div className="p-8 text-center text-red-500">{error}</div>}
         {/* Booking Request Table */}
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <div className="overflow-x-auto">

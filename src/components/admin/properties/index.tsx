@@ -4,6 +4,7 @@ import { FiEye, FiPlus, FiChevronLeft, FiChevronRight, FiSearch, FiCheck, FiX } 
 import PropertyDetailModal from '@/components/common/PropertyDetailModal';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 interface Property {
   id: string;
@@ -19,6 +20,7 @@ interface Property {
   status?: 'Pending' | 'Occupied' | 'Active' | 'Rejected';
   listingDate?: string;
   active?: boolean;
+  services?: Array<{name: string, price: string}>;
   owner?: {
     name: string;
     email: string;
@@ -134,7 +136,9 @@ const PropertyRequestList = ({role}: {role: string}) => {
       const response = await fetch(`/api/properties/admin?page=${currentPage}&pageSize=${itemsPerPage}`);
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || data.message || 'Failed to fetch properties');
+        const errorMessage = data.error || data.message || 'Failed to fetch properties';
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
       }
       const data = await response.json();
       console.log("data",data)
@@ -144,10 +148,18 @@ const PropertyRequestList = ({role}: {role: string}) => {
         setUserRole(data.userRole || '');
         setCanManageAllProperties(data.canManageAllProperties || false);
       } else {
-        setError(data.message || 'Failed to fetch properties');
+        const errorMessage = data.message || 'Failed to fetch properties';
+        toast.error(errorMessage);
+        setError(errorMessage);
       }
     } catch (err: any) {
-      setError(err.message);
+      const errorMessage = err.message;
+      // Only set error state if this is the first load (no existing data)
+      if (properties.length === 0) {
+        setError(errorMessage);
+      }
+      // Always show toast for errors
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -380,7 +392,7 @@ const PropertyRequestList = ({role}: {role: string}) => {
           <div className="overflow-x-auto">
             {loading ? (
               <div className="p-8 text-center text-gray-500">Loading properties...</div>
-            ) : error ? (
+            ) : error && properties.length === 0 ? (
               <div className="p-8 text-center text-red-500">{error}</div>
             ) : (
               <table className="min-w-full divide-y divide-gray-200">
@@ -408,6 +420,9 @@ const PropertyRequestList = ({role}: {role: string}) => {
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">
                       Price
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">
+                      Services
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">
                       Status
@@ -449,6 +464,42 @@ const PropertyRequestList = ({role}: {role: string}) => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                           {property.price || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                          <div className="max-w-xs">
+                            {property.services && property.services.length > 0 ? (
+                              <div className="space-y-2">
+                                {property.services.slice(0, 2).map((service, index) => (
+                                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                                    <div className="flex items-center space-x-2">
+                                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                                      <span className="truncate font-medium text-gray-700">{service.name}</span>
+                                    </div>
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                      parseFloat(service.price) === 0 
+                                        ? 'bg-green-100 text-green-700' 
+                                        : 'bg-blue-100 text-blue-700'
+                                    }`}>
+                                      {parseFloat(service.price) === 0 ? 'Free' : `$${service.price}`}
+                                    </span>
+                                  </div>
+                                ))}
+                                {property.services.length > 2 && (
+                                  <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full text-center">
+                                    +{property.services.length - 2} more services
+                                  </div>
+                                )}
+                                <div className="text-xs text-gray-500 text-center">
+                                  {property.services.filter(s => parseFloat(s.price) === 0).length} free, {property.services.filter(s => parseFloat(s.price) > 0).length} paid
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex items-center space-x-2 text-gray-400">
+                                <div className="w-1.5 h-1.5 bg-gray-300 rounded-full"></div>
+                                <span>No services</span>
+                              </div>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-5 py-2 inline-flex text-md leading-5 font-semibold rounded-full  ${getStatusBadge(property.status || (property.active ? 'Active' : 'Pending'))}`}>

@@ -125,6 +125,7 @@ async function mergeOwnerRezWithLocalData(ownerRezProperties: Property[]): Promi
             status: localProp.status,
             isVerified: localProp.isVerified,
             images: localProp.images,
+            services: (localProp as any).services || [],
             createdAt: localProp.createdAt,
             updatedAt: localProp.updatedAt,
             lastSyncedWithOwnerRez: localProp.lastSyncedWithOwnerRez

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import EditModal from './editModal';
 import dynamic from 'next/dynamic';
+import { FiPlus } from 'react-icons/fi';
 const RichTextEditor = dynamic(() => import('@/components/common/Editor'), { ssr: false });
 
 interface Property {
@@ -65,6 +66,10 @@ export default function EditPropertyPage() {
   const [existingImages, setExistingImages] = useState<Array<{ url: string; publicId?: string; alt?: string; isPrimary?: boolean }>>([]);
   const [removedExistingPublicIds, setRemovedExistingPublicIds] = useState<string[]>([]);
   const [localPropertyId, setLocalPropertyId] = useState<string | null>(null);
+  const [services, setServices] = useState<Array<{name: string, price: string}>>([
+    { name: 'Breakfast', price: '4' },
+    { name: 'WiFi', price: '0' }
+  ]);
 
   // Fetch property data on component mount
   useEffect(() => {
@@ -109,6 +114,12 @@ export default function EditPropertyPage() {
       setEditorValue(localDescription);
       // Capture local Mongo _id for image operations
       setLocalPropertyId(data.localId || (property as any)?.localData?._id || null);
+      
+      // Load services from local data
+      const localServices = (property as any)?.localData?.services || (property as any)?.services || [];
+      if (localServices.length > 0) {
+        setServices(localServices);
+      }
       
       // Set existing images
       const localImagesFromMerged: Array<{ url: string; publicId?: string; alt?: string; isPrimary?: boolean }> = (property as any)?.localData?.images || [];
@@ -202,6 +213,7 @@ export default function EditPropertyPage() {
         // Include rich text for local DB mapping
         editorValue: editorValue,
         details: editorValue,
+        services: services,
         calendar_color: "FF0000",
         days_before_arrival_for_check: 5,
         days_before_arrival_for_custom: 1,
@@ -298,6 +310,21 @@ export default function EditPropertyPage() {
       }
       return prev.filter((_, i) => i !== index);
     });
+  };
+
+  // Service management functions
+  const addService = () => {
+    setServices(prev => [...prev, { name: '', price: '0' }]);
+  };
+
+  const removeService = (index: number) => {
+    setServices(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateService = (index: number, field: 'name' | 'price', value: string) => {
+    setServices(prev => prev.map((service, i) => 
+      i === index ? { ...service, [field]: value } : service
+    ));
   };
 
   if (fetching) {
@@ -673,6 +700,72 @@ export default function EditPropertyPage() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Services Section */}
+          <div className="bg-white shadow rounded-lg p-6 sm:p-8 mb-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Property Services</h3>
+              <button
+                type="button"
+                onClick={addService}
+                className="px-4 py-2 bg-[#586DF7] text-white rounded-lg hover:bg-[#586DF7]/80 transition-colors flex items-center gap-2"
+              >
+                <FiPlus size={16} />
+                Add Service
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {services.map((service, index) => (
+                <div key={index} className="flex gap-4 items-center p-4 border border-gray-200 rounded-lg">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Service Name
+                    </label>
+                    <input
+                      type="text"
+                      value={service.name}
+                      onChange={(e) => updateService(index, 'name', e.target.value)}
+                      placeholder="e.g., Breakfast, WiFi, Parking"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  <div className="w-32">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Price ($)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={service.price}
+                      onChange={(e) => updateService(index, 'price', e.target.value)}
+                      placeholder="0"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <button
+                      type="button"
+                      onClick={() => removeService(index)}
+                      className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                      disabled={services.length <= 1}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {services.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <p>No services added yet. Click "Add Service" to get started.</p>
+              </div>
+            )}
           </div>
 
           {/* Rich Text Editor */}
