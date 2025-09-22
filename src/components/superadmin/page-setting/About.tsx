@@ -597,7 +597,7 @@ export default function About() {
             <input
                 ref={fileInputRef}
                 type="file"
-                accept={mainMediaType === 'image' ? 'image/*' : 'video/*'}
+                accept="image/*"
                 className="hidden"
                 onChange={(e) => {
                     const imageType = e.currentTarget.getAttribute('data-image-type') as 'main' | 'small';
