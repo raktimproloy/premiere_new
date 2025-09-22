@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     // Check content length for Vercel limits
     const contentLength = request.headers.get('content-length');
-    if (contentLength && parseInt(contentLength) > 10 * 1024 * 1024) { // 10MB limit for Vercel
+    if (contentLength && parseInt(contentLength) > 5 * 1024 * 1024) { // 5MB limit for Vercel
       return NextResponse.json(
         { success: false, message: 'File too large for upload. Please use a smaller file or compress it.' },
         { status: 413 }
@@ -51,9 +51,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Additional size check for Vercel deployment
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
       return NextResponse.json(
-        { success: false, message: 'File too large. Maximum size is 10MB for deployment.' },
+        { success: false, message: 'File too large. Maximum size is 5MB for deployment.' },
         { status: 413 }
       );
     }
