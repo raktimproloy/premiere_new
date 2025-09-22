@@ -53,16 +53,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file size based on type
+    // File size validation removed - no size limits
+
+    // Determine if file is video
     const isVideo = allowedVideoTypes.includes(file.type);
-    const maxSize = isVideo ? 50 * 1024 * 1024 : 5 * 1024 * 1024; // 50MB for videos, 5MB for images
-    if (file.size > maxSize) {
-      const maxSizeMB = maxSize / (1024 * 1024);
-      return NextResponse.json(
-        { success: false, message: `File size too large. Maximum size is ${maxSizeMB}MB.` },
-        { status: 400 }
-      );
-    }
 
     // Upload to Cloudinary
     try {
