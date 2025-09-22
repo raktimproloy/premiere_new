@@ -108,6 +108,9 @@ export default function About() {
 
         if (!response.ok) {
             const errorData = await response.json();
+            if (response.status === 413) {
+                throw new Error('File too large for upload. Please compress the image or use a smaller file (max 10MB).');
+            }
             throw new Error(errorData.message || 'Failed to upload image');
         }
 
@@ -132,6 +135,12 @@ export default function About() {
                 if (!allowedTypes.includes(file.type)) {
                     const mediaType = imageType === 'main' && mainMediaType === 'video' ? 'video' : 'image';
                     setMessage(`Invalid file type. Only ${mediaType === 'video' ? 'MP4, WebM, and OGV' : 'JPEG, PNG, and WebP'} files are allowed.`);
+                    return;
+                }
+
+                // Check file size for Vercel deployment limits
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                    setMessage('File too large. Maximum size is 10MB for deployment. Please compress the file.');
                     return;
                 }
 

@@ -31,6 +31,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check content length for Vercel limits
+    const contentLength = request.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > 10 * 1024 * 1024) { // 10MB limit for Vercel
+      return NextResponse.json(
+        { success: false, message: 'File too large for upload. Please use a smaller file or compress it.' },
+        { status: 413 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
@@ -38,6 +47,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, message: 'No image file provided' },
         { status: 400 }
+      );
+    }
+
+    // Additional size check for Vercel deployment
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      return NextResponse.json(
+        { success: false, message: 'File too large. Maximum size is 10MB for deployment.' },
+        { status: 413 }
       );
     }
 
