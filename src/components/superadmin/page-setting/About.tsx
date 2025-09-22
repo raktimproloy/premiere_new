@@ -120,27 +120,18 @@ export default function About() {
         if (file) {
             try {
                 let allowedTypes: string[];
-                let maxSize: number;
                 
                 if (imageType === 'main' && mainMediaType === 'video') {
                     // Video validation for main media
                     allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
-                    maxSize = 50 * 1024 * 1024; // 50MB for videos
                 } else {
                     // Image validation
                     allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-                    maxSize = 5 * 1024 * 1024; // 5MB for images
                 }
                 
                 if (!allowedTypes.includes(file.type)) {
                     const mediaType = imageType === 'main' && mainMediaType === 'video' ? 'video' : 'image';
                     setMessage(`Invalid file type. Only ${mediaType === 'video' ? 'MP4, WebM, and OGV' : 'JPEG, PNG, and WebP'} files are allowed.`);
-                    return;
-                }
-
-                if (file.size > maxSize) {
-                    const maxSizeMB = maxSize / (1024 * 1024);
-                    setMessage(`File size too large. Maximum size is ${maxSizeMB}MB.`);
                     return;
                 }
 
