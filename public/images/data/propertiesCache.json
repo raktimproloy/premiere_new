@@ -12,9 +12,9 @@
         "street1": "259 Northwest 39th Street",
         "street2": "Complete Property"
       },
-      "bathrooms": 5,
+      "bathrooms": 6,
       "bathrooms_full": 4,
-      "bathrooms_half": 1,
+      "bathrooms_half": 2,
       "bedrooms": 6,
       "check_in": "15:00",
       "check_out": "11:00",
@@ -26,12 +26,15 @@
       "listing_numbers": {
         "Airbnb": "1052117495221241968"
       },
+      "living_area": 3300,
+      "living_area_type": "sq. ft.",
       "longitude": -80.2007511,
+      "max_children": 0,
       "max_guests": 16,
       "max_pets": 0,
       "name": "Wynwood Townhomes w/Heated Pools",
       "owner_id": 150913611,
-      "property_type": "house",
+      "property_type": "townhome",
       "thumbnail_url": "https://uc.orez.io/i/d53dc27e2ae84dba91d67039bcf54b40-Thumb",
       "thumbnail_url_large": "https://uc.orez.io/i/d53dc27e2ae84dba91d67039bcf54b40-Large",
       "thumbnail_url_medium": "https://uc.orez.io/i/d53dc27e2ae84dba91d67039bcf54b40-Medium",
@@ -64,6 +67,8 @@
         "Vrbo": "3180366",
         "Airbnb": "743455221086012901"
       },
+      "living_area": 1650,
+      "living_area_type": "sq. ft.",
       "longitude": -80.20074986,
       "max_guests": 10,
       "max_pets": 0,
@@ -102,12 +107,14 @@
         "Airbnb": "1052090851461774832",
         "Vrbo": "4802602"
       },
+      "living_area": 1650,
+      "living_area_type": "sq. ft.",
       "longitude": -80.20073611,
       "max_guests": 10,
       "max_pets": 0,
       "name": "Wynwood/Design District TH w/heated Pool",
       "owner_id": 150913611,
-      "property_type": "house",
+      "property_type": "townhome",
       "thumbnail_url": "https://uc.orez.io/i/e0995045a86a40728ccd7870684649bf-Thumb",
       "thumbnail_url_large": "https://uc.orez.io/i/e0995045a86a40728ccd7870684649bf-Large",
       "thumbnail_url_medium": "https://uc.orez.io/i/e0995045a86a40728ccd7870684649bf-Medium",
@@ -140,6 +147,8 @@
         "Vrbo": "3180084",
         "Airbnb": "1052156283570567870"
       },
+      "living_area": 450,
+      "living_area_type": "sq. ft.",
       "longitude": -80.1972257,
       "max_guests": 4,
       "max_pets": 0,
@@ -152,6 +161,6 @@
       "localData": null
     }
   ],
-  "timestamp": 1757685123629,
-  "expiresAt": 1757685423629
+  "timestamp": 1758513330702,
+  "expiresAt": 1758513630702
 }

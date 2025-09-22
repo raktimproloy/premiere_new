@@ -186,7 +186,7 @@ const ProfilePage = ({role}: {role: string}) => {
                 alt="Profile" 
                 className="w-full h-full object-cover rounded-full"
               />
-              <button 
+              {/* <button 
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingImage}
                 className="absolute bottom-1 -right-1 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center border-2 border-gray-100 hover:bg-gray-50 disabled:opacity-50"
@@ -196,14 +196,14 @@ const ProfilePage = ({role}: {role: string}) => {
                 ) : (
                   <CameraIcon />
                 )}
-              </button>
-              <input
+              </button> */}
+              {/*<input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handleImageUpload}
                 className="hidden"
-              />
+              />*/}
             </div>
           </div>
 
