@@ -8,7 +8,7 @@ interface CachedProperties {
 }
 
 const CACHE_FILE_PATH = path.join(process.cwd(), 'public', 'images', 'data', 'propertiesCache.json');
-const CACHE_EXPIRY_MINUTES = 5;
+const CACHE_EXPIRY_MINUTES = 0.5; // 30 seconds for more frequent updates - reduced from 5 minutes for better data freshness
 
 // In-memory cache for production
 let memoryCache: CachedProperties | null = null;

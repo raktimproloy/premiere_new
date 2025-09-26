@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateProperty, getProperty } from '@/lib/ownerRezService';
 import { OwnerRezPropertyUpdate } from '@/lib/ownerRezConfig';
+import { clearCache } from '@/utils/propertyCache';
 
 // Define the request body interface
 interface UpdatePropertyRequest {
@@ -75,6 +76,15 @@ export async function PATCH(request: NextRequest) {
     const updateResponse = await updateProperty(propertyId, finalUpdateData);
 
     if (updateResponse.success) {
+      // Clear properties cache to ensure fresh data is shown
+      try {
+        clearCache();
+        console.log('Properties cache cleared after OwnerRez property update');
+      } catch (cacheError) {
+        console.error('Failed to clear properties cache:', cacheError);
+        // Don't fail the operation if cache clearing fails
+      }
+
       return NextResponse.json(
         {
           success: true,

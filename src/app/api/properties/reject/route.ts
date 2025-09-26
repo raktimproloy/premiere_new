@@ -3,6 +3,7 @@ import { authService } from '@/lib/auth';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { notifyAdminPropertyStatus } from '@/lib/notificationService';
+import { clearCache } from '@/utils/propertyCache';
 
 export async function POST(request: NextRequest) {
   try {
@@ -230,6 +231,15 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Property successfully updated in local database');
+
+    // Clear properties cache to ensure fresh data is shown
+    try {
+      clearCache();
+      console.log('Properties cache cleared after property rejection');
+    } catch (cacheError) {
+      console.error('Failed to clear properties cache:', cacheError);
+      // Don't fail the operation if cache clearing fails
+    }
 
     // Create notification for property owner (admin)
     try {

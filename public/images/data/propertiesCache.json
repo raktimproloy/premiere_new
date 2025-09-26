@@ -2,115 +2,6 @@
   "properties": [
     {
       "active": true,
-      "bathrooms": 2,
-      "bathrooms_full": 2,
-      "bathrooms_half": 0,
-      "bedrooms": 4,
-      "check_in": "15:00",
-      "check_out": "11:00",
-      "currency_code": "USD",
-      "id": 466209,
-      "is_snoozed": false,
-      "key": "local-466209",
-      "max_guests": 10,
-      "name": "Rajshai taz",
-      "property_type": "townhouse",
-      "max_children": 0,
-      "max_pets": 0,
-      "address": {
-        "street1": "Bazar, Rajshahi",
-        "street2": "",
-        "city": "Rajshahi",
-        "state": "rajshahi",
-        "country": "Bangladesh",
-        "postal_code": "10001",
-        "id": 0,
-        "is_default": false
-      },
-      "thumbnail_url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758899443/properties/csl3p6qbdjvsnbr1ykz5.jpg",
-      "thumbnail_url_medium": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758899443/properties/csl3p6qbdjvsnbr1ykz5.jpg",
-      "thumbnail_url_large": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758899443/properties/csl3p6qbdjvsnbr1ykz5.jpg",
-      "latitude": null,
-      "longitude": null,
-      "listing_numbers": {},
-      "living_area": null,
-      "living_area_type": null,
-      "owner_id": "68b46c1558024cbd7e851c65",
-      "services": [
-        {
-          "name": "Breakfast",
-          "price": "4"
-        },
-        {
-          "name": "WiFi",
-          "price": "0"
-        }
-      ],
-      "localData": {
-        "_id": "68d6acfca12de5387ef97d5e",
-        "description": "<p>hello bangladesh</p>",
-        "amenities": [],
-        "rules": [],
-        "pricing": {
-          "baseRate": 0,
-          "currency": "USD",
-          "cleaningFee": 0,
-          "serviceFee": 0,
-          "taxes": 0
-        },
-        "availability": {
-          "checkInTime": "15:00",
-          "checkOutTime": "11:00",
-          "minStay": 1,
-          "maxStay": 30
-        },
-        "policies": {
-          "cancellationPolicy": "Standard",
-          "houseRules": [],
-          "petPolicy": "No pets allowed",
-          "smokingPolicy": "No smoking"
-        },
-        "owner": {
-          "id": "68b46c1558024cbd7e851c65",
-          "name": "Test",
-          "email": "test@gmail.com",
-          "phone": "1234123123"
-        },
-        "status": "active",
-        "isVerified": false,
-        "images": [
-          {
-            "url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758899443/properties/csl3p6qbdjvsnbr1ykz5.jpg",
-            "publicId": "properties/csl3p6qbdjvsnbr1ykz5",
-            "alt": "Rajshai taz - Image 1",
-            "isPrimary": true,
-            "uploadedAt": "2025-09-26T15:10:52.280Z"
-          },
-          {
-            "url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758899450/properties/uyj78ilsimrr0rgq3k7o.png",
-            "publicId": "properties/uyj78ilsimrr0rgq3k7o",
-            "alt": "Rajshai taz - Image 2",
-            "isPrimary": false,
-            "uploadedAt": "2025-09-26T15:10:52.280Z"
-          }
-        ],
-        "services": [
-          {
-            "name": "Breakfast",
-            "price": "4"
-          },
-          {
-            "name": "WiFi",
-            "price": "0"
-          }
-        ],
-        "createdAt": "2025-09-26T15:10:52.280Z",
-        "updatedAt": "2025-09-26T15:12:43.035Z",
-        "lastSyncedWithOwnerRez": "2025-09-26T15:10:52.280Z"
-      }
-    },
-    {
-      "active": true,
       "bathrooms": 1,
       "bathrooms_full": 1,
       "bathrooms_half": 0,
@@ -118,26 +9,27 @@
       "check_in": "15:00",
       "check_out": "11:00",
       "currency_code": "USD",
-      "id": 466204,
+      "id": 466217,
       "is_snoozed": false,
-      "key": "local-466204",
-      "max_guests": 0,
-      "name": "Kazla Palace",
+      "key": "local-466217",
+      "max_guests": 4,
+      "name": "Mumbai Palace",
+      "property_type": "house",
       "max_children": 0,
       "max_pets": 0,
       "address": {
-        "street1": "kazla, Rajshahi",
+        "street1": "Mumbail, India",
         "street2": "",
-        "city": "",
-        "state": "",
-        "country": "USA",
-        "postal_code": "",
+        "city": "Mumbai",
+        "state": "Mumbai",
+        "country": "India",
+        "postal_code": "123123",
         "id": 0,
         "is_default": false
       },
-      "thumbnail_url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758896514/properties/kzimyhqz1xbjsodyc27i.jpg",
-      "thumbnail_url_medium": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758896514/properties/kzimyhqz1xbjsodyc27i.jpg",
-      "thumbnail_url_large": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758896514/properties/kzimyhqz1xbjsodyc27i.jpg",
+      "thumbnail_url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758903656/properties/yc857liixh8qimoafypn.jpg",
+      "thumbnail_url_medium": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758903656/properties/yc857liixh8qimoafypn.jpg",
+      "thumbnail_url_large": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758903656/properties/yc857liixh8qimoafypn.jpg",
       "latitude": null,
       "longitude": null,
       "listing_numbers": {},
@@ -146,17 +38,13 @@
       "owner_id": "68b46c1558024cbd7e851c65",
       "services": [
         {
-          "name": "Breakfast",
-          "price": "4"
-        },
-        {
-          "name": "WiFi",
+          "name": "Wifi",
           "price": "0"
         }
       ],
       "localData": {
-        "_id": "68d6a1836a60f36d0bc16aec",
-        "description": "<p><br></p>",
+        "_id": "68d6bd69219abd227926f621",
+        "description": "<h1>Hello Mumbai, India</h1><p>welcome to India</p>",
         "amenities": [],
         "rules": [],
         "pricing": {
@@ -188,26 +76,22 @@
         "isVerified": false,
         "images": [
           {
-            "url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758896514/properties/kzimyhqz1xbjsodyc27i.jpg",
-            "publicId": "properties/kzimyhqz1xbjsodyc27i",
-            "alt": "Kazla Palace - Image 1",
+            "url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758903656/properties/yc857liixh8qimoafypn.jpg",
+            "publicId": "properties/yc857liixh8qimoafypn",
+            "alt": "Mumbai Palace - Image 1",
             "isPrimary": true,
-            "uploadedAt": "2025-09-26T14:21:55.689Z"
+            "uploadedAt": "2025-09-26T16:20:57.996Z"
           }
         ],
         "services": [
           {
-            "name": "Breakfast",
-            "price": "4"
-          },
-          {
-            "name": "WiFi",
+            "name": "Wifi",
             "price": "0"
           }
         ],
-        "createdAt": "2025-09-26T14:21:55.689Z",
-        "updatedAt": "2025-09-26T14:57:56.856Z",
-        "lastSyncedWithOwnerRez": "2025-09-26T14:57:40.004Z"
+        "createdAt": "2025-09-26T16:20:57.996Z",
+        "updatedAt": "2025-09-26T16:45:37.155Z",
+        "lastSyncedWithOwnerRez": "2025-09-26T16:20:57.996Z"
       }
     },
     {
@@ -371,6 +255,6 @@
       "localData": null
     }
   ],
-  "timestamp": 1758901616715,
-  "expiresAt": 1758901916715
+  "timestamp": 1758905164645,
+  "expiresAt": 1758905194645
 }
