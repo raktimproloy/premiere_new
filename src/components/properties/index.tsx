@@ -107,85 +107,143 @@ export default function MainSection(props: MainSectionProps) {
                 {property?.address ? `${property.address.city}, ${property.address.state}, ${property.address.country}` : 'Location not available'}
               </div>
               
-              {/* Property Description */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {property?.description || 'No description available for this property.'}
-                </p>
-              </div>
 
-              {/* Property Features */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Property Features</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {property?.amenities && property.amenities.length > 0 ? (
-                    property.amenities.slice(0, 8).map((amenity: string, index: number) => (
+              {/* Property Services */}
+              {(property?.services && property.services.length > 0) && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Services & Amenities</h3>
+                  <div className="grid grid-cols-1 gap-2">
+                    {property.services.map((service: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                          <span className="text-sm font-medium text-gray-700">{service.name}</span>
+                        </div>
+                        <span className="text-sm font-semibold text-green-600">
+                          {service.price === '0' || service.price === 0 ? 'Free' : `$${service.price}`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Property Amenities */}
+              {(property?.localData?.amenities && property.localData.amenities.length > 0) && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Property Features</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {property.localData.amenities.slice(0, 8).map((amenity: any, index: number) => (
                       <div key={index} className="flex items-center text-sm text-gray-600">
                         <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                        {amenity}
+                        {amenity.name || amenity}
                       </div>
-                    ))
-                  ) : (
-                    <div className="text-gray-500 text-sm">No amenities listed</div>
-                  )}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+
             </div>
           </div>
         </div>
         
         {/* Bottom: Property Details */}
-        <div className="w-full max-w-7xl mx-auto flex flex-col md:flex-row gap-4 mt-8">
-          <div className="flex-1 flex items-center justify-start bg-white rounded-xl shadow p-4 gap-2">
-            <div className="flex items-center">
-              <span className='bg-[#586DF7] p-2 rounded-lg'><PropertyIcon2 /></span>
-              <div className='flex flex-col ml-2'>
-                <span className="text-xs text-gray-500 mb-1">Type</span>
-                <span className="rounded-lg py-1 text-sm font-semibold">
-                  {property?.property_type ? property.property_type.charAt(0).toUpperCase() + property.property_type.slice(1) : 'N/A'}
-                </span>
+        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+          {/* Property Type */}
+          {property?.property_type && (
+            <div className="flex items-center justify-start bg-white rounded-xl shadow p-4 gap-2">
+              <div className="flex items-center">
+                <span className='bg-[#586DF7] p-2 rounded-lg'><PropertyIcon2 /></span>
+                <div className='flex flex-col ml-2'>
+                  <span className="text-xs text-gray-500 mb-1">Type</span>
+                  <span className="rounded-lg py-1 text-sm font-semibold">
+                    {property.property_type.charAt(0).toUpperCase() + property.property_type.slice(1)}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex-1 flex items-center justify-start bg-white rounded-xl shadow p-4 gap-2">
-            <div className="flex items-center">
-              <span className='bg-[#F86E04] p-2 rounded-lg'><GuestIcon /></span>
-              <div className='flex flex-col ml-2'>
-                <span className="text-xs text-gray-500 mb-1">Accommodation</span>
-                <span className="text-orange-700 rounded-lg py-1 text-sm font-semibold">
-                  {property?.max_guests ? `${property.max_guests}+ Guests` : 'N/A'}
-                </span>
+          )}
+
+          {/* Max Guests */}
+          {property?.max_guests && property.max_guests > 0 && (
+            <div className="flex items-center justify-start bg-white rounded-xl shadow p-4 gap-2">
+              <div className="flex items-center">
+                <span className='bg-[#F86E04] p-2 rounded-lg'><GuestIcon /></span>
+                <div className='flex flex-col ml-2'>
+                  <span className="text-xs text-gray-500 mb-1">Accommodation</span>
+                  <span className="text-orange-700 rounded-lg py-1 text-sm font-semibold">
+                    {property.max_guests} Guest{property.max_guests > 1 ? 's' : ''}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex-1 flex items-center justify-start bg-white rounded-xl shadow p-4 gap-2">
-            <div className="flex items-center">
-              <span className='bg-[#38C6F9] p-2 rounded-lg'><BedIcon /></span>
-              <div className='flex flex-col ml-2'>
-                <span className="text-xs text-gray-500 mb-1">Bedrooms</span>
-                <span className="text-blue-700 rounded-lg py-1 text-sm font-semibold">
-                  {property?.bedrooms ? `${property.bedrooms} Bedroom${property.bedrooms > 1 ? 's' : ''}` : 'N/A'}
-                </span>
+          )}
+
+          {/* Bedrooms */}
+          {property?.bedrooms && property.bedrooms > 0 && (
+            <div className="flex items-center justify-start bg-white rounded-xl shadow p-4 gap-2">
+              <div className="flex items-center">
+                <span className='bg-[#38C6F9] p-2 rounded-lg'><BedIcon /></span>
+                <div className='flex flex-col ml-2'>
+                  <span className="text-xs text-gray-500 mb-1">Bedrooms</span>
+                  <span className="text-blue-700 rounded-lg py-1 text-sm font-semibold">
+                    {property.bedrooms} Bedroom{property.bedrooms > 1 ? 's' : ''}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex-1 flex items-center justify-start bg-white rounded-xl shadow p-4 gap-2">
-            <div className="flex items-center">
-              <span className='bg-[#586DF7] p-2 rounded-lg'><BathroomIcon /></span>
-              <div className='flex flex-col ml-2'>
-                <span className="text-xs text-gray-500 mb-1">Bathrooms</span>
-                <span className="text-purple-700 rounded-lg py-1 text-sm font-semibold">
-                  {property?.bathrooms_full && property?.bathrooms_half 
-                    ? `${property.bathrooms_full} Full ${property.bathrooms_half} Half Bath${(property.bathrooms_full + property.bathrooms_half) > 1 ? 's' : ''}`
-                    : property?.bathrooms 
-                      ? `${property.bathrooms} Bathroom${property.bathrooms > 1 ? 's' : ''}`
-                      : 'N/A'
-                  }
-                </span>
+          )}
+
+          {/* Bathrooms */}
+          {property?.bathrooms && property.bathrooms > 0 && (
+            <div className="flex items-center justify-start bg-white rounded-xl shadow p-4 gap-2">
+              <div className="flex items-center">
+                <span className='bg-[#586DF7] p-2 rounded-lg'><BathroomIcon /></span>
+                <div className='flex flex-col ml-2'>
+                  <span className="text-xs text-gray-500 mb-1">Bathrooms</span>
+                  <span className="text-purple-700 rounded-lg py-1 text-sm font-semibold">
+                    {property.bathrooms_full && property.bathrooms_half 
+                      ? `${property.bathrooms_full} Full ${property.bathrooms_half} Half Bath${(property.bathrooms_full + property.bathrooms_half) > 1 ? 's' : ''}`
+                      : `${property.bathrooms} Bathroom${property.bathrooms > 1 ? 's' : ''}`
+                    }
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Status */}
+          {property?.status && (
+            <div className="flex items-center justify-start bg-white rounded-xl shadow p-4 gap-2">
+              <div className="flex items-center">
+                <span className={`p-2 rounded-lg ${property.status === 'active' ? 'bg-green-100' : 'bg-gray-100'}`}>
+                  <div className={`w-3 h-3 rounded-full ${property.status === 'active' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                </span>
+                <div className='flex flex-col ml-2'>
+                  <span className="text-xs text-gray-500 mb-1">Status</span>
+                  <span className={`rounded-lg py-1 text-sm font-semibold ${property.status === 'active' ? 'text-green-700' : 'text-gray-700'}`}>
+                    {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Pricing */}
+          {property?.localData?.pricing && (property.localData.pricing.baseRate > 0 || property.localData.pricing.cleaningFee > 0) && (
+            <div className="flex items-center justify-start bg-white rounded-xl shadow p-4 gap-2">
+              <div className="flex items-center">
+                <span className='bg-[#10B981] p-2 rounded-lg'>💰</span>
+                <div className='flex flex-col ml-2'>
+                  <span className="text-xs text-gray-500 mb-1">Starting from</span>
+                  <span className="text-green-700 rounded-lg py-1 text-sm font-semibold">
+                    ${property.localData.pricing.baseRate || 0}
+                    {property.localData.pricing.cleaningFee > 0 && ` + $${property.localData.pricing.cleaningFee} cleaning`}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
       <AboutSection property={property}/>

@@ -14,10 +14,16 @@ export default function CreatePropertyPage() {
   // State for form fields
   const [propertyName, setPropertyName] = useState('');
   const [propertyLocation, setPropertyLocation] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [country, setCountry] = useState('USA');
   const [totalBathroom, setTotalBathroom] = useState('');
   const [totalBedroom, setTotalBedroom] = useState('');
   const [propertyType, setPropertyType] = useState('');
   const [capacity, setCapacity] = useState('');
+  const [checkIn, setCheckIn] = useState('15:00');
+  const [checkOut, setCheckOut] = useState('11:00');
   const [details, setDetails] = useState(''); // was fullName
   const [fileUploaded, setFileUploaded] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -54,10 +60,20 @@ export default function CreatePropertyPage() {
     const propertyData = {
       name: propertyName,
       propertyLocation: propertyLocation,
+      address: {
+        street1: propertyLocation,
+        street2: "",
+        city: city,
+        state: state,
+        postalCode: postalCode,
+        country: country,
+      },
       totalBathroom: totalBathroom,
       totalBedroom: totalBedroom,
       propertyType: propertyType,
       capacity: capacity,
+      checkIn: checkIn,
+      checkOut: checkOut,
       details: details,
       editorValue: editorValue,
       services: services,
@@ -97,10 +113,16 @@ export default function CreatePropertyPage() {
       // Reset all form fields after successful creation
       setPropertyName("");
       setPropertyLocation("");
+      setCity("");
+      setState("");
+      setPostalCode("");
+      setCountry("USA");
       setTotalBathroom("");
       setTotalBedroom("");
       setPropertyType("");
       setCapacity("");
+      setCheckIn("15:00");
+      setCheckOut("11:00");
       setDetails("");
       setUploadedFiles([]);
       setFileUrls([]);
@@ -202,17 +224,73 @@ export default function CreatePropertyPage() {
               {/* Property Location */}
               <div className="mb-6">
                 <label htmlFor="propertyLocation" className="block text-sm font-medium text-gray-700 mb-2">
-                  Property Location
+                  Street Address *
                 </label>
                 <input
                   type="text"
                   id="propertyLocation"
                   value={propertyLocation}
                   onChange={(e) => setPropertyLocation(e.target.value)}
-                  placeholder="Type your Property Location"
+                  placeholder="Enter street address"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                   required
                 />
+              </div>
+
+              {/* City, State, Postal Code, Country */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    id="city"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="City"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-2">
+                    State/Province
+                  </label>
+                  <input
+                    type="text"
+                    id="state"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    placeholder="State"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-2">
+                    Postal Code
+                  </label>
+                  <input
+                    type="text"
+                    id="postalCode"
+                    value={postalCode}
+                    onChange={(e) => setPostalCode(e.target.value)}
+                    placeholder="Postal Code"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
+                    Country
+                  </label>
+                  <input
+                    type="text"
+                    id="country"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                    placeholder="Country"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  />
+                </div>
               </div>
 
               {/* Bathroom and Bedroom Selection */}
@@ -292,6 +370,34 @@ export default function CreatePropertyPage() {
                       <option key={num} value={num}>{num} {num === 1 ? 'person' : 'people'}</option>
                     ))}
                   </select>
+                </div>
+              </div>
+
+              {/* Check-in/Check-out Times */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label htmlFor="checkIn" className="block text-sm font-medium text-gray-700 mb-2">
+                    Check-in Time
+                  </label>
+                  <input
+                    type="time"
+                    id="checkIn"
+                    value={checkIn}
+                    onChange={(e) => setCheckIn(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="checkOut" className="block text-sm font-medium text-gray-700 mb-2">
+                    Check-out Time
+                  </label>
+                  <input
+                    type="time"
+                    id="checkOut"
+                    value={checkOut}
+                    onChange={(e) => setCheckOut(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  />
                 </div>
               </div>
 

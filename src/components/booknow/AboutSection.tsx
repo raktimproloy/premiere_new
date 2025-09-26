@@ -206,9 +206,12 @@ const AboutSection = ({ property }: { property: Property | null }) => {
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 border-b border-gray-200 pb-3 sm:pb-4">About this listing</h2>
             <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2 sm:mb-3">About this space</h3>
             <div className="space-y-3 sm:space-y-4 text-gray-700 text-sm sm:text-base">
-              <p>
-                {getPropertyDescription()}
-              </p>
+              <div 
+                dangerouslySetInnerHTML={{ 
+                  __html: getPropertyDescription() 
+                }} 
+                className="prose prose-sm max-w-none"
+              />
               
               {/* Location Info */}
               {property?.address && (

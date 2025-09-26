@@ -93,7 +93,8 @@ export async function GET(request: NextRequest) {
       price: property.pricing?.baseRate?.toString() || '0',
       status: property.status === 'draft' ? 'Pending' : 
               property.status === 'active' ? 'Active' : 
-              property.status === 'occupied' ? 'Occupied' : 'Pending',
+              property.status === 'occupied' ? 'Occupied' : 
+              property.status === 'disabled' ? 'Disabled' : 'Pending',
       active: property.status === 'active',
       listingDate: property.createdAt,
       description: property.description,
@@ -103,6 +104,7 @@ export async function GET(request: NextRequest) {
       rules: property.rules || [],
       services: property.services || [],
       owner: property.owner,
+      ownerRezId: property.ownerRezId || null, // Include OwnerRez ID from local database
       createdAt: property.createdAt,
       updatedAt: property.updatedAt
     }));

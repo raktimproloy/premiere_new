@@ -17,9 +17,10 @@ interface Property {
   capacity?: string;
   max_guests?: number;
   price?: string;
-  status?: 'Pending' | 'Occupied' | 'Active' | 'Rejected';
+  status?: 'Pending' | 'Occupied' | 'Active' | 'Rejected' | 'Disabled';
   listingDate?: string;
   active?: boolean;
+  ownerRezId?: number; // OwnerRez property ID for API calls
   owner?: {
     name: string;
     email: string;
@@ -51,30 +52,34 @@ const PropertyRequestList = ({role}: {role: string}) => {
     setIsModalOpen(true);
   };
 
-  const handleApprove = async (propertyId: string) => {
+  const handleApprove = async (propertyId: string, ownerRezId?: number) => {
+    console.log("propertyId", propertyId);
+    console.log("ownerRezId", ownerRezId);
+    
     try {
       setActionLoading(propertyId);
       setError(null);
       
+      // Use the approve API that updates both OwnerRez and local database
       const response = await fetch('/api/properties/approve', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ propertyId }),
+        body: JSON.stringify({
+          propertyId: propertyId
+        })
       });
 
       const data = await response.json();
-      console.log("data",data)
+      
       if (data.success) {
         toast.success('Property approved successfully!');
         // Refresh properties list
         fetchProperties();
       } else {
-        const errorMessage = data.message || 'Failed to approve property';
-        toast.error(errorMessage);
-        setError(errorMessage);
-        setTimeout(() => setError(null), 5000);
+        toast.error('Failed to approve property: ' + data.message);
+        console.error('Property approval failed:', data);
       }
     } catch (error) {
       const errorMessage = 'Failed to approve property';
@@ -86,35 +91,37 @@ const PropertyRequestList = ({role}: {role: string}) => {
     }
   };
 
-  const handleReject = async (propertyId: string) => {
+  const handleToggleStatus = async (propertyId: string, currentStatus: string, ownerRezId?: number) => {
+    const isCurrentlyActive = currentStatus === 'Active';
+    console.log(propertyId, currentStatus, ownerRezId)
     try {
       setActionLoading(propertyId);
       setError(null);
       
-      const reason = prompt('Please provide a reason for rejection:') || 'No reason provided';
-      
-      const response = await fetch('/api/properties/reject', {
+      // Use the approve API for both enable and disable operations
+      const response = await fetch('/api/properties/approve', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ propertyId, reason }),
+        body: JSON.stringify({
+          propertyId: propertyId,
+          action: isCurrentlyActive ? 'disable' : 'enable'
+        })
       });
 
       const data = await response.json();
-
+      
       if (data.success) {
-        toast.success('Property rejected successfully!');
+        toast.success(`Property ${isCurrentlyActive ? 'disabled' : 'enabled'} successfully!`);
         // Refresh properties list
         fetchProperties();
       } else {
-        const errorMessage = data.message || 'Failed to reject property';
-        toast.error(errorMessage);
-        setError(errorMessage);
-        setTimeout(() => setError(null), 5000);
+        toast.error(`Failed to ${isCurrentlyActive ? 'disable' : 'enable'} property: ` + data.message);
+        console.error('Property toggle failed:', data);
       }
     } catch (error) {
-      const errorMessage = 'Failed to reject property';
+      const errorMessage = `Failed to ${isCurrentlyActive ? 'disable' : 'enable'} property`;
       toast.error(errorMessage);
       setError(errorMessage);
       setTimeout(() => setError(null), 5000);
@@ -142,7 +149,9 @@ const PropertyRequestList = ({role}: {role: string}) => {
         ? 'pending'
         : (statusFilter || 'All').toLowerCase() === 'active'
           ? 'active'
-          : 'all';
+          : (statusFilter || 'All').toLowerCase() === 'disabled'
+            ? 'disabled'
+            : 'all';
       const basePath = role === 'superadmin' ? '/api/properties/superadmin' : '/api/properties/admin';
       const response = await fetch(`${basePath}?page=${currentPage}&pageSize=${itemsPerPage}&status=${statusParam}`);
       if (!response.ok) {
@@ -294,13 +303,15 @@ const PropertyRequestList = ({role}: {role: string}) => {
         return 'bg-[#586DF7] text-white';
       case 'Active':
         return 'bg-[#40C557] text-white';
+      case 'Disabled':
+        return 'bg-gray-500 text-white';
       case 'Rejected':
         return 'bg-red-600 text-white';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
-
+console.log(filteredProperties)
   return (
     <div className="min-h-screen bg-gray-50">
       {loading && (
@@ -397,6 +408,22 @@ const PropertyRequestList = ({role}: {role: string}) => {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}>
                 Active Properties
+                </span>
+            </label>
+            <label className="flex items-center cursor-pointer w-full md:w-auto">
+                <input
+                type="radio"
+                name="statusFilter"
+                checked={statusFilter === 'Disabled'}
+                onChange={() => { setCurrentPage(1); setStatusFilter('Disabled'); }}
+                className="sr-only"
+                />
+                <span className={`px-5 py-2 rounded-full text-sm font-medium ${
+                statusFilter === 'Disabled' 
+                    ? 'bg-gray-500 text-white ' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}>
+                Disabled Properties
                 </span>
             </label>
             </div>
@@ -515,35 +542,44 @@ const PropertyRequestList = ({role}: {role: string}) => {
                               <FiEye size={18} />
                             </button>
                             
-                            {/* Approve/Reject buttons - only for superadmins */}
+                            {/* Approve button - only for pending properties */}
                             {canManageAllProperties && property.status === 'Pending' && (
-                              <>
-                                <button
-                                  onClick={() => handleApprove(property.id)}
-                                  disabled={actionLoading === property.id}
-                                  className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors disabled:opacity-50"
-                                  title="Approve Property"
-                                >
-                                  {actionLoading === property.id ? (
-                                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-green-600"></div>
-                                  ) : (
-                                    <FiCheck size={18} />
-                                  )}
-                                </button>
-                                
-                                <button
-                                  onClick={() => handleReject(property.id)}
-                                  disabled={actionLoading === property.id}
-                                  className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors disabled:opacity-50"
-                                  title="Reject Property"
-                                >
-                                  {actionLoading === property.id ? (
-                                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-red-600"></div>
-                                  ) : (
-                                    <FiX size={18} />
-                                  )}
-                                </button>
-                              </>
+                              <button
+                                onClick={() => handleApprove(property.id, property.ownerRezId)}
+                                disabled={actionLoading === property.id}
+                                className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors disabled:opacity-50"
+                                title="Approve Property"
+                              >
+                                {actionLoading === property.id ? (
+                                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-green-600"></div>
+                                ) : (
+                                  <FiCheck size={18} />
+                                )}
+                              </button>
+                            )}
+                            
+                            {/* Enable/Disable toggle - only for active/disabled properties */}
+                            {canManageAllProperties && (property.status === 'Active' || property.status === 'Disabled') && (
+                              <button
+                                onClick={() => handleToggleStatus(property.id, property.status || '', property.ownerRezId)}
+                                disabled={actionLoading === property.id}
+                                className={`p-1 rounded transition-colors disabled:opacity-50 ${
+                                  property.status === 'Active' 
+                                    ? 'text-orange-600 hover:text-orange-900 hover:bg-orange-50' 
+                                    : 'text-green-600 hover:text-green-900 hover:bg-green-50'
+                                }`}
+                                title={property.status === 'Active' ? 'Disable Property' : 'Enable Property'}
+                              >
+                                {actionLoading === property.id ? (
+                                  <div className={`animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 ${
+                                    property.status === 'Active' ? 'border-orange-600' : 'border-green-600'
+                                  }`}></div>
+                                ) : property.status === 'Active' ? (
+                                  <FiX size={18} />
+                                ) : (
+                                  <FiCheck size={18} />
+                                )}
+                              </button>
                             )}
                           </div>
                         </td>

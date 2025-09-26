@@ -3,6 +3,7 @@ import { authService } from '@/lib/auth';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { notifyAdminPropertyStatus } from '@/lib/notificationService';
+import { updateProperty } from '@/lib/ownerRezService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { propertyId } = await request.json();
+    const { propertyId, action = 'approve' } = await request.json();
 
     if (!propertyId) {
       return NextResponse.json(
@@ -121,98 +122,81 @@ export async function POST(request: NextRequest) {
       status: property.status
     });
 
-    if (!property.ownerRezId) {
+    // Check if ownerRezId exists and is a valid number
+    if (!property.ownerRezId || typeof property.ownerRezId !== 'number' || isNaN(property.ownerRezId)) {
+      console.error('Property found but no valid ownerRezId:', {
+        ownerRezId: property.ownerRezId,
+        type: typeof property.ownerRezId,
+        isNaN: isNaN(property.ownerRezId),
+        property: property
+      });
       return NextResponse.json(
         { 
           success: false, 
-          message: 'Property does not have an OwnerRez ID',
+          message: 'Property does not have a valid OwnerRez ID',
           propertyDetails: {
             _id: property._id,
             name: property.name,
-            status: property.status
+            status: property.status,
+            ownerRezId: property.ownerRezId
           }
         },
         { status: 400 }
       );
     }
 
-    // Update property in OwnerRez to set active = true
-    const username = process.env.NEXT_PUBLIC_OWNERREZ_USERNAME || "info@premierestaysmiami.com";
-    const password = process.env.NEXT_PUBLIC_OWNERREZ_ACCESS_TOKEN || "pt_1xj6mw0db483n2arxln6rg2zd8xockw2";
-    const baseUrl = process.env.NEXT_PUBLIC_OWNERREZ_API_V1 || "https://api.ownerrez.com/v1";
+    console.log('About to call updateProperty with ownerRezId:', property.ownerRezId, 'type:', typeof property.ownerRezId);
 
-    if (!username || !password) {
+    // Ensure ownerRezId is a number
+    const numericOwnerRezId = typeof property.ownerRezId === 'string' ? parseInt(property.ownerRezId) : property.ownerRezId;
+    
+    if (isNaN(numericOwnerRezId)) {
+      console.error('Failed to convert ownerRezId to number:', property.ownerRezId);
       return NextResponse.json(
-        { success: false, message: 'API credentials not configured' },
-        { status: 500 }
+        { 
+          success: false, 
+          message: 'Invalid OwnerRez ID format',
+          ownerRezId: property.ownerRezId
+        },
+        { status: 400 }
       );
     }
 
-    console.log('Updating property in OwnerRez with ID:', property.ownerRezId);
+    // Determine the action to perform
+    const isApprove = action === 'approve' || action === 'enable';
+    const isDisable = action === 'disable';
+    
+    // Update property in OwnerRez using the service directly
+    console.log(`${action} property in OwnerRez with ID:`, numericOwnerRezId);
 
-    const auth = Buffer.from(`${username}:${password}`).toString('base64');
-    const headers = {
-      'Authorization': `Basic ${auth}`,
-      'Content-Type': 'application/json',
+    const ownerRezUpdateData = {
+      Active: isApprove ? true : false,
     };
 
-    // Update property in OwnerRez with ALL required fields
-    const ownerRezRes = await fetch(`${baseUrl}/properties/${property.ownerRezId}`, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify({ 
-        active: true,
-        name: property.name,
-        // Required fields according to API documentation
-        calendarColor: "FF0000",
-        checkIn: "15:00",
-        checkOut: "11:00",
-        daysBeforeArrivalForCheck: 5,
-        daysBeforeArrivalForCustom: 1,
-        minHoursBeforeArrival: 2,
-        minNights: 1,
-        pendingAction: "cancel",
-        pendingFor: "payment",
-        pendingHoursForCheck: 1,
-        pendingHoursForCreditCard: 1,
-        pendingHoursForCustom: 1,
-        quoteExpirationDays: 7,
-        requireConfirmationForOnlineBookings: true,
-        secondPaymentRule: "",
-        securityDepositRule: "",
-        securityDepositType: "hold",
-        sendPaymentReminder: true,
-        sendSecurityDepositReminder: true,
-        travelInsuranceRule: "disabled",
-        userId: 1,
-        firstPaymentRule: "amount",
-        maxGuests: property.maxGuests || 2,
-        maxNights: 30
-      }),
-    });
+    const ownerRezResult = await updateProperty(numericOwnerRezId, ownerRezUpdateData);
 
-    if (!ownerRezRes.ok) {
-      const errorData = await ownerRezRes.json();
-      console.error('OwnerRez API error:', errorData);
+    if (!ownerRezResult.success) {
+      console.error('OwnerRez API error:', ownerRezResult.error);
       return NextResponse.json(
         { 
           success: false, 
           message: 'Failed to approve property in OwnerRez',
-          details: errorData,
+          details: ownerRezResult.error,
           ownerRezId: property.ownerRezId
         },
-        { status: ownerRezRes.status }
+        { status: 400 }
       );
     }
 
-    console.log('Property successfully updated in OwnerRez');
+    console.log('Property successfully updated in OwnerRez:', ownerRezResult.data);
 
     // Update property status in local database
+    const newStatus = isApprove ? 'active' : 'disabled';
     const updateResult = await db.collection("properties").updateOne(
       { _id: property._id },
       { 
         $set: { 
-          status: 'active',
+          status: newStatus,
           updatedAt: new Date(),
           approvedBy: authResult.user._id,
           approvedAt: new Date()
@@ -228,7 +212,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Property successfully updated in local database');
+    console.log(`Property successfully ${action}ed in local database`);
 
     // Create notification for property owner (admin)
     try {
@@ -237,19 +221,21 @@ export async function POST(request: NextRequest) {
           property._id.toString(),
           property.name || 'Property',
           property.owner._id.toString(),
-          'approved'
+          action === 'disable' ? 'rejected' : 'approved'
         );
       }
     } catch (notificationError) {
-      console.error('Failed to create approval notification:', notificationError);
-      // Don't fail the approval if notification fails
+      console.error(`Failed to create ${action} notification:`, notificationError);
+      // Don't fail the operation if notification fails
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Property approved successfully',
+      message: `Property ${action}ed successfully`,
       propertyId: property._id,
       ownerRezId: property.ownerRezId,
+      action: action,
+      newStatus: newStatus,
       approvedBy: authResult.user._id,
       approvedAt: new Date(),
       debug: {

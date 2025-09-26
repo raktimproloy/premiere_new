@@ -2,6 +2,216 @@
   "properties": [
     {
       "active": true,
+      "bathrooms": 2,
+      "bathrooms_full": 2,
+      "bathrooms_half": 0,
+      "bedrooms": 4,
+      "check_in": "15:00",
+      "check_out": "11:00",
+      "currency_code": "USD",
+      "id": 466209,
+      "is_snoozed": false,
+      "key": "local-466209",
+      "max_guests": 10,
+      "name": "Rajshai taz",
+      "property_type": "townhouse",
+      "max_children": 0,
+      "max_pets": 0,
+      "address": {
+        "street1": "Bazar, Rajshahi",
+        "street2": "",
+        "city": "Rajshahi",
+        "state": "rajshahi",
+        "country": "Bangladesh",
+        "postal_code": "10001",
+        "id": 0,
+        "is_default": false
+      },
+      "thumbnail_url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758899443/properties/csl3p6qbdjvsnbr1ykz5.jpg",
+      "thumbnail_url_medium": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758899443/properties/csl3p6qbdjvsnbr1ykz5.jpg",
+      "thumbnail_url_large": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758899443/properties/csl3p6qbdjvsnbr1ykz5.jpg",
+      "latitude": null,
+      "longitude": null,
+      "listing_numbers": {},
+      "living_area": null,
+      "living_area_type": null,
+      "owner_id": "68b46c1558024cbd7e851c65",
+      "services": [
+        {
+          "name": "Breakfast",
+          "price": "4"
+        },
+        {
+          "name": "WiFi",
+          "price": "0"
+        }
+      ],
+      "localData": {
+        "_id": "68d6acfca12de5387ef97d5e",
+        "description": "<p>hello bangladesh</p>",
+        "amenities": [],
+        "rules": [],
+        "pricing": {
+          "baseRate": 0,
+          "currency": "USD",
+          "cleaningFee": 0,
+          "serviceFee": 0,
+          "taxes": 0
+        },
+        "availability": {
+          "checkInTime": "15:00",
+          "checkOutTime": "11:00",
+          "minStay": 1,
+          "maxStay": 30
+        },
+        "policies": {
+          "cancellationPolicy": "Standard",
+          "houseRules": [],
+          "petPolicy": "No pets allowed",
+          "smokingPolicy": "No smoking"
+        },
+        "owner": {
+          "id": "68b46c1558024cbd7e851c65",
+          "name": "Test",
+          "email": "test@gmail.com",
+          "phone": "1234123123"
+        },
+        "status": "active",
+        "isVerified": false,
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758899443/properties/csl3p6qbdjvsnbr1ykz5.jpg",
+            "publicId": "properties/csl3p6qbdjvsnbr1ykz5",
+            "alt": "Rajshai taz - Image 1",
+            "isPrimary": true,
+            "uploadedAt": "2025-09-26T15:10:52.280Z"
+          },
+          {
+            "url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758899450/properties/uyj78ilsimrr0rgq3k7o.png",
+            "publicId": "properties/uyj78ilsimrr0rgq3k7o",
+            "alt": "Rajshai taz - Image 2",
+            "isPrimary": false,
+            "uploadedAt": "2025-09-26T15:10:52.280Z"
+          }
+        ],
+        "services": [
+          {
+            "name": "Breakfast",
+            "price": "4"
+          },
+          {
+            "name": "WiFi",
+            "price": "0"
+          }
+        ],
+        "createdAt": "2025-09-26T15:10:52.280Z",
+        "updatedAt": "2025-09-26T15:12:43.035Z",
+        "lastSyncedWithOwnerRez": "2025-09-26T15:10:52.280Z"
+      }
+    },
+    {
+      "active": true,
+      "bathrooms": 1,
+      "bathrooms_full": 1,
+      "bathrooms_half": 0,
+      "bedrooms": 2,
+      "check_in": "15:00",
+      "check_out": "11:00",
+      "currency_code": "USD",
+      "id": 466204,
+      "is_snoozed": false,
+      "key": "local-466204",
+      "max_guests": 0,
+      "name": "Kazla Palace",
+      "max_children": 0,
+      "max_pets": 0,
+      "address": {
+        "street1": "kazla, Rajshahi",
+        "street2": "",
+        "city": "",
+        "state": "",
+        "country": "USA",
+        "postal_code": "",
+        "id": 0,
+        "is_default": false
+      },
+      "thumbnail_url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758896514/properties/kzimyhqz1xbjsodyc27i.jpg",
+      "thumbnail_url_medium": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758896514/properties/kzimyhqz1xbjsodyc27i.jpg",
+      "thumbnail_url_large": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758896514/properties/kzimyhqz1xbjsodyc27i.jpg",
+      "latitude": null,
+      "longitude": null,
+      "listing_numbers": {},
+      "living_area": null,
+      "living_area_type": null,
+      "owner_id": "68b46c1558024cbd7e851c65",
+      "services": [
+        {
+          "name": "Breakfast",
+          "price": "4"
+        },
+        {
+          "name": "WiFi",
+          "price": "0"
+        }
+      ],
+      "localData": {
+        "_id": "68d6a1836a60f36d0bc16aec",
+        "description": "<p><br></p>",
+        "amenities": [],
+        "rules": [],
+        "pricing": {
+          "baseRate": 0,
+          "currency": "USD",
+          "cleaningFee": 0,
+          "serviceFee": 0,
+          "taxes": 0
+        },
+        "availability": {
+          "checkInTime": "15:00",
+          "checkOutTime": "11:00",
+          "minStay": 1,
+          "maxStay": 30
+        },
+        "policies": {
+          "cancellationPolicy": "Standard",
+          "houseRules": [],
+          "petPolicy": "No pets allowed",
+          "smokingPolicy": "No smoking"
+        },
+        "owner": {
+          "id": "68b46c1558024cbd7e851c65",
+          "name": "Test",
+          "email": "test@gmail.com",
+          "phone": "1234123123"
+        },
+        "status": "active",
+        "isVerified": false,
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758896514/properties/kzimyhqz1xbjsodyc27i.jpg",
+            "publicId": "properties/kzimyhqz1xbjsodyc27i",
+            "alt": "Kazla Palace - Image 1",
+            "isPrimary": true,
+            "uploadedAt": "2025-09-26T14:21:55.689Z"
+          }
+        ],
+        "services": [
+          {
+            "name": "Breakfast",
+            "price": "4"
+          },
+          {
+            "name": "WiFi",
+            "price": "0"
+          }
+        ],
+        "createdAt": "2025-09-26T14:21:55.689Z",
+        "updatedAt": "2025-09-26T14:57:56.856Z",
+        "lastSyncedWithOwnerRez": "2025-09-26T14:57:40.004Z"
+      }
+    },
+    {
+      "active": true,
       "address": {
         "city": "Miami",
         "country": "UNITED STATES",
@@ -152,7 +362,7 @@
       "longitude": -80.1972257,
       "max_guests": 4,
       "max_pets": 0,
-      "name": "Design District Guesthouse - 2Bdrms",
+      "name": "Sample Test Property New1",
       "owner_id": 150913611,
       "property_type": "guest_house",
       "thumbnail_url": "https://uc.orez.io/i/0bdf2c5c38f74ef8aa9dce6f10de1813-Thumb",
@@ -161,6 +371,6 @@
       "localData": null
     }
   ],
-  "timestamp": 1758519385852,
-  "expiresAt": 1758519685852
+  "timestamp": 1758901616715,
+  "expiresAt": 1758901916715
 }

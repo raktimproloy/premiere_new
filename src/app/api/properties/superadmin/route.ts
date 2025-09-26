@@ -13,12 +13,13 @@ interface UnifiedProperty {
   max_guests?: number;
   images?: string[];
   price?: string;
-  status?: 'Pending' | 'Occupied' | 'Active' | 'Rejected';
+  status?: 'Pending' | 'Occupied' | 'Active' | 'Rejected' | 'Disabled';
   active?: boolean;
   listingDate?: string | null;
   address?: any;
   services?: Array<{name: string, price: string}>;
   owner?: { name?: string; email?: string, phone?: string } | null;
+  ownerRezId?: number; // Add OwnerRez ID field
 }
 
 export async function GET(request: NextRequest) {
@@ -63,12 +64,14 @@ export async function GET(request: NextRequest) {
       price: property.pricing?.baseRate?.toString() || '0',
       status: property.status === 'draft' ? 'Pending' : 
               property.status === 'active' ? 'Active' : 
-              property.status === 'occupied' ? 'Occupied' : 'Pending',
+              property.status === 'occupied' ? 'Occupied' : 
+              property.status === 'disabled' ? 'Disabled' : 'Pending',
       active: property.status === 'active',
       listingDate: property.createdAt ? new Date(property.createdAt).toISOString() : null,
       address: property.address,
       services: property.services || [],
       owner: property.owner ? { name: property.owner.name, email: property.owner.email, phone: property.owner.phone } : null,
+      ownerRezId: property.ownerRezId || null, // Include OwnerRez ID from local database
     }));
 
     // Fetch OwnerRez properties (v2)
@@ -111,6 +114,7 @@ export async function GET(request: NextRequest) {
             address: p.address || null,
             services: [], // OwnerRez properties don't have services in our system
             owner: null,
+            ownerRezId: p.id, // Use OwnerRez ID as the ownerRezId
           }));
         } else {
           // Non-fatal; proceed with local only
@@ -122,8 +126,36 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Merge both lists
-    let merged: UnifiedProperty[] = [...localMapped, ...ownerRezMapped];
+    // Merge both lists - prioritize local data when ownerRezId matches
+    let merged: UnifiedProperty[] = [];
+    
+    // Start with OwnerRez properties
+    for (const ownerRezProp of ownerRezMapped) {
+      // Check if there's a local property with matching ownerRezId
+      const matchingLocalProp = localMapped.find(local => local.ownerRezId === (typeof ownerRezProp.id === 'number' ? ownerRezProp.id : parseInt(ownerRezProp.id.toString())));
+      
+      if (matchingLocalProp) {
+        // Use local property data but keep OwnerRez ID and some OwnerRez fields
+        merged.push({
+          ...matchingLocalProp,
+          id: ownerRezProp.id, // Keep OwnerRez ID as main ID
+          ownerRezId: typeof ownerRezProp.id === 'number' ? ownerRezProp.id : parseInt(ownerRezProp.id.toString()),
+          // Keep some OwnerRez data that might not be in local
+          address: ownerRezProp.address || matchingLocalProp.address,
+          property_type: ownerRezProp.property_type || matchingLocalProp.property_type,
+          type: ownerRezProp.type || matchingLocalProp.type
+        });
+      } else {
+        // No local match, use OwnerRez data
+        merged.push(ownerRezProp);
+      }
+    }
+    
+    // Add local properties that don't have OwnerRez matches
+    const localWithoutOwnerRez = localMapped.filter(local => 
+      !ownerRezMapped.some(ownerRez => ownerRez.id === local.ownerRezId)
+    );
+    merged.push(...localWithoutOwnerRez);
 
     // Apply status filter
     if (statusFilter === 'pending') {

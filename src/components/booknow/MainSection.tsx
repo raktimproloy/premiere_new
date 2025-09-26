@@ -427,6 +427,27 @@ export default function MainSection(props: MainSectionProps) {
                 <span className='mr-2 bg-[#586DF71A] p-2 rounded-full'><LocationFillIcon /></span>
                 {property?.address ? `${property.address.city}, ${property.address.state}, ${property.address.country}` : 'Location not available'}
               </div>
+              
+              {/* Services Section */}
+              {(property?.localData?.services && property.localData.services.length > 0) && (
+                <div className="mb-4">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Included Services</h3>
+                  <div className="space-y-2">
+                    {property.localData.services.map((service: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200">
+                        <div className="flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                          <span className="text-sm font-medium text-gray-700">{service.name}</span>
+                        </div>
+                        <span className="text-sm font-semibold text-green-600">
+                          {service.price === '0' || service.price === 0 ? 'Free' : `$${service.price}`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <input
                 type="email"
                 placeholder="Enter your email"

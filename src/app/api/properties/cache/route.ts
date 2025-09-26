@@ -110,21 +110,79 @@ async function mergeOwnerRezWithLocalData(ownerRezProperties: Property[]): Promi
       const localProp = localPropertiesMap.get(ownerRezProp.id);
       
       if (localProp) {
-        // Merge OwnerRez data with local data (OwnerRez takes priority)
+        // For local properties, prioritize local data over OwnerRez data
         return {
           ...ownerRezProp,
+          // Override OwnerRez data with local data where available
+          name: localProp.name || ownerRezProp.name,
+          property_type: localProp.propertyType || ownerRezProp.property_type,
+          bedrooms: localProp.bedrooms || ownerRezProp.bedrooms,
+          bathrooms: localProp.bathrooms || ownerRezProp.bathrooms,
+          bathrooms_full: localProp.bathrooms || ownerRezProp.bathrooms_full,
+          bathrooms_half: 0,
+          max_guests: localProp.maxGuests || ownerRezProp.max_guests,
+          max_children: 0,
+          max_pets: localProp.maxPets || ownerRezProp.max_pets || 0,
+          active: localProp.status === 'active',
+          check_in: localProp.availability?.checkInTime || ownerRezProp.check_in || '15:00',
+          check_out: localProp.availability?.checkOutTime || ownerRezProp.check_out || '11:00',
+          address: localProp.address ? {
+            street1: localProp.address.street1 || '',
+            street2: localProp.address.street2 || '',
+            city: localProp.address.city || '',
+            state: localProp.address.state || '',
+            country: localProp.address.country || 'USA',
+            postal_code: localProp.address.postalCode || '',
+            id: ownerRezProp.address?.id || 0,
+            is_default: false
+          } : ownerRezProp.address,
+          thumbnail_url: localProp.images?.[0]?.url || ownerRezProp.thumbnail_url,
+          thumbnail_url_medium: localProp.images?.[0]?.url || ownerRezProp.thumbnail_url_medium,
+          thumbnail_url_large: localProp.images?.[0]?.url || ownerRezProp.thumbnail_url_large,
+          currency_code: 'USD',
+          is_snoozed: false,
+          key: localProp.ownerRezId ? `local-${localProp.ownerRezId}` : ownerRezProp.key,
+          latitude: localProp.address?.latitude || ownerRezProp.latitude || null,
+          longitude: localProp.address?.longitude || ownerRezProp.longitude || null,
+          listing_numbers: ownerRezProp.listing_numbers || {},
+          living_area: null,
+          living_area_type: null,
+          owner_id: localProp.owner?.id || ownerRezProp.owner_id || null,
+          services: (localProp as any).services || [],
           // Add local data as additional fields
           localData: {
+            _id: (localProp as any)._id,
             description: localProp.description,
-            amenities: localProp.amenities,
-            rules: localProp.rules,
-            pricing: localProp.pricing,
-            availability: localProp.availability,
-            policies: localProp.policies,
-            owner: localProp.owner,
-            status: localProp.status,
-            isVerified: localProp.isVerified,
-            images: localProp.images,
+            amenities: localProp.amenities || [],
+            rules: localProp.rules || [],
+            pricing: localProp.pricing || {
+              baseRate: 0,
+              currency: 'USD',
+              cleaningFee: 0,
+              serviceFee: 0,
+              taxes: 0
+            },
+            availability: localProp.availability || {
+              checkInTime: '15:00',
+              checkOutTime: '11:00',
+              minStay: 1,
+              maxStay: 30
+            },
+            policies: localProp.policies || {
+              cancellationPolicy: 'Standard',
+              houseRules: [],
+              petPolicy: 'No pets allowed',
+              smokingPolicy: 'No smoking'
+            },
+            owner: localProp.owner || {
+              id: '',
+              name: '',
+              email: '',
+              phone: ''
+            },
+            status: localProp.status || 'active',
+            isVerified: localProp.isVerified || false,
+            images: localProp.images || [],
             services: (localProp as any).services || [],
             createdAt: localProp.createdAt,
             updatedAt: localProp.updatedAt,
