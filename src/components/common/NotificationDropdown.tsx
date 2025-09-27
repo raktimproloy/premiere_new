@@ -398,7 +398,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                             <span className="text-xs text-gray-400">
                               {formatTimeAgo(notification.createdAt)}
                             </span>
-                            <div className="flex items-center gap-1">
+                            {/* <div className="flex items-center gap-1">
                               {notification.actionUrl && notification.actionLabel && (
                                 <a
                                   href={notification.actionUrl}
@@ -423,7 +423,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                               >
                                 <Trash2 size={12} />
                               </button>
-                            </div>
+                            </div> */}
                           </div>
                         </div>
                       </div>
@@ -435,7 +435,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           </div>
 
           {/* Footer */}
-          {displayNotifications.length > 0 && (
+          {/* {displayNotifications.length > 0 && (
             <div className="p-3 border-t border-gray-200 bg-gray-50">
               <button
                 onClick={() => setIsOpen(false)}
@@ -444,7 +444,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                 View all notifications
               </button>
             </div>
-          )}
+          )} */}
         </div>
       )}
     </div>

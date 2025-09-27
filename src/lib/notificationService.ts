@@ -2,26 +2,26 @@ import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
 export interface CreateNotificationData {
-  userId: string;
+  userId: string; // Input parameter - will be converted to ObjectId
   title: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
   actionUrl?: string;
   actionLabel?: string;
-  relatedId?: string;
+  relatedId?: string; // Input parameter - will be converted to ObjectId
   relatedType?: 'booking' | 'property' | 'review' | 'contact';
 }
 
 export interface Notification {
   _id?: ObjectId;
-  userId: string;
+  userId: ObjectId;
   title: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
   read: boolean;
   actionUrl?: string;
   actionLabel?: string;
-  relatedId?: string;
+  relatedId?: ObjectId;
   relatedType?: 'booking' | 'property' | 'review' | 'contact';
   createdAt: Date;
   updatedAt: Date;
@@ -36,14 +36,14 @@ export async function createNotification(data: CreateNotificationData): Promise<
     const db = client.db("premiere-stays");
 
     const notification: Notification = {
-      userId: data.userId,
+      userId: new ObjectId(data.userId), // Convert string to ObjectId
       title: data.title,
       message: data.message,
       type: data.type,
       read: false,
       actionUrl: data.actionUrl,
       actionLabel: data.actionLabel,
-      relatedId: data.relatedId,
+      relatedId: data.relatedId ? new ObjectId(data.relatedId) : undefined, // Convert string to ObjectId
       relatedType: data.relatedType,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -90,7 +90,7 @@ export async function notifyAdminPropertyStatus(propertyId: string, propertyName
     type: isApproved ? 'success' : 'warning',
     actionUrl: `/admin/properties`,
     actionLabel: 'View Properties',
-    relatedId: propertyId,
+    relatedId: adminId, // Use admin ID instead of property ID
     relatedType: 'property'
   });
 }
@@ -106,7 +106,7 @@ export async function notifySuperadminNewProperty(propertyId: string, propertyNa
     type: 'info',
     actionUrl: `/superadmin/properties`,
     actionLabel: 'Review Property',
-    relatedId: propertyId,
+    relatedId: superadminId, // Use superadmin ID instead of property ID
     relatedType: 'property'
   });
 }
@@ -138,7 +138,7 @@ export async function notifyAdminNewReview(reviewId: string, guestName: string, 
     type: 'info',
     actionUrl: `/admin/reviews`,
     actionLabel: 'View Review',
-    relatedId: reviewId,
+    relatedId: adminId, // Use admin ID instead of review ID
     relatedType: 'review'
   });
 }
@@ -154,7 +154,7 @@ export async function notifyAdminContactMessage(messageId: string, contactName: 
     type: 'info',
     actionUrl: `/admin/contact`,
     actionLabel: 'View Message',
-    relatedId: messageId,
+    relatedId: adminId, // Use admin ID instead of message ID
     relatedType: 'contact'
   });
 }
@@ -191,9 +191,9 @@ export async function getPropertyOwnerId(propertyId: string): Promise<string | n
     const db = client.db("premiere-stays");
     
     const property = await db.collection("properties")
-      .findOne({ _id: new ObjectId(propertyId) }, { projection: { 'owner._id': 1 } });
+      .findOne({ _id: new ObjectId(propertyId) }, { projection: { 'owner.id': 1 } });
     
-    return property?.owner?._id?.toString() || null;
+    return property?.owner?.id?.toString() || null;
   } catch (error) {
     console.error('Error getting property owner ID:', error);
     return null;
@@ -209,11 +209,39 @@ export async function getPropertyOwnerIdByOwnerRezId(ownerRezPropertyId: number)
     const db = client.db("premiere-stays");
     
     const property = await db.collection("properties")
-      .findOne({ ownerRezId: ownerRezPropertyId }, { projection: { 'owner._id': 1 } });
+      .findOne({ ownerRezId: ownerRezPropertyId }, { projection: { 'owner.id': 1 } });
     
-    return property?.owner?._id?.toString() || null;
+    return property?.owner?.id?.toString() || null;
   } catch (error) {
     console.error('Error getting property owner ID by OwnerRez ID:', error);
+    return null;
+  }
+}
+
+/**
+ * Get property owner email by OwnerRez property ID and find user ID by email
+ */
+export async function getPropertyOwnerUserIdByOwnerRezId(ownerRezPropertyId: number): Promise<string | null> {
+  try {
+    const client = await clientPromise;
+    const db = client.db("premiere-stays");
+    
+    // First, get the property to find owner email
+    const property = await db.collection("properties")
+      .findOne({ ownerRezId: ownerRezPropertyId }, { projection: { 'owner.email': 1 } });
+    
+    if (!property?.owner?.email) {
+      console.log('No owner email found for property:', ownerRezPropertyId);
+      return null;
+    }
+    
+    // Then, find the user by email to get the user ID
+    const user = await db.collection("users")
+      .findOne({ email: property.owner.email }, { projection: { _id: 1 } });
+    
+    return user?._id?.toString() || null;
+  } catch (error) {
+    console.error('Error getting property owner user ID by OwnerRez ID:', error);
     return null;
   }
 }

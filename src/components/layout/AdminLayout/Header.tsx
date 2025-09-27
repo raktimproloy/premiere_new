@@ -101,9 +101,13 @@ export default function Header({ sidebarOpen, setSidebarOpen, userData, currentP
         setUnreadCount(unread);
       } else {
         console.error('Failed to fetch notifications:', data.message);
+        setNotifications([]);
+        setUnreadCount(0);
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
+      setNotifications([]);
+      setUnreadCount(0);
     } finally {
       setNotificationsLoading(false);
     }
@@ -115,6 +119,104 @@ export default function Header({ sidebarOpen, setSidebarOpen, userData, currentP
       fetchNotifications();
     }
   }, [isAuthenticated]);
+
+  // Refresh notifications every 30 seconds for real-time updates
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const interval = setInterval(() => {
+      // Only refresh if not currently loading
+      if (!notificationsLoading) {
+        fetchNotifications();
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, notificationsLoading]);
+
+  // Manual refresh function
+  const refreshNotifications = () => {
+    fetchNotifications();
+  };
+
+  // Create real notifications (for development/testing only)
+  const createRealNotifications = async () => {
+    try {
+      const response = await fetch('/api/notifications?createTest=true');
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('Real notifications created successfully');
+        // Refresh notifications to show the new ones
+        refreshNotifications();
+      } else {
+        console.error('Failed to create real notifications:', data.message);
+      }
+    } catch (error) {
+      console.error('Error creating real notifications:', error);
+    }
+  };
+
+  // Create real review notification (for development/testing only)
+  const createRealReviewNotification = async () => {
+    try {
+      const response = await fetch('/api/notifications?createRealReview=true');
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('Real review notification created successfully');
+        // Refresh notifications to show the new one
+        refreshNotifications();
+      } else {
+        console.error('Failed to create real review notification:', data.message);
+      }
+    } catch (error) {
+      console.error('Error creating real review notification:', error);
+    }
+  };
+
+  // Force refresh notifications with debug info (for development/testing only)
+  const forceRefreshNotifications = async () => {
+    try {
+      const response = await fetch('/api/notifications?forceRefresh=true&limit=10');
+      const data = await response.json();
+      
+      console.log('Force refresh response:', data);
+      
+      if (data.success) {
+        setNotifications(data.notifications || []);
+        const unread = (data.notifications || []).filter((n: any) => !n.read).length;
+        setUnreadCount(unread);
+        console.log('Force refresh completed. Notifications found:', data.notifications.length);
+      } else {
+        console.error('Failed to force refresh notifications:', data.message);
+      }
+    } catch (error) {
+      console.error('Error force refreshing notifications:', error);
+    }
+  };
+
+  // Handle notification mark as read
+  const handleNotificationClick = async (notificationId: string) => {
+    try {
+      // Mark notification as read
+      await fetch('/api/notifications', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          notificationId,
+          action: 'markAsRead'
+        })
+      });
+
+      // Refresh notifications to update the UI
+      refreshNotifications();
+    } catch (error) {
+      console.error('Error handling notification click:', error);
+    }
+  };
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -203,9 +305,11 @@ export default function Header({ sidebarOpen, setSidebarOpen, userData, currentP
                 notifications={notifications}
                 unreadCount={unreadCount}
                 loading={notificationsLoading}
-                onRefresh={fetchNotifications}
+                onRefresh={refreshNotifications}
+                onMarkAsRead={handleNotificationClick}
               />
             </div>
+
             
             <div className="relative" ref={dropdownRef}>
               <button

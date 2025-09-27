@@ -243,11 +243,11 @@ export async function POST(request: NextRequest) {
 
     // Create notification for property owner (admin)
     try {
-      if (property.owner?._id) {
+      if (property.owner?.id) {
         await notifyAdminPropertyStatus(
           property.ownerRezId?.toString() || property._id.toString(),
           property.name || 'Property',
-          property.owner._id.toString(),
+          property.owner.id.toString(),
           'rejected'
         );
       }

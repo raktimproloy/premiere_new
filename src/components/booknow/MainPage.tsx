@@ -31,6 +31,8 @@ interface Property {
   pricing?: any;
   pricingLoading?: boolean;
   pricingError?: string | null;
+  // Add local data for fallback pricing
+  localData?: any;
 }
 
 const ROOM_TYPES = ['house', 'apartment', 'condo', 'villa', 'townhouse'];
@@ -248,6 +250,7 @@ export default function MainPage() {
 
                 // Get search session from cookie
                 const session = getSearchSession(searchId);
+                console.log('🔍 Search session for ID:', searchId, session);
                 if (!session) {
                     console.log('No valid search session found, redirecting to home page');
                     // router.push('/');
@@ -298,6 +301,10 @@ export default function MainPage() {
                              const bathrooms = prop.bathrooms || 1;
                              const maxGuests = prop.max_guests || 2;
                             
+                             // Check for local pricing data
+                             const localPricing = (prop as any)?.localData?.pricing;
+                             const hasLocalPricing = localPricing?.pricePerNight && localPricing.pricePerNight > 0;
+                            
                                                          return {
                                  id: prop.id,
                                  title: prop.name,
@@ -309,15 +316,17 @@ export default function MainPage() {
                                  persons: maxGuests,
                                  roomType: roomType,
                                  facilities: [], // Simplified for now
-                                 price: 0, // Will be updated with real pricing when user requests it
+                                 price: hasLocalPricing ? localPricing.pricePerNight : 0, // Use local pricing if available
                                  discountPrice: 180,
                                  badge: "FOR RENT",
                                  rating: 4.8,
                                  reviews: 28,
                                  // Initialize pricing state - will show skeleton while loading
                                  pricing: null,
-                                 pricingLoading: true,
-                                 pricingError: null
+                                 pricingLoading: !hasLocalPricing, // Don't show loading if we have local pricing
+                                 pricingError: null,
+                                 // Store local data for fallback pricing
+                                 localData: (prop as any)?.localData
                              };
                         });
                         
@@ -400,10 +409,22 @@ export default function MainPage() {
         
         if (!isInitialLoad && searchSession && properties.length > 0 && !hasPricingLoaded && !isBulkPricingInProgressRef.current && !skipNextPricingLoadRef.current) {
             const { checkInDate, checkOutDate } = searchSession;
+            console.log('🔍 Pricing conditions check:', {
+                isInitialLoad,
+                hasSearchSession: !!searchSession,
+                propertiesCount: properties.length,
+                hasPricingLoaded,
+                isBulkPricingInProgress: isBulkPricingInProgressRef.current,
+                skipNextPricingLoad: skipNextPricingLoadRef.current,
+                checkInDate,
+                checkOutDate
+            });
             if (checkInDate && checkOutDate) {
                 console.log('🔄 Auto-loading bulk pricing for properties...');
                 skipNextPricingLoadRef.current = true; // Prevent immediate re-trigger
                 fetchBulkPricing(properties, checkInDate, checkOutDate);
+            } else {
+                console.log('❌ Missing check-in or check-out dates in search session');
             }
         }
     }, [isInitialLoad, searchSession, properties, hasPricingLoaded]);

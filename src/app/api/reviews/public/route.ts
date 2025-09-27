@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
-import { notifyAdminNewReview, getPropertyOwnerIdByOwnerRezId } from '@/lib/notificationService';
+import { notifyAdminNewReview, getPropertyOwnerUserIdByOwnerRezId } from '@/lib/notificationService';
 
 interface ReviewData {
   body: string;
@@ -106,14 +106,26 @@ export async function POST(request: NextRequest) {
     if (result.insertedId) {
       // Create notification for property owner
       try {
-        const propertyOwnerId = await getPropertyOwnerIdByOwnerRezId(property_id);
-        if (propertyOwnerId) {
-          await notifyAdminNewReview(
+        // First detect the owner email from property, then find user ID by email
+        const propertyOwnerUserId = await getPropertyOwnerUserIdByOwnerRezId(property_id);
+        console.log('Review notification debug:', {
+          property_id,
+          propertyName,
+          propertyOwnerUserId,
+          reviewId: result.insertedId.toString(),
+          display_name
+        });
+        
+        if (propertyOwnerUserId) {
+          const notificationResult = await notifyAdminNewReview(
             result.insertedId.toString(),
             display_name,
             propertyName,
-            propertyOwnerId
+            propertyOwnerUserId
           );
+          console.log('Review notification created:', notificationResult);
+        } else {
+          console.log('No property owner found for property ID:', property_id);
         }
       } catch (notificationError) {
         console.error('Failed to create review notification:', notificationError);

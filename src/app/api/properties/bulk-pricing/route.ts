@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import clientPromise from '@/lib/mongodb';
 
 interface BulkPricingRequest {
   properties: Array<{
@@ -69,7 +70,54 @@ async function fetchPropertyPricing(
       };
     }
 
-    // Fetch pricing from OwnerRez v1 API
+    // First, check if property exists in local database with pricing
+    const client = await clientPromise;
+    const db = client.db("premiere-stays");
+    
+    const localProperty = await db.collection("properties").findOne({
+      ownerRezId: parseInt(propertyId.toString())
+    });
+
+    // If local property has pricePerNight, use it
+    if (localProperty && localProperty.pricing?.pricePerNight && localProperty.pricing.pricePerNight > 0) {
+      const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      const totalAmount = localProperty.pricing.pricePerNight * daysDiff;
+      
+      // Generate daily pricing array for consistency
+      const dailyPricing = [];
+      for (let i = 0; i < daysDiff; i++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(currentDate.getDate() + i);
+        dailyPricing.push({
+          date: currentDate.toISOString().split('T')[0],
+          amount: localProperty.pricing.pricePerNight,
+          isStayDisallowed: false
+        });
+      }
+
+      const summary = {
+        totalAmount: parseFloat(totalAmount.toFixed(2)),
+        totalNights: daysDiff,
+        availableNights: daysDiff,
+        blockedNights: 0,
+        averagePricePerNight: localProperty.pricing.pricePerNight,
+        startDate: start,
+        endDate: end
+      };
+
+      return {
+        propertyId,
+        success: true,
+        pricing: {
+          pricing: dailyPricing,
+          summary,
+          source: 'local_database'
+        },
+        summary
+      };
+    }
+
+    // Fallback to OwnerRez API for properties without local pricing
     const username = process.env.NEXT_PUBLIC_OWNERREZ_USERNAME || "info@premierestaysmiami.com";
     const password = process.env.NEXT_PUBLIC_OWNERREZ_ACCESS_TOKEN || "pt_1xj6mw0db483n2arxln6rg2zd8xockw2";
     const pricingBaseUrl = process.env.NEXT_PUBLIC_OWNERREZ_API_V1 || "https://api.ownerrez.com/v1";
@@ -145,7 +193,8 @@ async function fetchPropertyPricing(
       success: true,
       pricing: {
         pricing: pricingData,
-        summary
+        summary,
+        source: 'ownerrez'
       },
       summary
     };

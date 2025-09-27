@@ -351,7 +351,7 @@ export async function POST(request: NextRequest) {
         type: 'success',
         actionUrl: '/admin/properties',
         actionLabel: 'View Properties',
-        relatedId: ownerRezId.toString(),
+        relatedId: authResult.user._id, // Use admin ID instead of property ID
         relatedType: 'property'
       });
     } catch (notificationError) {
