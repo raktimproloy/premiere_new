@@ -2,6 +2,94 @@
   "properties": [
     {
       "active": true,
+      "bathrooms": 2,
+      "bathrooms_full": 2,
+      "bathrooms_half": 0,
+      "bedrooms": 3,
+      "check_in": "15:00",
+      "check_out": "11:00",
+      "currency_code": "USD",
+      "id": 466219,
+      "is_snoozed": false,
+      "key": "local-466219",
+      "max_guests": 5,
+      "name": "Kathmundu House",
+      "property_type": "house",
+      "max_children": 0,
+      "max_pets": 0,
+      "address": {
+        "street1": "Kathmundu, Nepal",
+        "street2": "",
+        "city": "Kathmundu",
+        "state": "Kathmundu",
+        "country": "Nepal",
+        "postal_code": "",
+        "id": 0,
+        "is_default": false
+      },
+      "thumbnail_url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758906127/properties/owc791evqarrc6kpofb0.jpg",
+      "thumbnail_url_medium": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758906127/properties/owc791evqarrc6kpofb0.jpg",
+      "thumbnail_url_large": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758906127/properties/owc791evqarrc6kpofb0.jpg",
+      "latitude": 27.729679376858385,
+      "longitude": 85.288648259608,
+      "listing_numbers": {},
+      "living_area": null,
+      "living_area_type": null,
+      "owner_id": "68b46c1558024cbd7e851c65",
+      "services": [
+        {
+          "name": "WiFi",
+          "price": "0"
+        }
+      ],
+      "localData": {
+        "_id": "68d6c7108ee003e9e2f6c325",
+        "description": "<p><br></p>",
+        "amenities": [],
+        "rules": [],
+        "pricing": {
+          "pricePerNight": 20
+        },
+        "availability": {
+          "checkInTime": "15:00",
+          "checkOutTime": "11:00"
+        },
+        "policies": {
+          "cancellationPolicy": "Standard",
+          "houseRules": [],
+          "petPolicy": "No pets allowed",
+          "smokingPolicy": "No smoking"
+        },
+        "owner": {
+          "id": "68b46c1558024cbd7e851c65",
+          "name": "Test",
+          "email": "test@gmail.com",
+          "phone": "1234123123"
+        },
+        "status": "active",
+        "isVerified": false,
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758906127/properties/owc791evqarrc6kpofb0.jpg",
+            "publicId": "properties/owc791evqarrc6kpofb0",
+            "alt": "Kathmundu House - Image 1",
+            "isPrimary": true,
+            "uploadedAt": "2025-09-26T17:02:08.492Z"
+          }
+        ],
+        "services": [
+          {
+            "name": "WiFi",
+            "price": "0"
+          }
+        ],
+        "createdAt": "2025-09-26T17:02:08.492Z",
+        "updatedAt": "2025-09-27T03:14:43.118Z",
+        "lastSyncedWithOwnerRez": "2025-09-27T03:14:43.118Z"
+      }
+    },
+    {
+      "active": true,
       "bathrooms": 1,
       "bathrooms_full": 1,
       "bathrooms_half": 0,
@@ -255,6 +343,6 @@
       "localData": null
     }
   ],
-  "timestamp": 1758905164645,
-  "expiresAt": 1758905194645
+  "timestamp": 1758950073474,
+  "expiresAt": 1758950103474
 }

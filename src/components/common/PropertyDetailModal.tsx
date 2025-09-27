@@ -335,6 +335,24 @@ const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                             <td className="font-medium text-gray-700 py-1 pr-4 whitespace-nowrap">Capacity:</td>
                             <td className="text-gray-500 py-1 whitespace-nowrap">{mockBooking.property.capacity}</td>
                           </tr>
+                          {(property as any)?.localData?.pricing?.pricePerNight && (
+                            <tr>
+                              <td className="font-medium text-gray-700 py-1 pr-4 whitespace-nowrap">Price Per Night:</td>
+                              <td className="text-gray-500 py-1 whitespace-nowrap">${(property as any).localData.pricing.pricePerNight}</td>
+                            </tr>
+                          )}
+                          {((property as any)?.latitude || (property as any)?.longitude) && (
+                            <>
+                              <tr>
+                                <td className="font-medium text-gray-700 py-1 pr-4 whitespace-nowrap">Latitude:</td>
+                                <td className="text-gray-500 py-1 whitespace-nowrap">{(property as any).latitude || 'N/A'}</td>
+                              </tr>
+                              <tr>
+                                <td className="font-medium text-gray-700 py-1 pr-4 whitespace-nowrap">Longitude:</td>
+                                <td className="text-gray-500 py-1 whitespace-nowrap">{(property as any).longitude || 'N/A'}</td>
+                              </tr>
+                            </>
+                          )}
                           <tr>
                             <td className="font-medium text-gray-700 py-1 pr-4 whitespace-nowrap">Services:</td>
                             <td className="text-gray-500 py-1 whitespace-nowrap">

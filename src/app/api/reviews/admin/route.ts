@@ -96,13 +96,67 @@ export async function GET(request: NextRequest) {
 
     console.log(`Admin ${authResult.user._id} has ${adminProperties.length} properties with ${adminOwnerRezIds.length} OwnerRez IDs:`, adminOwnerRezIds);
 
+    let allReviews: UnifiedReview[] = [];
+
+    // Fetch local database reviews
+    const localReviews = await db.collection("reviews")
+      .find({
+        property_id: { $in: adminOwnerRezIds }
+      })
+      .sort({ created_at: -1 })
+      .toArray();
+
+    console.log(`Found ${localReviews.length} local reviews for admin's properties`);
+
+    // Convert local reviews to unified format
+    const localUnifiedReviews = localReviews.map((review: any) => {
+      const propertyDetails = ownerRezIdToProperty[review.property_id] || {
+        id: review.property_id.toString(),
+        name: review.property?.name || 'Unknown Property',
+        type: 'Property',
+        price: '0',
+        listingDate: review.created_at
+      };
+
+      return {
+        id: review._id.toString(),
+        propertyName: propertyDetails.name,
+        propertyId: review.property_id,
+        type: propertyDetails.type,
+        price: propertyDetails.price,
+        listingDate: propertyDetails.listingDate,
+        rating: review.stars,
+        reviewCount: '1',
+        reviewerName: review.display_name,
+        reviewDate: new Date(review.date || review.created_at).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }),
+        reviewText: review.body,
+        reviewTitle: review.title || '',
+        reviewerAvatar: "/images/review.png",
+        response: review.response || '',
+        visible: review.status === 'approved',
+        monthOfStay: new Date(review.date || review.created_at).getMonth() + 1,
+        yearOfStay: new Date(review.date || review.created_at).getFullYear(),
+        listingSite: 'Local Database',
+        reviewer: review.display_name,
+        status: review.status,
+        created_at: review.created_at,
+        updated_at: review.updated_at,
+        rejection_reason: review.rejection_reason,
+        source: 'local'
+      };
+    });
+
+    allReviews = [...localUnifiedReviews];
+
     // Fetch reviews from OwnerRez API
     const username = process.env.NEXT_PUBLIC_OWNERREZ_USERNAME || "info@premierestaysmiami.com";
     const password = process.env.NEXT_PUBLIC_OWNERREZ_ACCESS_TOKEN || "pt_1xj6mw0db483n2arxln6rg2zd8xockw2";
     const baseUrl = process.env.NEXT_PUBLIC_OWNERREZ_API_V2 || "https://api.ownerrez.com/v2";
     
-    let allReviews: UnifiedReview[] = [];
-
     if (username && password && baseUrl) {
       try {
         const auth = Buffer.from(`${username}:${password}`).toString('base64');
@@ -130,11 +184,11 @@ export async function GET(request: NextRequest) {
               // Check if this review's property_id matches any of the admin's OwnerRez property IDs
               return adminOwnerRezIds.includes(review.property_id);
             });
-            console.log(`Filtered ${reviews.length} total reviews to ${filteredReviews.length} reviews for admin's properties`);
+            console.log(`Filtered ${reviews.length} total OwnerRez reviews to ${filteredReviews.length} reviews for admin's properties`);
           }
 
           // Convert OwnerRez reviews to unified format
-          allReviews = filteredReviews.map((review: OwnerRezReview) => {
+          const ownerRezUnifiedReviews = filteredReviews.map((review: OwnerRezReview) => {
             // Get property details from our mapping
             const propertyDetails = ownerRezIdToProperty[review.property_id] || {
               id: review.property_id.toString(),
@@ -167,9 +221,13 @@ export async function GET(request: NextRequest) {
               monthOfStay: review.month_of_stay,
               yearOfStay: review.year_of_stay,
               listingSite: review.listing_site,
-              reviewer: review.reviewer
+              reviewer: review.reviewer,
+              status: 'approved', // OwnerRez reviews are considered approved
+              source: 'ownerrez'
             };
           });
+
+          allReviews = [...allReviews, ...ownerRezUnifiedReviews];
         } else {
           console.error('OwnerRez reviews fetch failed:', res.status, await res.text());
         }

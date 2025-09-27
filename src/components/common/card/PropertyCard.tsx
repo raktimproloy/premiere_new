@@ -121,6 +121,10 @@ export default function PropertyCard({property, searchId, showPrice = true}: {pr
                 <div className="text-lg sm:text-xl font-bold text-gray-900">
                   ${property.price.toFixed(2)}
                 </div>
+              ) : (property as any)?.localData?.pricing?.pricePerNight ? (
+                <div className="text-lg sm:text-xl font-bold text-gray-900">
+                  ${(property as any).localData.pricing.pricePerNight.toFixed(2)}/night
+                </div>
               ) : (
                 <div className="text-sm text-gray-400">Price on request</div>
               )}

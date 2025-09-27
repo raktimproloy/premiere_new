@@ -49,6 +49,7 @@ const MainSection = () => {
   const [guests, setGuests] = useState(1);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [suppressClose, setSuppressClose] = useState(false);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const checkInRef = useRef<DatePicker>(null);
   const checkOutRef = useRef<DatePicker>(null);
   const guestsRef = useRef<HTMLDivElement>(null);
@@ -109,9 +110,18 @@ const MainSection = () => {
       .finally(() => setPropertyLoading(false));
   }, [id, router]);
 
-  // Prefill right side from search session
+  // Prefill right side from search session and URL parameters
   useEffect(() => {
     console.log('Checkout component mounted with searchId:', searchId); // Debug log
+    
+    // Parse services from URL parameters
+    const servicesParam = searchParams.get('services');
+    if (servicesParam) {
+      const services = decodeURIComponent(servicesParam).split(',').filter(s => s.trim());
+      setSelectedServices(services);
+      console.log('Selected services from URL:', services);
+    }
+    
     if (searchId) {
       const session = getSearchSession(searchId);
       console.log('Search session found:', session); // Debug log
@@ -127,7 +137,7 @@ const MainSection = () => {
     } else {
       console.log('No searchId provided, proceeding with checkout'); // Debug log
     }
-  }, [searchId, router]);
+  }, [searchId, searchParams, router]);
 
   // Auto-fetch pricing when dates are available from search session
   useEffect(() => {
@@ -357,6 +367,26 @@ const MainSection = () => {
     { id: 'googlepay', label: 'Google Pay', image: '/images/gpay.png' },
   ];
 
+  // Calculate total including services
+  const calculateTotalWithServices = () => {
+    let total = 0;
+    
+    // Add property pricing if available
+    if (pricing?.summary?.totalAmount) {
+      total += pricing.summary.totalAmount;
+    }
+    
+    // Add selected service costs
+    const propertyServices = (property as any)?.localData?.services || (property as any)?.services || [];
+    propertyServices.forEach((service: any) => {
+      if (selectedServices.includes(service.name)) {
+        total += parseFloat(service.price) || 0;
+      }
+    });
+    
+    return total;
+  };
+
   // Booking handler
   const handleCheckout = async () => {
     setBookingLoading(true);
@@ -423,14 +453,15 @@ const MainSection = () => {
           propertyImage: property.thumbnail_url_medium || '/images/property.png',
           checkInDate: arrival,
           checkOutDate: departure,
-          totalAmount: pricing?.summary?.totalAmount || 0,
+          totalAmount: calculateTotalWithServices(),
           guestName: addedGuests[0]?.name || 'Guest',
           guestEmail: addedGuests[0]?.email || 'guest@example.com',
           guests: guests,
           propertyAddress: property.address ? `${property.address.city}, ${property.address.state}, ${property.address.country}` : 'Address not available',
           propertyType: property.property_type || 'Property',
           bedrooms: property.bedrooms || 1,
-          bathrooms: property.bathrooms || 1
+          bathrooms: property.bathrooms || 1,
+          selectedServices: selectedServices.join(', ')
         };
         
         // Build confirmation URL with parameters
@@ -764,21 +795,34 @@ const MainSection = () => {
                           <span>-${(pricing.summary.blockedNights * pricing.summary.averagePricePerNight).toFixed(2)}</span>
                         </div>
                       )}
-                      {/* <div className="flex justify-between text-sm sm:text-base">
-                        <span className="text-gray-600">Taxes (4.5%)</span>
-                        <span className="font-medium">${(pricing.summary.totalAmount).toFixed(2)}</span>
-                      </div> */}
+                      
+                      {/* Selected Services */}
+                      {selectedServices.length > 0 && (
+                        <div className="border-t border-gray-100 pt-2">
+                          <div className="text-sm font-medium text-gray-700 mb-2">Selected Services:</div>
+                          {((property as any)?.localData?.services || (property as any)?.services || [])
+                            .filter((service: any) => selectedServices.includes(service.name))
+                            .map((service: any, index: number) => (
+                              <div key={`service-${index}`} className="flex justify-between text-sm">
+                                <span className="text-gray-600">{service.name}</span>
+                                <span className="text-gray-500">
+                                  {parseFloat(service.price) === 0 ? 'Free' : `$${parseFloat(service.price).toFixed(2)}`}
+                                </span>
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
                     <div className="border-t border-gray-200 pt-3 sm:pt-4 mb-4 sm:mb-6">
                       <div className="flex justify-between text-base sm:text-lg font-bold">
                         <span>Total</span>
-                        <span>${(pricing.summary.totalAmount ).toFixed(2)}</span>
+                        <span>${calculateTotalWithServices().toFixed(2)}</span>
                       </div>
                     </div>
                     <div className="bg-blue-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
                       <div className="flex justify-between text-sm sm:text-base">
                         <span className="font-medium text-blue-800">Payment due</span>
-                        <span className="font-bold text-blue-800">${(pricing.summary.totalAmount).toFixed(2)}</span>
+                        <span className="font-bold text-blue-800">${calculateTotalWithServices().toFixed(2)}</span>
                       </div>
                     </div>
                   </>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { propertyService } from '@/lib/propertyService';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -25,6 +26,56 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     
     if (startDate >= endDate) {
       return NextResponse.json({ error: 'Start date must be before end date' }, { status: 400 });
+    }
+
+    // Check if property exists in local database first
+    const idAsNumber = Number(id);
+    const shouldQueryOwnerRez = !Number.isNaN(idAsNumber) && Number.isFinite(idAsNumber);
+
+    let localProperty = null;
+    if (shouldQueryOwnerRez) {
+      localProperty = await propertyService.getPropertyByOwnerRezId(idAsNumber);
+    } else {
+      localProperty = await propertyService.getPropertyById(id);
+    }
+
+    // If property exists in local database and has pricePerNight, calculate pricing locally
+    if (localProperty && localProperty.pricing?.pricePerNight) {
+      const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      const pricePerNight = localProperty.pricing.pricePerNight;
+      const totalAmount = daysDiff * pricePerNight;
+
+      // Generate daily pricing array
+      const dailyPricing = [];
+      for (let i = 0; i < daysDiff; i++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(currentDate.getDate() + i);
+        dailyPricing.push({
+          date: currentDate.toISOString().split('T')[0],
+          amount: pricePerNight,
+          isStayDisallowed: false,
+          currency: 'USD'
+        });
+      }
+
+      const pricing = {
+        pricing: dailyPricing,
+        summary: {
+          totalAmount: parseFloat(totalAmount.toFixed(2)),
+          totalNights: daysDiff,
+          availableNights: daysDiff,
+          blockedNights: 0,
+          averagePricePerNight: parseFloat(pricePerNight.toFixed(2)),
+          startDate: start,
+          endDate: end,
+          source: 'local_database'
+        }
+      };
+
+      return NextResponse.json({ 
+        success: true, 
+        pricing: pricing
+      });
     }
 
     // Fetch pricing from OwnerRez v1 API
@@ -89,7 +140,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         blockedNights,
         averagePricePerNight: availableNights > 0 ? parseFloat((totalAmount / availableNights).toFixed(2)) : 0,
         startDate: start,
-        endDate: end
+        endDate: end,
+        source: 'ownerrez'
       }
     };
 

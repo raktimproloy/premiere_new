@@ -65,6 +65,9 @@ export default function EditPropertyPage() {
   const [existingImages, setExistingImages] = useState<Array<{ url: string; publicId?: string; alt?: string; isPrimary?: boolean }>>([]);
   const [removedExistingPublicIds, setRemovedExistingPublicIds] = useState<string[]>([]);
   const [localPropertyId, setLocalPropertyId] = useState<string | null>(null);
+  const [pricePerNight, setPricePerNight] = useState('');
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
 
   // Fetch property data on component mount
   useEffect(() => {
@@ -109,6 +112,12 @@ export default function EditPropertyPage() {
       setEditorValue(localDescription);
       // Capture local Mongo _id for image operations
       setLocalPropertyId(data.localId || (property as any)?.localData?._id || null);
+      
+      // Load price per night and coordinates
+      const localPricing = (property as any)?.localData?.pricing || (property as any)?.pricing || {};
+      setPricePerNight(localPricing.pricePerNight?.toString() || '');
+      setLatitude(property.latitude?.toString() || '');
+      setLongitude(property.longitude?.toString() || '');
       
       // Set existing images
       const localImagesFromMerged: Array<{ url: string; publicId?: string; alt?: string; isPrimary?: boolean }> = (property as any)?.localData?.images || [];
@@ -189,6 +198,8 @@ export default function EditPropertyPage() {
           state: state,
           postal_code: postalCode,
           country: country,
+          latitude: latitude ? parseFloat(latitude) : undefined,
+          longitude: longitude ? parseFloat(longitude) : undefined,
         },
         bathrooms: parseInt(totalBathroom) || 0,
         bedrooms: parseInt(totalBedroom) || 0,
@@ -199,6 +210,7 @@ export default function EditPropertyPage() {
         // Include rich text for local DB mapping
         editorValue: editorValue,
         details: editorValue,
+        pricePerNight: pricePerNight ? parseFloat(pricePerNight) : undefined,
       };
 
       console.log('Updating property with payload:', payload);
@@ -554,6 +566,55 @@ export default function EditPropertyPage() {
                     id="checkOut"
                     value={checkOut}
                     onChange={(e) => setCheckOut(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  />
+                </div>
+              </div>
+
+              {/* Price Per Night */}
+              <div className="mb-6">
+                <label htmlFor="pricePerNight" className="block text-sm font-medium text-gray-700 mb-2">
+                  Price Per Night ($)
+                </label>
+                <input
+                  type="number"
+                  id="pricePerNight"
+                  value={pricePerNight}
+                  onChange={(e) => setPricePerNight(e.target.value)}
+                  placeholder="Enter price per night"
+                  min="0"
+                  step="0.01"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                />
+              </div>
+
+              {/* Latitude and Longitude */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label htmlFor="latitude" className="block text-sm font-medium text-gray-700 mb-2">
+                    Latitude
+                  </label>
+                  <input
+                    type="number"
+                    id="latitude"
+                    value={latitude}
+                    onChange={(e) => setLatitude(e.target.value)}
+                    placeholder="e.g., 25.7617"
+                    step="any"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="longitude" className="block text-sm font-medium text-gray-700 mb-2">
+                    Longitude
+                  </label>
+                  <input
+                    type="number"
+                    id="longitude"
+                    value={longitude}
+                    onChange={(e) => setLongitude(e.target.value)}
+                    placeholder="e.g., -80.1918"
+                    step="any"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                   />
                 </div>

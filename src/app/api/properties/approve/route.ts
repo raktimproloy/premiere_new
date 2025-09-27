@@ -162,7 +162,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
     // Determine the action to perform
     const isApprove = action === 'approve' || action === 'enable';
     const isDisable = action === 'disable';
@@ -228,7 +227,7 @@ export async function POST(request: NextRequest) {
     try {
       if (property.owner?._id) {
         await notifyAdminPropertyStatus(
-          property._id.toString(),
+          property.ownerRezId?.toString() || property._id.toString(),
           property.name || 'Property',
           property.owner._id.toString(),
           action === 'disable' ? 'rejected' : 'approved'

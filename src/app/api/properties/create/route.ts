@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cloudinaryService } from '@/lib/cloudinaryService';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
-import { notifySuperadminNewProperty, getSuperadminUsers } from '@/lib/notificationService';
+import { notifySuperadminNewProperty, getSuperadminUsers, createNotification } from '@/lib/notificationService';
 import { authService } from '@/lib/auth';
 import { clearCache } from '@/utils/propertyCache';
 
@@ -109,6 +109,8 @@ export async function POST(request: NextRequest) {
         state: propertyData.address?.state || '',
         postalCode: propertyData.address?.postalCode || '',
         country: propertyData.address?.country || 'USA',
+        latitude: propertyData.address?.latitude || propertyData.latitude,
+        longitude: propertyData.address?.longitude || propertyData.longitude,
       },
       calendar_color: "FF0000",
       check_in: propertyData.checkIn || "15:00",
@@ -236,6 +238,8 @@ export async function POST(request: NextRequest) {
         state: propertyData.address?.state || '',
         country: propertyData.address?.country || 'USA',
         postalCode: propertyData.address?.postalCode || '',
+        latitude: propertyData.address?.latitude || propertyData.latitude,
+        longitude: propertyData.address?.longitude || propertyData.longitude,
       },
       bedrooms: parseInt(propertyData.totalBedroom) || 1,
       bathrooms: parseInt(propertyData.totalBathroom) || 1,
@@ -253,6 +257,7 @@ export async function POST(request: NextRequest) {
       services: propertyData.services || [],
       pricing: {
         baseRate: 0,
+        pricePerNight: propertyData.pricePerNight || 0,
         currency: 'USD',
         cleaningFee: 0,
         serviceFee: 0,
@@ -326,7 +331,7 @@ export async function POST(request: NextRequest) {
       
       for (const superadmin of superadmins) {
         await notifySuperadminNewProperty(
-          mongoResult.insertedId.toString(),
+          ownerRezId.toString(),
           propertyData.name,
           adminName,
           superadmin._id
@@ -334,6 +339,23 @@ export async function POST(request: NextRequest) {
       }
     } catch (notificationError) {
       console.error('Failed to create new property notification:', notificationError);
+      // Don't fail the property creation if notification fails
+    }
+
+    // Create notification for the property owner (admin) about successful submission
+    try {
+      await createNotification({
+        userId: authResult.user._id,
+        title: 'Property Submitted Successfully',
+        message: `Your property "${propertyData.name}" has been submitted for review and is pending approval`,
+        type: 'success',
+        actionUrl: '/admin/properties',
+        actionLabel: 'View Properties',
+        relatedId: ownerRezId.toString(),
+        relatedType: 'property'
+      });
+    } catch (notificationError) {
+      console.error('Failed to create property owner notification:', notificationError);
       // Don't fail the property creation if notification fails
     }
 

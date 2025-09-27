@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { notifyPropertyOwnerBooking, getPropertyOwnerId } from '@/lib/notificationService';
+import { notifyPropertyOwnerBooking, getPropertyOwnerIdByOwnerRezId } from '@/lib/notificationService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     
     // Create notification for property owner
     try {
-      const ownerId = await getPropertyOwnerId(body.property_id.toString());
+      const ownerId = await getPropertyOwnerIdByOwnerRezId(body.property_id);
       if (ownerId) {
         // Get guest name from the request body or use a default
         const guestName = body.guest_name || 'A guest';

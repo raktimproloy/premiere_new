@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { FiEye, FiGrid, FiList, FiChevronLeft, FiChevronRight, FiStar, FiRefreshCw } from 'react-icons/fi';
+import { FiEye, FiGrid, FiList, FiChevronLeft, FiChevronRight, FiStar, FiRefreshCw, FiCheck, FiX } from 'react-icons/fi';
 import { UnifiedReview, ReviewsApiResponse } from '@/types/review';
 
 const PropertyReviewsPage = () => {
@@ -14,6 +14,7 @@ const PropertyReviewsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalCount, setTotalCount] = useState<number>(0);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   
   const itemsPerPage = 8;
 
@@ -57,6 +58,38 @@ const PropertyReviewsPage = () => {
   // Refresh reviews
   const handleRefresh = () => {
     fetchReviews(currentPage);
+  };
+
+  // Handle review approval/rejection
+  const handleReviewAction = async (reviewId: string, action: 'approve' | 'reject') => {
+    try {
+      setActionLoading(reviewId);
+      
+      const response = await fetch('/api/reviews/admin/approve', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reviewIds: [reviewId],
+          action: action
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Refresh reviews to show updated status
+        fetchReviews(currentPage);
+      } else {
+        setError(data.message || 'Failed to update review');
+      }
+    } catch (err) {
+      setError('Failed to update review. Please try again.');
+      console.error('Error updating review:', err);
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   // Render star rating
@@ -171,7 +204,8 @@ const PropertyReviewsPage = () => {
               <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Review Date</th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Rating</th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Reviewer</th>
-              <th className="px-6 py-3 text-right text-xs font-semibold text-black uppercase tracking-wider">Action</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase tracking-wider">Status</th>
+              <th className="px-6 py-3 text-right text-xs font-semibold text-black uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -189,20 +223,61 @@ const PropertyReviewsPage = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{review.reviewerName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      (review as any).status === 'approved' ? 'bg-green-100 text-green-800' :
+                      (review as any).status === 'rejected' ? 'bg-red-100 text-red-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {(review as any).status || 'pending'}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleOpenModal(review)}
-                      className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
-                      title="View Details"
-                    >
-                      <FiEye size={18} />
-                    </button>
+                    <div className="flex items-center justify-end space-x-2">
+                      <button
+                        onClick={() => handleOpenModal(review)}
+                        className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
+                        title="View Details"
+                      >
+                        <FiEye size={18} />
+                      </button>
+                      
+                      {/* Show approval/rejection buttons only for pending reviews */}
+                      {(review as any).status === 'pending' && (
+                        <>
+                          <button
+                            onClick={() => handleReviewAction(review.id.toString(), 'approve')}
+                            disabled={actionLoading === review.id}
+                            className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors disabled:opacity-50"
+                            title="Approve Review"
+                          >
+                            {actionLoading === review.id ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-green-600"></div>
+                            ) : (
+                              <FiCheck size={18} />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => handleReviewAction(review.id.toString(), 'reject')}
+                            disabled={actionLoading === review.id}
+                            className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors disabled:opacity-50"
+                            title="Reject Review"
+                          >
+                            {actionLoading === review.id ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-red-600"></div>
+                            ) : (
+                              <FiX size={18} />
+                            )}
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
                   {loading ? 'Loading reviews...' : 'No reviews found'}
                 </td>
               </tr>
@@ -317,14 +392,52 @@ const PropertyReviewsPage = () => {
               </div>
 
               <div className="border-t pt-4">
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between text-sm mb-4">
                   <span className="text-gray-500">Status:</span>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    selectedReview.visible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    (selectedReview as any).status === 'approved' ? 'bg-green-100 text-green-800' :
+                    (selectedReview as any).status === 'rejected' ? 'bg-red-100 text-red-800' :
+                    'bg-yellow-100 text-yellow-800'
                   }`}>
-                    {selectedReview.visible ? 'Visible' : 'Hidden'}
+                    {(selectedReview as any).status || 'pending'}
                   </span>
                 </div>
+                
+                {/* Show approval/rejection buttons only for pending reviews */}
+                {(selectedReview as any).status === 'pending' && (
+                  <div className="flex items-center justify-end space-x-3">
+                    <button
+                      onClick={() => {
+                        handleReviewAction(selectedReview.id.toString(), 'approve');
+                        handleCloseModal();
+                      }}
+                      disabled={actionLoading === selectedReview.id}
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    >
+                      {actionLoading === selectedReview.id ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                      ) : (
+                        <FiCheck size={16} />
+                      )}
+                      <span>Approve</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleReviewAction(selectedReview.id.toString(), 'reject');
+                        handleCloseModal();
+                      }}
+                      disabled={actionLoading === selectedReview.id}
+                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    >
+                      {actionLoading === selectedReview.id ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                      ) : (
+                        <FiX size={16} />
+                      )}
+                      <span>Reject</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

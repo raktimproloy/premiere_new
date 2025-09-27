@@ -157,6 +157,7 @@ async function mergeOwnerRezWithLocalData(ownerRezProperties: Property[]): Promi
             rules: localProp.rules || [],
             pricing: localProp.pricing || {
               baseRate: 0,
+              pricePerNight: 0,
               currency: 'USD',
               cleaningFee: 0,
               serviceFee: 0,

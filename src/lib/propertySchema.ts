@@ -99,6 +99,7 @@ export interface LocalProperty {
   rules: PropertyRule[];
   pricing: {
     baseRate: number;
+    pricePerNight: number; // New field for per night pricing
     currency: string;
     cleaningFee?: number;
     serviceFee?: number;
@@ -157,6 +158,7 @@ export interface PropertyCreateRequest {
   maxPets: number;
   pricing: {
     baseRate: number;
+    pricePerNight: number; // New field for per night pricing
     currency: string;
     cleaningFee?: number;
     serviceFee?: number;

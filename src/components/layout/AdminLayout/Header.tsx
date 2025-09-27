@@ -51,6 +51,9 @@ export default function Header({ sidebarOpen, setSidebarOpen, userData, currentP
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated, logout } = useAuth();
   const router = useRouter();
@@ -84,6 +87,34 @@ export default function Header({ sidebarOpen, setSidebarOpen, userData, currentP
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Fetch notifications on header load
+  const fetchNotifications = async () => {
+    setNotificationsLoading(true);
+    try {
+      const response = await fetch('/api/notifications?limit=6');
+      const data = await response.json();
+      
+      if (data.success) {
+        setNotifications(data.notifications || []);
+        const unread = (data.notifications || []).filter((n: any) => !n.read).length;
+        setUnreadCount(unread);
+      } else {
+        console.error('Failed to fetch notifications:', data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
+  // Fetch notifications on component mount
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotifications();
+    }
+  }, [isAuthenticated]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -168,7 +199,12 @@ export default function Header({ sidebarOpen, setSidebarOpen, userData, currentP
             
             {/* Notification Dropdown */}
             <div className="relative">
-              <NotificationDropdown />
+              <NotificationDropdown 
+                notifications={notifications}
+                unreadCount={unreadCount}
+                loading={notificationsLoading}
+                onRefresh={fetchNotifications}
+              />
             </div>
             
             <div className="relative" ref={dropdownRef}>

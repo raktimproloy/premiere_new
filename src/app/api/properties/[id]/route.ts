@@ -309,6 +309,16 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
             state: body.address.state || body.address.province || '',
             country: body.address.country || 'USA',
             postalCode: body.address.postal_code || body.address.postalCode || '',
+            latitude: body.address.latitude,
+            longitude: body.address.longitude,
+          };
+        }
+
+        // Update price per night
+        if (typeof body.pricePerNight === 'number') {
+          localUpdate.pricing = {
+            ...localUpdate.pricing,
+            pricePerNight: body.pricePerNight
           };
         }
 

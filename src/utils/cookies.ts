@@ -17,6 +17,7 @@ export interface BookingPath {
   checkOut?: string;
   guests?: number;
   email?: string;
+  selectedServices?: {[key: string]: boolean};
   createdAt: string;
 }
 

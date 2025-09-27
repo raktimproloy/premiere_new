@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { notifyAdminNewReview, getPropertyOwnerIdByOwnerRezId } from '@/lib/notificationService';
 
 interface ReviewData {
   body: string;
@@ -103,6 +104,22 @@ export async function POST(request: NextRequest) {
     const result = await db.collection("reviews").insertOne(reviewData);
 
     if (result.insertedId) {
+      // Create notification for property owner
+      try {
+        const propertyOwnerId = await getPropertyOwnerIdByOwnerRezId(property_id);
+        if (propertyOwnerId) {
+          await notifyAdminNewReview(
+            result.insertedId.toString(),
+            display_name,
+            propertyName,
+            propertyOwnerId
+          );
+        }
+      } catch (notificationError) {
+        console.error('Failed to create review notification:', notificationError);
+        // Don't fail the operation if notification fails
+      }
+
       return NextResponse.json({
         success: true,
         message: 'Review submitted successfully and is pending approval',

@@ -218,8 +218,13 @@ const PropertiesTable: React.FC<PropertiesTableProps> = ({
                     
                     {/* Rates - Hidden on mobile by default */}
                     <td className={`px-4 py-4 text-sm text-gray-500 hidden sm:table-cell ${showColumns ? '!table-cell' : ''}`}>
-                      <div className="text-gray-900">N/A</div>
-                      <div>Currency: {property.currency_code || 'N/A'}</div>
+                      <div className="text-gray-900">
+                        {(property as any)?.localData?.pricing?.pricePerNight ? 
+                          `$${(property as any).localData.pricing.pricePerNight}/night` : 
+                          'N/A'
+                        }
+                      </div>
+                      <div>Currency: {property.currency_code || 'USD'}</div>
                     </td>
                     
                     {/* Rules - Hidden on mobile by default */}

@@ -463,7 +463,10 @@ const PropertyRequestList = ({role}: {role: string}) => {
                           {property.capacity || property.max_guests}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                          {property.price || '-'}
+                          {(property as any)?.localData?.pricing?.pricePerNight ? 
+                            `$${(property as any).localData.pricing.pricePerNight}/night` : 
+                            (property.price || '-')
+                          }
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                           <div className="max-w-xs">

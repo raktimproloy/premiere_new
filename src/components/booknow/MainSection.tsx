@@ -38,11 +38,7 @@ export default function MainSection(props: MainSectionProps) {
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');
     const [guests, setGuests] = useState(1);
-    const [services, setServices] = useState({
-      breakfast: false,
-      lunch: false,
-      driver: false
-    });
+    const [selectedServices, setSelectedServices] = useState<{[key: string]: boolean}>({});
     
     // Property data state
     const [property, setProperty] = useState<any>(null);
@@ -162,8 +158,8 @@ export default function MainSection(props: MainSectionProps) {
       }, 5000);
     };
 
-    const handleServiceChange = (service: keyof typeof services) => {
-      setServices(prev => ({ ...prev, [service]: !prev[service] }));
+    const handleServiceChange = (serviceName: string) => {
+      setSelectedServices(prev => ({ ...prev, [serviceName]: !prev[serviceName] }));
     };
   
     const fetchPricing = async (startDate: string, endDate: string) => {
@@ -217,10 +213,13 @@ export default function MainSection(props: MainSectionProps) {
         total += pricing.summary.totalAmount;
       }
       
-      // Add service costs
-      if (services.breakfast) total += 9.00;
-      if (services.lunch) total += 12.00;
-      if (services.driver) total += 12.00;
+      // Add selected service costs
+      const propertyServices = (property as any)?.localData?.services || (property as any)?.services || [];
+      propertyServices.forEach((service: any) => {
+        if (selectedServices[service.name]) {
+          total += parseFloat(service.price) || 0;
+        }
+      });
       
       return total.toFixed(2);
     };
@@ -286,7 +285,8 @@ export default function MainSection(props: MainSectionProps) {
           checkIn: checkIn,
           checkOut: checkOut,
           guests: guests,
-          email: email
+          email: email,
+          selectedServices: selectedServices
         });
         router.push('/login');
         return;
@@ -341,11 +341,18 @@ export default function MainSection(props: MainSectionProps) {
           // }
         }
         
-        // All settings are complete, proceed to checkout
+        // All settings are complete, proceed to checkout with selected services
+        const servicesParam = Object.keys(selectedServices).filter(serviceName => selectedServices[serviceName]).join(',');
         if (searchId) {
-          router.push(`/book-now/checkout/${id}?id=${searchId}`);
+          const url = servicesParam ? 
+            `/book-now/checkout/${id}?id=${searchId}&services=${encodeURIComponent(servicesParam)}` :
+            `/book-now/checkout/${id}?id=${searchId}`;
+          router.push(url);
         } else {
-          router.push(`/book-now/checkout/${id}`);
+          const url = servicesParam ? 
+            `/book-now/checkout/${id}?services=${encodeURIComponent(servicesParam)}` :
+            `/book-now/checkout/${id}`;
+          router.push(url);
         }
         
       } catch (error) {
@@ -429,7 +436,7 @@ export default function MainSection(props: MainSectionProps) {
               </div>
               
               {/* Services Section */}
-              {(property?.localData?.services && property.localData.services.length > 0) && (
+              {/* {(property?.localData?.services && property.localData.services.length > 0) && (
                 <div className="mb-4">
                   <h3 className="text-sm font-semibold text-gray-700 mb-2">Included Services</h3>
                   <div className="space-y-2">
@@ -446,7 +453,7 @@ export default function MainSection(props: MainSectionProps) {
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
               
               <input
                 type="email"
@@ -528,23 +535,28 @@ export default function MainSection(props: MainSectionProps) {
                   </div>
                 )}
               </div>
-              {/* <div className="border-t border-gray-200 pt-4 mt-4 mb-4 border-dashed">
-                <div className="font-semibold mb-2">Extra Services</div>
-                <div className="space-y-2">
-                  {[{ id: 'breakfast', label: 'Breakfast', price: 9.00 }, { id: 'lunch', label: 'Lunch', price: 12.00 }, { id: 'driver', label: 'Dinner', price: 12.00 }].map((service) => (
-                    <label key={service.id} className="flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={services[service.id as keyof typeof services]}
-                        onChange={() => handleServiceChange(service.id as keyof typeof services)}
-                        className="form-checkbox h-4 w-4 text-yellow-400 border-gray-300 rounded mr-2"
-                      />
-                      <span className="flex-1 text-gray-700">{service.label}</span>
-                      <span className="text-gray-500 text-sm">${service.price.toFixed(2)}</span>
-                    </label>
-                  ))}
+              {/* Services Section */}
+              {((property as any)?.localData?.services || (property as any)?.services || []).length > 0 && (
+                <div className="border-t border-gray-200 pt-4 mt-4 mb-4 border-dashed">
+                  <div className="font-semibold mb-2">Additional Services</div>
+                  <div className="space-y-2">
+                    {((property as any)?.localData?.services || (property as any)?.services || []).map((service: any, index: number) => (
+                      <label key={`${service.name}-${index}`} className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedServices[service.name] || false}
+                          onChange={() => handleServiceChange(service.name)}
+                          className="form-checkbox h-4 w-4 text-yellow-400 border-gray-300 rounded mr-2"
+                        />
+                        <span className="flex-1 text-gray-700">{service.name}</span>
+                        <span className={`text-sm ${parseFloat(service.price) === 0 ? 'text-green-600' : 'text-gray-500'}`}>
+                          {parseFloat(service.price) === 0 ? 'Free' : `$${parseFloat(service.price).toFixed(2)}`}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div> */}
+              )}
               
               {/* Pricing Information */}
               {!checkIn || !checkOut ? (
@@ -606,6 +618,25 @@ export default function MainSection(props: MainSectionProps) {
                       </div>
                     )}
                   </div>
+                  
+                  {/* Services Breakdown */}
+                  {Object.keys(selectedServices).some(serviceName => selectedServices[serviceName]) && (
+                    <div className="border-t border-gray-100 pt-3 mt-3">
+                      <div className="text-sm font-medium text-gray-700 mb-2">Selected Services:</div>
+                      <div className="space-y-1">
+                        {((property as any)?.localData?.services || (property as any)?.services || [])
+                          .filter((service: any) => selectedServices[service.name])
+                          .map((service: any, index: number) => (
+                            <div key={`selected-${service.name}-${index}`} className="flex justify-between text-sm">
+                              <span className="text-gray-600">{service.name}</span>
+                              <span className="text-gray-500">
+                                {parseFloat(service.price) === 0 ? 'Free' : `$${parseFloat(service.price).toFixed(2)}`}
+                              </span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : null}
               

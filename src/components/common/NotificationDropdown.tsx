@@ -19,19 +19,25 @@ interface Notification {
 
 interface NotificationDropdownProps {
   notifications?: Notification[];
+  unreadCount?: number;
+  loading?: boolean;
   onMarkAsRead?: (id: string) => void;
   onDelete?: (id: string) => void;
   onMarkAllAsRead?: () => void;
   onClearAll?: () => void;
+  onRefresh?: () => void;
   className?: string;
 }
 
 const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   notifications = [],
+  unreadCount: propUnreadCount,
+  loading: propLoading,
   onMarkAsRead,
   onDelete,
   onMarkAllAsRead,
   onClearAll,
+  onRefresh,
   className = ''
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,38 +45,61 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
-  // Use notification context if no props are provided
-  const contextNotifications = useNotifications();
-  const hasContext = !onMarkAsRead && !onDelete && !onMarkAllAsRead && !onClearAll;
+  // Use props if provided, otherwise fetch from API
+  const hasProps = notifications.length > 0 || propUnreadCount !== undefined;
+  const hasContext = false;
 
-  // Fetch notifications from API
+  // Fetch notifications from API (only if no props provided)
   const fetchNotifications = async () => {
-    if (hasContext) return; // Don't fetch if using context
+    if (hasProps) return; // Don't fetch if props are provided
     
     setLoading(true);
     try {
-      const response = await fetch('/api/notifications?limit=20');
+      const response = await fetch('/api/notifications?limit=6');
       const data = await response.json();
       
       if (data.success) {
         setNotificationsList(data.notifications || []);
       } else {
-        toast.error('Failed to fetch notifications');
+        console.error('Failed to fetch notifications:', data.message);
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      toast.error('Failed to fetch notifications');
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch notifications when dropdown opens
+  // Fetch notifications when dropdown opens and mark all as read
   useEffect(() => {
-    if (isOpen && !hasContext) {
+    if (isOpen && !hasProps) {
       fetchNotifications();
     }
-  }, [isOpen, hasContext]);
+    if (isOpen) {
+      // Auto-mark all notifications as read when dropdown opens
+      markAllAsReadOnOpen();
+    }
+  }, [isOpen, hasProps]);
+
+  // Function to mark all notifications as read when dropdown opens
+  const markAllAsReadOnOpen = async () => {
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'markAllAsRead' })
+      });
+      
+      if (response.ok) {
+        // Update local state to reflect all notifications as read
+        setNotificationsList(prev => 
+          prev.map(n => ({ ...n, read: true }))
+        );
+      }
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -174,9 +203,10 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   //   }
   // ];
 
-  // Use real notifications or context notifications
-  const displayNotifications = hasContext ? (Array.isArray(contextNotifications) ? contextNotifications : []) : notificationsList;
-  const unreadCount = displayNotifications.filter((n: Notification) => !n.read).length;
+  // Use props notifications or API notifications
+  const displayNotifications = hasProps ? notifications : notificationsList;
+  const unreadCount = hasProps ? (propUnreadCount || 0) : displayNotifications.filter((n: Notification) => !n.read).length;
+  const isLoading = hasProps ? (propLoading || false) : loading;
 
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
@@ -328,7 +358,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 
           {/* Notifications List */}
           <div className="max-h-64 overflow-y-auto">
-            {loading ? (
+            {isLoading ? (
               <div className="p-6 text-center text-gray-500">
                 <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin mx-auto mb-2"></div>
                 <p>Loading notifications...</p>

@@ -199,3 +199,61 @@ export async function getPropertyOwnerId(propertyId: string): Promise<string | n
     return null;
   }
 }
+
+/**
+ * Get property owner ID by OwnerRez property ID
+ */
+export async function getPropertyOwnerIdByOwnerRezId(ownerRezPropertyId: number): Promise<string | null> {
+  try {
+    const client = await clientPromise;
+    const db = client.db("premiere-stays");
+    
+    const property = await db.collection("properties")
+      .findOne({ ownerRezId: ownerRezPropertyId }, { projection: { 'owner._id': 1 } });
+    
+    return property?.owner?._id?.toString() || null;
+  } catch (error) {
+    console.error('Error getting property owner ID by OwnerRez ID:', error);
+    return null;
+  }
+}
+
+/**
+ * Mark all notifications as read for a user
+ */
+export async function markAllNotificationsAsRead(userId: string): Promise<boolean> {
+  try {
+    const client = await clientPromise;
+    const db = client.db("premiere-stays");
+    
+    const result = await db.collection("notifications").updateMany(
+      { userId: userId, read: false },
+      { $set: { read: true, updatedAt: new Date() } }
+    );
+    
+    return result.modifiedCount > 0;
+  } catch (error) {
+    console.error('Error marking all notifications as read:', error);
+    return false;
+  }
+}
+
+/**
+ * Get unread notification count for a user
+ */
+export async function getUnreadNotificationCount(userId: string): Promise<number> {
+  try {
+    const client = await clientPromise;
+    const db = client.db("premiere-stays");
+    
+    const count = await db.collection("notifications").countDocuments({
+      userId: userId,
+      read: false
+    });
+    
+    return count;
+  } catch (error) {
+    console.error('Error getting unread notification count:', error);
+    return 0;
+  }
+}

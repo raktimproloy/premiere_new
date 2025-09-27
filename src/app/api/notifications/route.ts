@@ -175,3 +175,65 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function PUT(request: NextRequest) {
+  try {
+    // Get token from cookie
+    const token = request.cookies.get('authToken')?.value;
+
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: 'Not authenticated' },
+        { status: 401 }
+      );
+    }
+
+    // Verify the token
+    const result = await authService.verifyToken(token);
+    if (!result.valid || !result.user) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid token' },
+        { status: 401 }
+      );
+    }
+
+    const { action } = await request.json();
+
+    if (action === 'markAllAsRead') {
+      const client = await clientPromise;
+      const db = client.db("premiere-stays");
+
+      // Mark all notifications as read for the user
+      const updateResult = await db.collection("notifications").updateMany(
+        { 
+          userId: result.user._id,
+          read: false
+        },
+        { 
+          $set: { 
+            read: true,
+            updatedAt: new Date()
+          } 
+        }
+      );
+
+      return NextResponse.json({
+        success: true,
+        message: `${updateResult.modifiedCount} notifications marked as read`,
+        modifiedCount: updateResult.modifiedCount
+      });
+    }
+
+    return NextResponse.json(
+      { success: false, message: 'Invalid action' },
+      { status: 400 }
+    );
+
+  } catch (error) {
+    console.error('Mark all notifications as read API error:', error);
+    return NextResponse.json(
+      { success: false, message: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

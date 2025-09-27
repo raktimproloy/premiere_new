@@ -22,7 +22,9 @@ export default function CreatePropertyPage() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [fileUrls, setFileUrls] = useState<string[]>([]);
   const [editorValue, setEditorValue] = useState('');
-
+  const [pricePerNight, setPricePerNight] = useState('');
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -55,6 +57,9 @@ export default function CreatePropertyPage() {
       capacity: capacity,
       details: details,
       editorValue: editorValue,
+      pricePerNight: pricePerNight ? parseFloat(pricePerNight) : undefined,
+      latitude: latitude ? parseFloat(latitude) : undefined,
+      longitude: longitude ? parseFloat(longitude) : undefined,
     };
 
     try {
@@ -99,6 +104,9 @@ export default function CreatePropertyPage() {
       setUploadedFiles([]);
       setFileUrls([]);
       setEditorValue("");
+      setPricePerNight("");
+      setLatitude("");
+      setLongitude("");
       setIsModalOpen(true);
     } catch (err: any) {
       setError(err.message || 'Failed to create property');
@@ -267,6 +275,55 @@ export default function CreatePropertyPage() {
                       <option key={num} value={num}>{num} {num === 1 ? 'person' : 'people'}</option>
                     ))}
                   </select>
+                </div>
+              </div>
+
+              {/* Price Per Night */}
+              <div className="mb-6">
+                <label htmlFor="pricePerNight" className="block text-sm font-medium text-gray-700 mb-2">
+                  Price Per Night ($)
+                </label>
+                <input
+                  type="number"
+                  id="pricePerNight"
+                  value={pricePerNight}
+                  onChange={(e) => setPricePerNight(e.target.value)}
+                  placeholder="Enter price per night"
+                  min="0"
+                  step="0.01"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                />
+              </div>
+
+              {/* Latitude and Longitude */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label htmlFor="latitude" className="block text-sm font-medium text-gray-700 mb-2">
+                    Latitude
+                  </label>
+                  <input
+                    type="number"
+                    id="latitude"
+                    value={latitude}
+                    onChange={(e) => setLatitude(e.target.value)}
+                    placeholder="e.g., 25.7617"
+                    step="any"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="longitude" className="block text-sm font-medium text-gray-700 mb-2">
+                    Longitude
+                  </label>
+                  <input
+                    type="number"
+                    id="longitude"
+                    value={longitude}
+                    onChange={(e) => setLongitude(e.target.value)}
+                    placeholder="e.g., -80.1918"
+                    step="any"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  />
                 </div>
               </div>
 

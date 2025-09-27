@@ -522,7 +522,10 @@ console.log(filteredProperties)
                           {property.capacity || property.max_guests}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                          {property.price || '-'}
+                          {(property as any)?.localData?.pricing?.pricePerNight ? 
+                            `$${(property as any).localData.pricing.pricePerNight}/night` : 
+                            (property.price || '-')
+                          }
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-5 py-2 inline-flex text-md leading-5 font-semibold rounded-full  ${getStatusBadge(property.status || (property.active ? 'Active' : 'Pending'))}`}>

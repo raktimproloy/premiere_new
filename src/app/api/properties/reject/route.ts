@@ -245,7 +245,7 @@ export async function POST(request: NextRequest) {
     try {
       if (property.owner?._id) {
         await notifyAdminPropertyStatus(
-          property._id.toString(),
+          property.ownerRezId?.toString() || property._id.toString(),
           property.name || 'Property',
           property.owner._id.toString(),
           'rejected'

@@ -164,6 +164,7 @@ export default function Header({ sidebarOpen, setSidebarOpen, userData, currentP
                 <Image src={searchIcon} alt="Search" width={24} height={24} />
               </button>
             )}
+            
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
