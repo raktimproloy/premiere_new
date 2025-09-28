@@ -78,6 +78,24 @@ export default function MainSection(props: MainSectionProps) {
       }
     }, [searchId]);
 
+    // Auto-check free services when property loads
+    useEffect(() => {
+      if (property) {
+        const propertyServices = (property as any)?.localData?.services || (property as any)?.services || [];
+        const freeServices: {[key: string]: boolean} = {};
+        
+        propertyServices.forEach((service: any) => {
+          if (parseFloat(service.price) === 0) {
+            freeServices[service.name] = true;
+          }
+        });
+        
+        if (Object.keys(freeServices).length > 0) {
+          setSelectedServices(prev => ({ ...prev, ...freeServices }));
+        }
+      }
+    }, [property]);
+
     // Fetch property data (without pricing)
     useEffect(() => {
       let isMounted = true;

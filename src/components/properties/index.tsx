@@ -1,9 +1,14 @@
 'use client'
-import React, { useState, useEffect } from 'react'
-import { BathroomIcon, BedIcon, GuestIcon, LocationFillIcon, PropertyIcon2 } from '../../../public/images/svg';
-import { useParams } from 'next/navigation';
+import React, { useState, useEffect, useRef } from 'react'
+import { BathroomIcon, BedIcon, GuestIcon, LocationFillIcon, PropertyIcon2, CalendarIcon, ProfileIcon } from '../../../public/images/svg';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { FaArrowRight, FaChevronDown } from 'react-icons/fa';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { saveSearchSession } from '@/utils/cookies';
+import { useAuth } from '@/components/common/AuthContext';
 import AboutSection from '../booknow/AboutSection';
 import MapSection from '../booknow/MapSection';
 import ReviewsSection from '../booknow/ReviewsSection';
@@ -23,12 +28,54 @@ interface MainSectionProps {
 
 export default function MainSection(props: MainSectionProps) {
     const params = useParams();
+    const router = useRouter();
     const id = props.id || (params?.id as string);
+    const { isAuthenticated, user } = useAuth();
     
     // Property data state
     const [property, setProperty] = useState<any>(null);
     const [propertyLoading, setPropertyLoading] = useState(true);
     const [propertyError, setPropertyError] = useState<string | null>(null);
+    
+    // Booking form state
+    const [email, setEmail] = useState('');
+    const [checkInDate, setCheckInDate] = useState<Date | null>(null);
+    const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
+    const [guests, setGuests] = useState(1);
+    const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+    const [suppressClose, setSuppressClose] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedServices, setSelectedServices] = useState<{[key: string]: boolean}>({});
+    
+    // Refs for form elements
+    const checkInRef = useRef<DatePicker>(null);
+    const checkOutRef = useRef<DatePicker>(null);
+    const guestsRef = useRef<HTMLDivElement>(null);
+
+    // Auto-fill email if user is authenticated
+    useEffect(() => {
+      if (isAuthenticated && user?.email) {
+        setEmail(user.email);
+      }
+    }, [isAuthenticated, user]);
+
+    // Auto-check free services when property loads
+    useEffect(() => {
+      if (property) {
+        const propertyServices = (property as any)?.localData?.services || (property as any)?.services || [];
+        const freeServices: {[key: string]: boolean} = {};
+        
+        propertyServices.forEach((service: any) => {
+          if (parseFloat(service.price) === 0) {
+            freeServices[service.name] = true;
+          }
+        });
+        
+        if (Object.keys(freeServices).length > 0) {
+          setSelectedServices(prev => ({ ...prev, ...freeServices }));
+        }
+      }
+    }, [property]);
 
     // Fetch property data
     useEffect(() => {
@@ -60,6 +107,73 @@ export default function MainSection(props: MainSectionProps) {
         });
       return () => { isMounted = false; };
     }, [id]);
+
+    // Helper function to format dates
+    const formatLocalDate = (date: Date) => {
+      return date.getFullYear() + '-' +
+        String(date.getMonth() + 1).padStart(2, '0') + '-' +
+        String(date.getDate()).padStart(2, '0');
+    };
+
+    // Handle dropdown interactions
+    const handleDropdown = (dropdown: string) => {
+      setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
+      setSuppressClose(true);
+    };
+
+    // Handle check-in date selection
+    const handleCheckInSelect = (date: Date | null) => {
+      setCheckInDate(date);
+      setSuppressClose(true);
+      setActiveDropdown('checkout');
+    };
+
+    // Handle check-out date selection
+    const handleCheckOutSelect = (date: Date | null) => {
+      setCheckOutDate(date);
+      setSuppressClose(true);
+      setActiveDropdown('guests');
+    };
+
+    // Handle service selection
+    const handleServiceChange = (serviceName: string) => {
+      setSelectedServices(prev => ({ ...prev, [serviceName]: !prev[serviceName] }));
+    };
+
+    // Handle form submission
+    const handleBookNow = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setIsSubmitting(true);
+
+      try {
+        // Create search session data
+        const searchData = {
+          location: property?.address ? `${property.address.city}, ${property.address.country}` : 'Property Location',
+          checkInDate: checkInDate ? formatLocalDate(checkInDate) : '',
+          checkOutDate: checkOutDate ? formatLocalDate(checkOutDate) : '',
+          guests,
+          propertyIds: [parseInt(id)]
+        };
+
+        // Save search session and get unique ID
+        const uniqueId = saveSearchSession(searchData);
+
+        // Create services parameter for URL
+        const servicesParam = Object.keys(selectedServices).filter(serviceName => selectedServices[serviceName]).join(',');
+        const url = servicesParam ? 
+          `/book-now/checkout/${id}?id=${uniqueId}&services=${encodeURIComponent(servicesParam)}` :
+          `/book-now/checkout/${id}?id=${uniqueId}`;
+
+        // Redirect to checkout page with the unique ID and services
+        router.push(url);
+
+      } catch (error) {
+        console.error('Error creating booking session:', error);
+        alert('An error occurred while processing your booking. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
 
     // Use property medium thumbnail if available, otherwise fallback
     const mainImage = property?.thumbnail_url_medium || images[0];
@@ -98,7 +212,7 @@ export default function MainSection(props: MainSectionProps) {
             </div>
           </div>
 
-          {/* Right: Property Info */}
+          {/* Right: Booking Form */}
           <div className="w-full lg:w-2/5 flex flex-col">
             <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{property?.name || 'Property Details'}</h1>
@@ -107,10 +221,137 @@ export default function MainSection(props: MainSectionProps) {
                 {property?.address ? `${property.address.city}, ${property.address.state}, ${property.address.country}` : 'Location not available'}
               </div>
               
+              {/* Booking Form */}
+              <form onSubmit={handleBookNow} className="space-y-4">
+                {/* Email Input */}
+                <div>
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={!!(isAuthenticated && user?.email)}
+                    required
+                  />
+                </div>
+
+                {/* Date Range Picker */}
+                <div className="flex flex-row border rounded-lg border-gray-300">
+                  <div className="flex-1 relative flex items-center px-4">
+                    <CalendarIcon />
+                    <DatePicker
+                      ref={checkInRef}
+                      selected={checkInDate}
+                      onChange={handleCheckInSelect}
+                      selectsStart
+                      startDate={checkInDate}
+                      endDate={checkOutDate}
+                      minDate={new Date()}
+                      placeholderText="Check-in"
+                      className="w-full px-4 py-3 bg-transparent focus:outline-none text-sm"
+                      onFocus={() => handleDropdown('checkin')}
+                      popperPlacement="bottom"
+                      popperClassName="z-30"
+                      open={activeDropdown === 'checkin'}
+                      onClickOutside={() => { if (!suppressClose) setActiveDropdown(null); }}
+                      disabled={isSubmitting}
+                      required
+                    />
+                  </div>
+                  <div className="flex items-center px-2 text-gray-300 select-none">|</div>
+                  <div className="flex-1 relative flex items-center px-4">
+                    <CalendarIcon />
+                    <DatePicker
+                      ref={checkOutRef}
+                      selected={checkOutDate}
+                      onChange={handleCheckOutSelect}
+                      selectsEnd
+                      startDate={checkInDate}
+                      endDate={checkOutDate}
+                      minDate={checkInDate || new Date()}
+                      placeholderText="Check-out"
+                      className="w-full px-4 py-3 bg-transparent focus:outline-none text-sm"
+                      onFocus={() => handleDropdown('checkout')}
+                      popperPlacement="bottom"
+                      popperClassName="z-30"
+                      open={activeDropdown === 'checkout'}
+                      onClickOutside={() => { if (!suppressClose) setActiveDropdown(null); }}
+                      disabled={isSubmitting}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Guests Selection */}
+                <div className="relative">
+                  <div
+                    className="flex px-4 items-center border border-gray-300 rounded-lg bg-white cursor-pointer"
+                    onClick={() => !isSubmitting && handleDropdown('guests')}
+                    tabIndex={0}
+                    ref={guestsRef}
+                  >
+                    <ProfileIcon />
+                    <span className="w-full px-2 py-3 text-left select-none text-sm">
+                      {guests} {guests === 1 ? 'Guest' : 'Guests'}
+                    </span>
+                    <FaChevronDown className={`text-gray-400 transition-transform duration-200 ${activeDropdown === 'guests' ? 'rotate-180' : ''}`} />
+                  </div>
+                  {activeDropdown === 'guests' && (
+                    <div className="absolute z-20 mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                        <div
+                          key={num}
+                          onClick={() => {
+                            setGuests(num);
+                            setActiveDropdown(null);
+                          }}
+                          className={`px-4 py-3 hover:bg-gray-100 cursor-pointer text-sm ${guests === num ? 'bg-blue-50' : ''}`}
+                        >
+                          {num} {num === 1 ? 'Guest' : 'Guests'}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Services Section */}
+                {((property as any)?.localData?.services || (property as any)?.services || []).length > 0 && (
+                  <div className="border-t border-gray-200 pt-4 mt-4 mb-4 border-dashed">
+                    <div className="font-semibold mb-2 text-sm">Additional Services</div>
+                    <div className="space-y-2">
+                      {((property as any)?.localData?.services || (property as any)?.services || []).map((service: any, index: number) => (
+                        <label key={`${service.name}-${index}`} className="flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedServices[service.name] || false}
+                            onChange={() => handleServiceChange(service.name)}
+                            className="form-checkbox h-4 w-4 text-yellow-400 border-gray-300 rounded mr-2"
+                          />
+                          <span className="flex-1 text-gray-700 text-sm">{service.name}</span>
+                          <span className={`text-sm ${parseFloat(service.price) === 0 ? 'text-green-600' : 'text-gray-500'}`}>
+                            {parseFloat(service.price) === 0 ? 'Free' : `$${parseFloat(service.price).toFixed(2)}`}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Book Now Button */}
+                <button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-[#F7B730] to-[#F7B730] hover:from-[#F7B730] hover:to-[#F7B730] text-black font-semibold py-3 px-4 rounded-full transition-all duration-300 transform hover:scale-[1.02] shadow-lg flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isSubmitting || !email || !checkInDate || !checkOutDate}
+                >
+                  <span className="text-sm">Book Now</span>
+                  <FaArrowRight className='ml-2 text-sm' />
+                </button>
+              </form>
 
               {/* Property Services */}
-              {(property?.services && property.services.length > 0) && (
-                <div className="mb-6">
+              {/*{(property?.services && property.services.length > 0) && (
+                <div className="mt-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Services & Amenities</h3>
                   <div className="grid grid-cols-1 gap-2">
                     {property.services.map((service: any, index: number) => (
@@ -126,11 +367,11 @@ export default function MainSection(props: MainSectionProps) {
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Property Amenities */}
               {(property?.localData?.amenities && property.localData.amenities.length > 0) && (
-                <div className="mb-6">
+                <div className="mt-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Property Features</h3>
                   <div className="grid grid-cols-2 gap-3">
                     {property.localData.amenities.slice(0, 8).map((amenity: any, index: number) => (
