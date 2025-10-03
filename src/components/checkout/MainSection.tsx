@@ -11,6 +11,8 @@ import { FaArrowRight } from 'react-icons/fa';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { getSearchSession } from '@/utils/cookies';
 import { useAuth } from '@/components/common/AuthContext';
+import PaymentForm from './PaymentForm';
+import PaymentMethodSelector from './PaymentMethodSelector';
 
 // Add GuestEntry type
 interface GuestEntry {
@@ -76,6 +78,13 @@ const MainSection = () => {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingResults, setBookingResults] = useState<any[]>([]);
   const [bookingError, setBookingError] = useState<string | null>(null);
+
+  // Payment state
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   // Fetch property data (without pricing)
   useEffect(() => {
@@ -358,14 +367,34 @@ const MainSection = () => {
     setActiveDropdown(dropdown);
   };
 
-  type PaymentMethod = 'card' | 'paypal' | 'googlepay';
-  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+  // Payment method handlers
+  const handlePaymentMethodSelect = (methodId: string) => {
+    setPaymentMethod(methodId);
+    setPaymentError(null);
+  };
 
-  const paymentMethods = [
-    { id: 'card', label: 'Debit/Credit Card', image: '/images/mastercard.png' },
-    { id: 'paypal', label: 'PayPal', image: '/images/paypal.png' },
-    { id: 'googlepay', label: 'Google Pay', image: '/images/gpay.png' },
-  ];
+  const handlePaymentSuccess = (paymentIntentId: string) => {
+    setPaymentSuccess(true);
+    setPaymentLoading(false);
+    setPaymentError(null);
+    
+    // Proceed with booking after successful payment
+    handleCompleteBooking(paymentIntentId);
+  };
+
+  const handlePaymentError = (error: string) => {
+    setPaymentError(error);
+    setPaymentLoading(false);
+  };
+
+  const handleProceedToPayment = () => {
+    if (!paymentMethod) {
+      setPaymentError('Please select a payment method');
+      return;
+    }
+    setShowPaymentForm(true);
+    setPaymentError(null);
+  };
 
   // Calculate total including services
   const calculateTotalWithServices = () => {
@@ -387,16 +416,36 @@ const MainSection = () => {
     return total;
   };
 
-  // Booking handler
+  // Booking handler - now handles payment flow
   const handleCheckout = async () => {
     setBookingLoading(true);
     setBookingResults([]);
     setBookingError(null);
+    setPaymentError(null);
+    
     if (!property || !checkInDate || !checkOutDate || addedGuests.length !== guests) {
       setBookingError('Please add all guests and select dates.');
       setBookingLoading(false);
       return;
     }
+
+    // If payment method is selected, proceed to payment
+    if (paymentMethod) {
+      setBookingLoading(false);
+      setShowPaymentForm(true);
+      return;
+    }
+
+    // If no payment method selected, show error
+    setPaymentError('Please select a payment method to continue');
+    setBookingLoading(false);
+  };
+
+  // Complete booking after successful payment
+  const handleCompleteBooking = async (paymentIntentId?: string) => {
+    setBookingLoading(true);
+    setBookingResults([]);
+    setBookingError(null);
     
     const arrival = formatLocalDate(checkInDate);
     const departure = formatLocalDate(checkOutDate);
@@ -461,7 +510,10 @@ const MainSection = () => {
           propertyType: property.property_type || 'Property',
           bedrooms: property.bedrooms || 1,
           bathrooms: property.bathrooms || 1,
-          selectedServices: selectedServices.join(', ')
+          selectedServices: selectedServices.join(', '),
+          paymentMethod: paymentMethod || 'card',
+          paymentIntentId: paymentIntentId || '',
+          paymentStatus: 'completed'
         };
         
         // Build confirmation URL with parameters
@@ -841,7 +893,7 @@ const MainSection = () => {
                   onClick={handleCheckout}
                   disabled={bookingLoading || addedGuests.length !== guests || !checkInDate || !checkOutDate || !property}
                 >
-                  {bookingLoading ? 'Processing...' : 'Confirm Booking'}
+                  {bookingLoading ? 'Processing...' : 'Proceed to Payment'}
                 </button>
                 {/* Booking feedback */}
                 {bookingError && <div className="text-red-500 text-sm mt-2">{bookingError}</div>}
@@ -870,36 +922,72 @@ const MainSection = () => {
         </div>
 
 
+        {/* Payment Section */}
         <div className="max-w-md mx-auto lg:mx-0 p-4 sm:p-6 bg-white rounded-lg shadow-sm mt-6 sm:mt-8 mb-14">
-      <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 sm:mb-6">Payment Method</h2>
-      
-      <div className="space-y-3 sm:space-y-4">
-        {paymentMethods.map((method) => (
-          <button
-            key={method.id}
-            type="button"
-            className={`w-full flex items-center p-3 sm:p-4 rounded-lg border transition-all duration-200 ${
-              selectedMethod === method.id
-                ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
-                : 'border-gray-300 hover:bg-gray-50'
-            }`}
-            onClick={() => setSelectedMethod(method.id as PaymentMethod)}
-          >
-            <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border flex items-center justify-center mr-3 sm:mr-4 ${
-              selectedMethod === method.id
-                ? 'border-blue-500 bg-blue-500'
-                : 'border-gray-400'
-            }`}>
-              {selectedMethod === method.id && (
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white"></div>
+          {!showPaymentForm ? (
+            <>
+              <PaymentMethodSelector
+                selectedMethod={paymentMethod}
+                onMethodSelect={handlePaymentMethodSelect}
+                amount={calculateTotalWithServices()}
+              />
+              
+              {/* Payment Error Display */}
+              {paymentError && (
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center">
+                    <svg className="h-5 w-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-sm text-red-700">{paymentError}</p>
+                  </div>
+                </div>
               )}
-            </div>
-            <Image src={method.image} alt={method.label} width={500} height={500} className='w-12 h-4 sm:w-14 sm:h-5 mr-2' />
-            <span className="text-gray-700 font-medium text-sm sm:text-base">{method.label}</span>
-          </button>
-        ))}
-      </div>
-    </div>
+
+              {/* Proceed to Payment Button */}
+              <button
+                onClick={handleProceedToPayment}
+                disabled={!paymentMethod || bookingLoading}
+                className="w-full mt-6 bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {bookingLoading ? 'Processing...' : 'Proceed to Payment'}
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Payment Form */}
+              {paymentMethod === 'stripe' && (
+                <PaymentForm
+                  amount={calculateTotalWithServices()}
+                  bookingData={{
+                    propertyId: property?.id,
+                    propertyName: property?.name,
+                    checkInDate: checkInDate ? formatLocalDate(checkInDate) : '',
+                    checkOutDate: checkOutDate ? formatLocalDate(checkOutDate) : '',
+                    guests: guests,
+                    guestName: addedGuests[0]?.name || '',
+                    guestEmail: addedGuests[0]?.email || '',
+                    selectedServices: selectedServices
+                  }}
+                  onPaymentSuccess={handlePaymentSuccess}
+                  onPaymentError={handlePaymentError}
+                  isLoading={bookingLoading}
+                />
+              )}
+
+              {/* Back to Payment Method Selection */}
+              <button
+                onClick={() => {
+                  setShowPaymentForm(false);
+                  setPaymentError(null);
+                }}
+                className="w-full mt-4 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+              >
+                Back to Payment Methods
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

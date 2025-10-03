@@ -437,7 +437,7 @@
       "longitude": -80.1972257,
       "max_guests": 4,
       "max_pets": 0,
-      "name": "Sample Test Property New1",
+      "name": "Design District Guesthouse",
       "owner_id": 150913611,
       "property_type": "guest_house",
       "thumbnail_url": "https://uc.orez.io/i/0bdf2c5c38f74ef8aa9dce6f10de1813-Thumb",
@@ -446,6 +446,6 @@
       "localData": null
     }
   ],
-  "timestamp": 1759037690283,
-  "expiresAt": 1759037720283
+  "timestamp": 1759049362611,
+  "expiresAt": 1759049392611
 }

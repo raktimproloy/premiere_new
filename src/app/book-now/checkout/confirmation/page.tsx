@@ -26,6 +26,9 @@ export default function ConfirmationPage() {
     const propertyType = searchParams.get('propertyType');
     const bedrooms = searchParams.get('bedrooms');
     const bathrooms = searchParams.get('bathrooms');
+    const paymentMethod = searchParams.get('paymentMethod');
+    const paymentIntentId = searchParams.get('paymentIntentId');
+    const paymentStatus = searchParams.get('paymentStatus');
 
     // Validate required parameters
     if (!bookingId || !propertyName || !checkInDate || !checkOutDate || !totalAmount || !guestName || !guestEmail) {
@@ -48,7 +51,10 @@ export default function ConfirmationPage() {
       propertyAddress: propertyAddress || 'Address not available',
       propertyType: propertyType || 'Property',
       bedrooms: parseInt(bedrooms || '1'),
-      bathrooms: parseInt(bathrooms || '1')
+      bathrooms: parseInt(bathrooms || '1'),
+      paymentMethod: paymentMethod || 'card',
+      paymentIntentId: paymentIntentId || '',
+      paymentStatus: paymentStatus || 'completed'
     });
 
     setLoading(false);

@@ -18,6 +18,9 @@ interface BookingConfirmationProps {
     propertyType: string;
     bedrooms: number;
     bathrooms: number;
+    paymentMethod?: string;
+    paymentIntentId?: string;
+    paymentStatus?: string;
   };
 }
 
@@ -177,14 +180,40 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({ bookingData }
               Payment Summary
             </h2>
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center mb-4">
                 <span className="text-xl font-medium text-gray-700">Total Amount</span>
                 <span className="text-3xl font-bold text-blue-600">
                   ${bookingData.totalAmount.toFixed(2)}
                 </span>
               </div>
-              <p className="text-sm text-gray-500 mt-2 text-center">
-                Payment will be processed according to your selected payment method
+              
+              {/* Payment Status */}
+              <div className="bg-white rounded-lg p-4 mb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className={`w-3 h-3 rounded-full mr-3 ${
+                      bookingData.paymentStatus === 'completed' ? 'bg-green-500' : 'bg-yellow-500'
+                    }`}></div>
+                    <span className="text-sm font-medium text-gray-700">
+                      Payment Status: {bookingData.paymentStatus === 'completed' ? 'Completed' : 'Pending'}
+                    </span>
+                  </div>
+                  <span className="text-sm text-gray-500 capitalize">
+                    {bookingData.paymentMethod || 'Card'} Payment
+                  </span>
+                </div>
+                {bookingData.paymentIntentId && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    Transaction ID: {bookingData.paymentIntentId}
+                  </p>
+                )}
+              </div>
+              
+              <p className="text-sm text-gray-500 text-center">
+                {bookingData.paymentStatus === 'completed' 
+                  ? 'Payment has been successfully processed'
+                  : 'Payment will be processed according to your selected payment method'
+                }
               </p>
             </div>
           </div>
