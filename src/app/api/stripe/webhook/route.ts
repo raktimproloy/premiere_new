@@ -3,6 +3,12 @@ import { stripe } from '@/lib/stripe';
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
+  // Check if Stripe is configured
+  if (!stripe) {
+    console.error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+    return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
+  }
+
   const body = await request.text();
   const signature = request.headers.get('stripe-signature');
 

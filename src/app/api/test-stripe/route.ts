@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 
 export async function GET(request: NextRequest) {
+  // Check if Stripe is configured
+  if (!stripe) {
+    return NextResponse.json({
+      success: false,
+      message: 'Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.',
+      error: 'Stripe not configured'
+    }, { status: 500 });
+  }
+
   try {
     // Test Stripe connection by creating a test payment intent
     const paymentIntent = await stripe.paymentIntents.create({
@@ -30,4 +39,5 @@ export async function GET(request: NextRequest) {
     }, { status: 500 });
   }
 }
+
 

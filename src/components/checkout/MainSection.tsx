@@ -923,7 +923,7 @@ const MainSection = () => {
 
 
         {/* Payment Section */}
-        <div className="max-w-md mx-auto lg:mx-0 p-4 sm:p-6 bg-white rounded-lg shadow-sm mt-6 sm:mt-8 mb-14">
+       {/* <div className="max-w-md mx-auto lg:mx-0 p-4 sm:p-6 bg-white rounded-lg shadow-sm mt-6 sm:mt-8 mb-14">
           {!showPaymentForm ? (
             <>
               <PaymentMethodSelector
@@ -932,7 +932,6 @@ const MainSection = () => {
                 amount={calculateTotalWithServices()}
               />
               
-              {/* Payment Error Display */}
               {paymentError && (
                 <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                   <div className="flex items-center">
@@ -944,7 +943,6 @@ const MainSection = () => {
                 </div>
               )}
 
-              {/* Proceed to Payment Button */}
               <button
                 onClick={handleProceedToPayment}
                 disabled={!paymentMethod || bookingLoading}
@@ -955,7 +953,6 @@ const MainSection = () => {
             </>
           ) : (
             <>
-              {/* Payment Form */}
               {paymentMethod === 'stripe' && (
                 <PaymentForm
                   amount={calculateTotalWithServices()}
@@ -975,7 +972,6 @@ const MainSection = () => {
                 />
               )}
 
-              {/* Back to Payment Method Selection */}
               <button
                 onClick={() => {
                   setShowPaymentForm(false);
@@ -987,7 +983,7 @@ const MainSection = () => {
               </button>
             </>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );

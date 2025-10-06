@@ -1,9 +1,10 @@
 import Stripe from 'stripe';
 
 // Initialize Stripe with your secret key
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
-});
+// Only initialize if the secret key is available to prevent build errors
+export const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY)
+  : null;
 
 // Get the publishable key for client-side usage
 export const getStripePublishableKey = () => {
@@ -12,6 +13,10 @@ export const getStripePublishableKey = () => {
 
 // Create a payment intent for booking
 export const createPaymentIntent = async (amount: number, currency: string = 'usd', metadata: any = {}) => {
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+  }
+
   try {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100), // Convert to cents
@@ -35,6 +40,10 @@ export const createPaymentIntent = async (amount: number, currency: string = 'us
 
 // Retrieve a payment intent
 export const retrievePaymentIntent = async (paymentIntentId: string) => {
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+  }
+
   try {
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
     return paymentIntent;
@@ -46,6 +55,10 @@ export const retrievePaymentIntent = async (paymentIntentId: string) => {
 
 // Create a customer
 export const createCustomer = async (email: string, name: string, metadata: any = {}) => {
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+  }
+
   try {
     const customer = await stripe.customers.create({
       email,
@@ -61,6 +74,10 @@ export const createCustomer = async (email: string, name: string, metadata: any 
 
 // Create a refund
 export const createRefund = async (paymentIntentId: string, amount?: number) => {
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+  }
+
   try {
     const refund = await stripe.refunds.create({
       payment_intent: paymentIntentId,
