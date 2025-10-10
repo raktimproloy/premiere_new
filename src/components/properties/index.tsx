@@ -77,6 +77,32 @@ export default function MainSection(props: MainSectionProps) {
       }
     }, [property]);
 
+    // Extract all images from property
+    const propertyImages = property?.localData?.images || [];
+    const allImages = propertyImages.length > 0 
+      ? propertyImages.map((img: any) => img.url)
+      : [property?.thumbnail_url_medium || images[0]];
+    
+    // State for selected image
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const mainImage = allImages[selectedImageIndex];
+
+    // Keyboard navigation for images
+    useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (allImages.length <= 1) return;
+        
+        if (e.key === 'ArrowLeft') {
+          setSelectedImageIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
+        } else if (e.key === 'ArrowRight') {
+          setSelectedImageIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
+        }
+      };
+
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [allImages.length]);
+
     // Fetch property data
     useEffect(() => {
       let isMounted = true;
@@ -175,9 +201,6 @@ export default function MainSection(props: MainSectionProps) {
       }
     };
 
-    // Use property medium thumbnail if available, otherwise fallback
-    const mainImage = property?.thumbnail_url_medium || images[0];
-
     if (propertyLoading) {
       return (
         <div className="flex justify-center items-center min-h-[400px]">
@@ -205,11 +228,73 @@ export default function MainSection(props: MainSectionProps) {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left: Images */}
+          {/* Left: Images Gallery */}
           <div className="w-full lg:w-3/5 flex flex-col items-center">
-            <div className="w-full aspect-video rounded-2xl overflow-hidden mb-4 bg-gray-100 flex items-center justify-center">
-              <img src={mainImage} alt="Property" className="object-cover w-full h-full" />
+            {/* Main Image with Navigation */}
+            <div className="w-full aspect-video rounded-2xl overflow-hidden mb-4 bg-gray-100 flex items-center justify-center shadow-lg relative group">
+              <img 
+                src={mainImage} 
+                alt="Property" 
+                className="object-cover w-full h-full transition-all duration-300" 
+              />
+              
+              {/* Navigation Arrows - Only show if multiple images */}
+              {allImages.length > 1 && (
+                <>
+                  {/* Previous Button */}
+                  <button
+                    onClick={() => setSelectedImageIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1))}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+                    aria-label="Previous image"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  
+                  {/* Next Button */}
+                  <button
+                    onClick={() => setSelectedImageIndex((prev) => (prev === allImages.length - 1 ? 0 : prev + 1))}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+                    aria-label="Next image"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </>
+              )}
             </div>
+            
+            {/* Thumbnail Slider - Only show if multiple images exist */}
+            {allImages.length > 1 && (
+              <div className="w-full">
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                  {allImages.map((imageUrl: string, index: number) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden transition-all duration-300 ${
+                        selectedImageIndex === index 
+                          ? 'scale-105' 
+                          : 'ring-2 ring-gray-200 hover:ring-gray-300 hover:scale-105 opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      <img 
+                        src={imageUrl} 
+                        alt={`Thumbnail ${index + 1}`}
+                        className="object-cover w-full h-full"
+                      />
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Image counter */}
+                <div className="text-center mt-2 text-sm text-gray-500">
+                  Image {selectedImageIndex + 1} of {allImages.length}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right: Booking Form */}
@@ -487,6 +572,8 @@ export default function MainSection(props: MainSectionProps) {
           )}
         </div>
       </section>
+      
+      
       <AboutSection property={property}/>
       {/* <AvailabilitySection/> */}
       <MapSection property={property}/>

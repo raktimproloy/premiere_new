@@ -30,6 +30,9 @@ interface Property {
       category: string;
       icon?: string;
     }>;
+    features?: Array<{
+      name: string;
+    }>;
     rules?: Array<{
       id: string;
       name: string;
@@ -55,6 +58,9 @@ interface Property {
       maxStay?: number;
     };
   };
+  features?: Array<{
+    name: string;
+  }>;
 }
 
 const AboutSection = ({ property }: { property: Property | null }) => {
@@ -121,6 +127,10 @@ const AboutSection = ({ property }: { property: Property | null }) => {
       'Spacious Living Areas',
       'Secure Parking'
     ];
+  };
+
+  const getFeatures = () => {
+    return (property as any)?.localData?.features || (property as any)?.features || [];
   };
 
   const getHouseRules = () => {
@@ -303,14 +313,20 @@ const AboutSection = ({ property }: { property: Property | null }) => {
         {activeTab === 'features' && (
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Property Features</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {getAmenities().map((feature, index) => (
-                <div key={index} className="flex items-center p-2 sm:p-3 bg-gray-50 rounded-lg">
-                  <div className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-blue-600">✓</div>
-                  <span className="text-gray-700 text-sm sm:text-base">{feature}</span>
-                </div>
-              ))}
-            </div>
+            {getFeatures().length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                {getFeatures().map((feature: any, index: number) => (
+                  <div key={index} className="flex items-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+                    <div className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-blue-600">✓</div>
+                    <span className="text-gray-700 text-sm sm:text-base">{feature.name}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>No features have been added for this property yet.</p>
+              </div>
+            )}
           </div>
         )}
         

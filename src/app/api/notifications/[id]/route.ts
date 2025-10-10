@@ -121,16 +121,51 @@ export async function DELETE(
     const client = await clientPromise;
     const db = client.db("premiere-stays");
 
+    // First, check if the notification exists
+    const notification = await db.collection("notifications").findOne({
+      _id: new ObjectId(id)
+    });
+
+    if (!notification) {
+      console.log('Notification not found with ID:', id);
+      return NextResponse.json(
+        { success: false, message: 'Notification not found' },
+        { status: 404 }
+      );
+    }
+
+    console.log('Notification found:', {
+      notificationId: id,
+      notificationUserId: notification.userId,
+      notificationUserIdType: typeof notification.userId,
+      currentUserId: result.user._id,
+      currentUserIdType: typeof result.user._id,
+      match: notification.userId === result.user._id,
+      matchString: String(notification.userId) === String(result.user._id)
+    });
+
+    // Check if user owns this notification (handle both string and ObjectId)
+    const userIdMatches = 
+      notification.userId === result.user._id || 
+      String(notification.userId) === String(result.user._id);
+
+    if (!userIdMatches) {
+      console.log('User does not own this notification');
+      return NextResponse.json(
+        { success: false, message: 'Access denied - you can only delete your own notifications' },
+        { status: 403 }
+      );
+    }
+
     // Delete the notification
     const deleteResult = await db.collection("notifications").deleteOne({
-      _id: new ObjectId(id),
-      userId: result.user._id // Ensure user can only delete their own notifications
+      _id: new ObjectId(id)
     });
 
     if (deleteResult.deletedCount === 0) {
       return NextResponse.json(
-        { success: false, message: 'Notification not found or access denied' },
-        { status: 404 }
+        { success: false, message: 'Failed to delete notification' },
+        { status: 500 }
       );
     }
 

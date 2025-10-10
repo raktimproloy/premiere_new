@@ -31,15 +31,15 @@ const FeaturedPropertiesSection = () => {
     const fetchProperties = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/properties/cache');
+        // Use mode=fixed to get only 3 properties for the featured section
+        const response = await fetch('/api/properties/cache?mode=fixed');
         if (!response.ok) {
           throw new Error('Failed to fetch properties');
         }
         const data = await response.json();
         
         if (data.success && data.properties) {
-          // Take only the first 3 properties for featured section
-          setProperties(data.properties.slice(0, 3));
+          setProperties(data.properties);
         } else {
           throw new Error(data.error || 'Failed to fetch properties');
         }

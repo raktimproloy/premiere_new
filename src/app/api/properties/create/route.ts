@@ -255,6 +255,7 @@ export async function POST(request: NextRequest) {
       amenities: [],
       rules: [],
       services: propertyData.services || [],
+      features: propertyData.features || [],
       pricing: {
         baseRate: 0,
         pricePerNight: propertyData.pricePerNight || 0,

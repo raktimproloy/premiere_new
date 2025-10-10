@@ -58,7 +58,7 @@ export default function QuillCDNEditor({ onChange }: { onChange: (value: string)
             ['clean']
           ]
         },
-        placeholder: 'Enter your full name',
+        placeholder: 'Enter property description',
       });
       quillInstanceRef.current = quill;
 

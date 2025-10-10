@@ -165,13 +165,14 @@ export default function Index() {
   };
     const fetchProperties = async (page: number) => {
     try {
-      const response = await fetch(`/api/properties?page=${page}&pageSize=4`);
-      if (!response.ok) throw new Error('Failed to fetch owner statements');
+      // Use admin endpoint which includes merged local data
+      const response = await fetch(`/api/properties/admin?page=${page}&pageSize=4`);
+      if (!response.ok) throw new Error('Failed to fetch properties');
       const data = await response.json();
       setPropertiesData(data);
     } catch (err) {
-      console.error('Error fetching statements:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch statements');
+      console.error('Error fetching properties:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch properties');
     }
   };
   useEffect(() => {
@@ -228,8 +229,8 @@ export default function Index() {
     fetchStatements(newPage);
   };
   const handlePageChangeProperties = (newPage: number) => {
-    setCurrentPage(newPage);
-    fetchStatements(newPage);
+    setCurrentPageProperties(newPage);
+    fetchProperties(newPage);
   };
 
   return (

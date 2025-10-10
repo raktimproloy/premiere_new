@@ -35,7 +35,7 @@ interface Property {
   localData?: any;
 }
 
-const ROOM_TYPES = ['house', 'apartment', 'condo', 'villa', 'townhouse'];
+const ROOM_TYPES = ['house', 'apartment', 'condo', 'villa', 'townhouse', 'guesthouse'];
 const BEDROOM_RANGES = ['1-2', '3-4', '5+'];
 const BATHROOM_RANGES = ['1-2', '3-4', '5+'];
 const GUEST_RANGES = ['1-4', '5-8', '9+'];

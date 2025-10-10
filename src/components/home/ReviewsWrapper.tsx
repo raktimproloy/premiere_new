@@ -15,26 +15,30 @@ interface Testimonial {
 // Fetch testimonials data server-side
 async function getTestimonialsData(): Promise<Testimonial[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/page-settings/testimonials`, {
-      cache: 'no-store' // Disable caching to always get fresh data
-    });
+    // In server components, we can directly call the API route handler
+    // Instead of using fetch which requires a full URL
+    const apiModule = await import('@/app/api/page-settings/testimonials/route');
     
-    if (!response.ok) {
-      throw new Error('Failed to fetch testimonials data');
-    }
-    
+    // Call GET function directly (it doesn't accept parameters)
+    const response = await apiModule.GET();
     const result = await response.json();
     
-    if (result.success) {
-      return result.data.testimonials || [];
-    } else {
-      throw new Error(result.message || 'Failed to fetch testimonials data');
+    if (result.success && result.data?.testimonials) {
+      return result.data.testimonials;
     }
+    
+    // If no data, return default testimonials
+    return getDefaultTestimonials();
   } catch (error) {
-    console.error('Error fetching testimonials data:', error);
-    // Return default testimonials if API fails
-    return [
+    // Silently fail and return default testimonials
+    // This is expected in development when the database might not be set up
+    return getDefaultTestimonials();
+  }
+}
+
+// Default testimonials data
+function getDefaultTestimonials(): Testimonial[] {
+  return [
       {
         id: '1',
         name: "Annette Black",
@@ -68,7 +72,6 @@ async function getTestimonialsData(): Promise<Testimonial[]> {
         description: "The booking process was seamless, and the property manager was incredibly responsive. The space was perfect for our group, and the location couldn't be beat. Highly recommend!"
       }
     ];
-  }
 }
 
 const ReviewsWrapper = async () => {

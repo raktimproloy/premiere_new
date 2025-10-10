@@ -300,7 +300,7 @@ const PropertiesTable: React.FC<PropertiesTableProps> = ({
         </div>
 
         {/* Pagination - Same as your example */}
-        <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 mt-4">
+        {/* <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 mt-4">
           <div className="flex flex-1 justify-between sm:hidden">
             <button
               onClick={() => handlePageChange(data.page - 1)}
@@ -351,7 +351,6 @@ const PropertiesTable: React.FC<PropertiesTableProps> = ({
                   </svg>
                 </button>
                 
-                {/* Page numbers */} 
                 {Array.from({ length: Math.min(5, data.totalPages) }, (_, i) => {
                   let pageNum;
                   if (data.totalPages <= 5) {
@@ -396,7 +395,7 @@ const PropertiesTable: React.FC<PropertiesTableProps> = ({
               </nav>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

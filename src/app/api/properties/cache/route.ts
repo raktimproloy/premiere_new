@@ -211,59 +211,85 @@ async function mergeOwnerRezWithLocalData(ownerRezProperties: Property[]): Promi
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     console.log('Cache API called. Environment:', process.env.NODE_ENV);
     console.log('Vercel environment:', process.env.VERCEL);
 
+    // Parse query parameters
+    const { searchParams } = new URL(request.url);
+    const mode = searchParams.get('mode'); // 'fixed' for 3 properties
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '9');
+
     // Check if cache is valid
     const cachedProperties = getCachedProperties();
     
+    let propertiesWithThumbnails: Property[];
+    let source: string;
+    let cacheSuccess = false;
+
     if (cachedProperties) {
       console.log(`Returning ${cachedProperties.length} properties from cache with local data merge`);
       const mergedProperties = await mergeOwnerRezWithLocalData(cachedProperties);
       
       // Ensure all properties have thumbnail URLs
       console.log('Ensuring all cached properties have thumbnail URLs...');
-      const propertiesWithThumbnails = await ensureThumbnailUrls(mergedProperties);
+      propertiesWithThumbnails = await ensureThumbnailUrls(mergedProperties);
+      source = 'cache_merged';
+    } else {
+      console.log('No valid cache found, fetching from API...');
+      const properties = await fetchAllProperties();
       
-      return NextResponse.json({
-        success: true,
-        message: 'Properties retrieved from cache and merged with local data',
-        totalProperties: propertiesWithThumbnails.length,
-        properties: propertiesWithThumbnails,
-        source: 'cache_merged',
-        environment: process.env.NODE_ENV,
-        isVercel: process.env.VERCEL === '1'
-      });
+      // Merge with local data
+      console.log('Merging OwnerRez properties with local data...');
+      const mergedProperties = await mergeOwnerRezWithLocalData(properties);
+      
+      // Ensure all properties have thumbnail URLs
+      console.log('Ensuring all merged properties have thumbnail URLs...');
+      propertiesWithThumbnails = await ensureThumbnailUrls(mergedProperties);
+      
+      // Store merged properties in cache
+      console.log('Storing merged properties in cache...');
+      cacheSuccess = setCachedProperties(propertiesWithThumbnails);
+
+      if (!cacheSuccess) {
+        console.warn('Failed to cache properties, but returning them anyway');
+      }
+      source = 'api_merged';
     }
 
-    console.log('No valid cache found, fetching from API...');
-    const properties = await fetchAllProperties();
-    
-    // Merge with local data
-    console.log('Merging OwnerRez properties with local data...');
-    const mergedProperties = await mergeOwnerRezWithLocalData(properties);
-    
-    // Ensure all properties have thumbnail URLs
-    console.log('Ensuring all merged properties have thumbnail URLs...');
-    const propertiesWithThumbnails = await ensureThumbnailUrls(mergedProperties);
-    
-    // Store merged properties in cache
-    console.log('Storing merged properties in cache...');
-    const cacheSuccess = setCachedProperties(propertiesWithThumbnails);
+    // Apply mode-based filtering
+    let resultProperties: Property[];
+    const totalProperties = propertiesWithThumbnails.length;
+    let hasMore = false;
 
-    if (!cacheSuccess) {
-      console.warn('Failed to cache properties, but returning them anyway');
+    if (mode === 'fixed') {
+      // Return only first 3 properties for featured section
+      resultProperties = propertiesWithThumbnails.slice(0, 3);
+    } else {
+      // Pagination mode
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      resultProperties = propertiesWithThumbnails.slice(startIndex, endIndex);
+      hasMore = endIndex < totalProperties;
     }
 
     return NextResponse.json({
       success: true,
-      message: cacheSuccess ? 'Properties fetched from API, merged with local data, and cached' : 'Properties fetched from API and merged with local data, but caching failed',
-      totalProperties: propertiesWithThumbnails.length,
-      properties: propertiesWithThumbnails,
-      source: 'api_merged',
-      cacheSuccess,
+      message: mode === 'fixed' 
+        ? 'Fixed properties retrieved' 
+        : 'Paginated properties retrieved',
+      totalProperties,
+      properties: resultProperties,
+      pagination: mode !== 'fixed' ? {
+        page,
+        limit,
+        hasMore,
+        totalPages: Math.ceil(totalProperties / limit)
+      } : undefined,
+      source,
+      cacheSuccess: source === 'api_merged' ? cacheSuccess : undefined,
       environment: process.env.NODE_ENV,
       isVercel: process.env.VERCEL === '1'
     });

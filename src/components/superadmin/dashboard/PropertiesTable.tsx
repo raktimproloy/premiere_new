@@ -34,6 +34,12 @@ interface Property {
   thumbnail_url: string;
   thumbnail_url_large: string;
   thumbnail_url_medium: string;
+  images?: Array<{ url: string }>;
+  localData?: {
+    pricing?: {
+      pricePerNight?: number;
+    };
+  };
 }
 
 interface PropertiesData {
@@ -162,7 +168,7 @@ const PropertiesTable: React.FC<PropertiesTableProps> = ({
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {data.properties.map((property) => (
+              {data.properties.map((property:any) => (
                 <React.Fragment key={property.key}>
                   <tr 
                     className="hover:bg-gray-50 cursor-pointer sm:cursor-auto"
@@ -177,8 +183,17 @@ const PropertiesTable: React.FC<PropertiesTableProps> = ({
                               className="h-12 w-12 rounded-full object-cover" 
                               src={property.thumbnail_url} 
                               alt={property.name} 
-                            />
-                          ) : (
+                              />
+                            ) : 
+                          
+                            property.images && property.images.length > 0 ? (
+                              <img 
+                                className="h-12 w-12 rounded-full object-cover" 
+                                src={property.images[0].url} 
+                                alt={property.name} 
+                              />
+                            ) : 
+                          (
                             <div className="bg-gray-200 border-2 border-dashed rounded-full w-12 h-12 flex items-center justify-center text-gray-400">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -289,7 +304,8 @@ const PropertiesTable: React.FC<PropertiesTableProps> = ({
           </table>
         </div>
 
-        {/* Pagination - Same as your example */}
+        {/* Pagination */}
+        {/* {data.totalPages > 1 && (
         <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 mt-4">
           <div className="flex flex-1 justify-between sm:hidden">
             <button
@@ -341,7 +357,6 @@ const PropertiesTable: React.FC<PropertiesTableProps> = ({
                   </svg>
                 </button>
                 
-                {/* Page numbers */} 
                 {Array.from({ length: Math.min(5, data.totalPages) }, (_, i) => {
                   let pageNum;
                   if (data.totalPages <= 5) {
@@ -387,6 +402,7 @@ const PropertiesTable: React.FC<PropertiesTableProps> = ({
             </div>
           </div>
         </div>
+        )} */}
       </div>
     </div>
   );

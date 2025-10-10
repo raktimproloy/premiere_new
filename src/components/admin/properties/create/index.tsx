@@ -33,9 +33,17 @@ export default function CreatePropertyPage() {
     { name: 'Breakfast', price: '4' },
     { name: 'WiFi', price: '0' }
   ]);
+  const [features, setFeatures] = useState<Array<{name: string}>>([
+    { name: 'Free Parking' },
+    { name: 'Pool Access' }
+  ]);
   const [pricePerNight, setPricePerNight] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+  const [savedServices, setSavedServices] = useState<Set<number>>(new Set());
+  const [savingService, setSavingService] = useState<number | null>(null);
+  const [savedFeatures, setSavedFeatures] = useState<Set<number>>(new Set());
+  const [savingFeature, setSavingFeature] = useState<number | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -81,6 +89,7 @@ export default function CreatePropertyPage() {
       details: details,
       editorValue: editorValue,
       services: services,
+      features: features,
       pricePerNight: pricePerNight ? parseFloat(pricePerNight) : undefined,
     };
 
@@ -136,6 +145,8 @@ export default function CreatePropertyPage() {
         { name: 'Breakfast', price: '4' },
         { name: 'WiFi', price: '0' }
       ]);
+      setSavedServices(new Set());
+      setSavingService(null);
       setPricePerNight("");
       setLatitude("");
       setLongitude("");
@@ -182,12 +193,80 @@ export default function CreatePropertyPage() {
 
   const removeService = (index: number) => {
     setServices(prev => prev.filter((_, i) => i !== index));
+    // Remove from saved services tracking
+    setSavedServices(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(index);
+      // Adjust indices for services after the removed one
+      const adjustedSet = new Set<number>();
+      newSet.forEach(savedIndex => {
+        if (savedIndex > index) {
+          adjustedSet.add(savedIndex - 1);
+        } else {
+          adjustedSet.add(savedIndex);
+        }
+      });
+      return adjustedSet;
+    });
   };
 
   const updateService = (index: number, field: 'name' | 'price', value: string) => {
     setServices(prev => prev.map((service, i) => 
       i === index ? { ...service, [field]: value } : service
     ));
+    // Remove from saved state when edited
+    setSavedServices(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(index);
+      return newSet;
+    });
+  };
+
+  // Dummy save function for individual service (provides visual feedback only)
+  const saveService = (index: number) => {
+    setSavingService(index);
+    // Simulate saving with a brief delay
+    setTimeout(() => {
+      setSavingService(null);
+      setSavedServices(prev => new Set(prev).add(index));
+    }, 500);
+  };
+
+  // Feature management functions
+  const addFeature = () => {
+    setFeatures(prev => [...prev, { name: '' }]);
+  };
+
+  const removeFeature = (index: number) => {
+    setFeatures(prev => prev.filter((_, i) => i !== index));
+    setSavedFeatures(prev => {
+      const adjustedSet = new Set<number>();
+      prev.forEach(savedIndex => {
+        if (savedIndex < index) adjustedSet.add(savedIndex);
+        else if (savedIndex > index) adjustedSet.add(savedIndex - 1);
+      });
+      return adjustedSet;
+    });
+  };
+
+  const updateFeature = (index: number, value: string) => {
+    setFeatures(prev => prev.map((feature, i) => 
+      i === index ? { name: value } : feature
+    ));
+    // Remove from saved state when edited
+    setSavedFeatures(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(index);
+      return newSet;
+    });
+  };
+
+  const saveFeature = (index: number) => {
+    setSavingFeature(index);
+    setTimeout(() => {
+      setSavingFeature(null);
+      setSavedFeatures(prev => new Set(prev).add(index));
+    }, 500);
   };
 
   return (
@@ -315,7 +394,7 @@ export default function CreatePropertyPage() {
                     required
                   >
                     <option value="">Select Bathroom</option>
-                    {[1, 2, 3, 4, 5, 6].map(num => (
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(num => (
                       <option key={num} value={num}>{num}</option>
                     ))}
                   </select>
@@ -333,7 +412,7 @@ export default function CreatePropertyPage() {
                     required
                   >
                     <option value="">Select Bedroom</option>
-                    {[1, 2, 3, 4, 5, 6].map(num => (
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(num => (
                       <option key={num} value={num}>{num}</option>
                     ))}
                   </select>
@@ -356,6 +435,7 @@ export default function CreatePropertyPage() {
                     <option value="">Select Property Type</option>
                     <option value="villa">Villa</option>
                     <option value="townhouse">Townhouse</option>
+                    <option value="guesthouse">Guesthouse</option>
                     <option value="apartment">Apartment</option>
                     <option value="house">House</option>
                     <option value="condo">Condo</option>
@@ -379,6 +459,60 @@ export default function CreatePropertyPage() {
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* Free Features Section */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Free Features (Amenities included at no extra cost)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addFeature}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm rounded-lg transition-colors"
+                  >
+                    <FiPlus className="w-4 h-4" />
+                    Add Feature
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {features.map((feature, index) => (
+                    <div key={index} className="flex gap-2 items-start">
+                      <input
+                        type="text"
+                        value={feature.name}
+                        onChange={(e) => updateFeature(index, e.target.value)}
+                        placeholder="e.g., Free WiFi, Pool Access, Parking"
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => saveFeature(index)}
+                        disabled={savingFeature === index || savedFeatures.has(index)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          savedFeatures.has(index)
+                            ? 'bg-green-100 text-green-700 cursor-default'
+                            : savingFeature === index
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-blue-500 hover:bg-blue-600 text-white'
+                        }`}
+                      >
+                        {savingFeature === index ? 'Saving...' : savedFeatures.has(index) ? 'Saved' : 'Save'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeFeature(index)}
+                        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-gray-500">
+                  Add amenities that come free with the property (WiFi, Parking, Pool, etc.)
+                </p>
               </div>
 
               {/* Check-in/Check-out Times */}
@@ -575,12 +709,44 @@ export default function CreatePropertyPage() {
                       required
                     />
                   </div>
-                  <div className="flex items-end">
+                  <div className="flex items-end gap-2">
+                    {/* Save button with visual feedback */}
+                    <button
+                      type="button"
+                      onClick={() => saveService(index)}
+                      disabled={savingService === index || savedServices.has(index)}
+                      className={`px-3 py-2 rounded-lg transition-all duration-300 font-medium ${
+                        savedServices.has(index)
+                          ? 'bg-green-500 text-white cursor-default'
+                          : savingService === index
+                          ? 'bg-blue-400 text-white cursor-wait'
+                          : 'bg-[#586DF7] text-white hover:bg-[#586DF7]/80'
+                      }`}
+                    >
+                      {savingService === index ? (
+                        <span className="flex items-center gap-1">
+                          <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Saving...
+                        </span>
+                      ) : savedServices.has(index) ? (
+                        <span className="flex items-center gap-1">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Saved
+                        </span>
+                      ) : (
+                        'Save'
+                      )}
+                    </button>
+                    {/* Remove button - no longer disabled for single service */}
                     <button
                       type="button"
                       onClick={() => removeService(index)}
                       className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                      disabled={services.length <= 1}
                     >
                       Remove
                     </button>

@@ -281,10 +281,23 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       });
       
       if (response.ok) {
+        // Update local state for real-time UI update
         setNotificationsList(prev => prev.filter(n => n._id !== id));
-        if (onDelete) onDelete(id);
+        
+        // Call parent's onDelete callback if provided
+        if (onDelete) {
+          onDelete(id);
+        }
+        
+        // If using props (hasProps), also refetch to ensure sync
+        if (hasProps && onRefresh) {
+          onRefresh();
+        }
+        
+        toast.success('Notification deleted successfully');
       } else {
-        toast.error('Failed to delete notification');
+        const data = await response.json();
+        toast.error(data.message || 'Failed to delete notification');
       }
     } catch (error) {
       console.error('Error deleting notification:', error);
@@ -398,7 +411,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                             <span className="text-xs text-gray-400">
                               {formatTimeAgo(notification.createdAt)}
                             </span>
-                            {/* <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1">
                               {notification.actionUrl && notification.actionLabel && (
                                 <a
                                   href={notification.actionUrl}
@@ -409,21 +422,27 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                               )}
                               {!notification.read && (
                                 <button
-                                  onClick={() => handleMarkAsRead(notification._id)}
-                                  className="p-1 text-gray-400 hover:text-gray-600"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleMarkAsRead(notification._id);
+                                  }}
+                                  className="p-1 text-gray-400 hover:text-green-600"
                                   title="Mark as read"
                                 >
-                                  <Check size={12} />
+                                  <Check size={14} />
                                 </button>
                               )}
                               <button
-                                onClick={() => handleDelete(notification._id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(notification._id);
+                                }}
                                 className="p-1 text-gray-400 hover:text-red-600"
                                 title="Delete notification"
                               >
-                                <Trash2 size={12} />
+                                <Trash2 size={14} />
                               </button>
-                            </div> */}
+                            </div>
                           </div>
                         </div>
                       </div>

@@ -307,6 +307,7 @@ export default function Header({ sidebarOpen, setSidebarOpen, userData, currentP
                 loading={notificationsLoading}
                 onRefresh={refreshNotifications}
                 onMarkAsRead={handleNotificationClick}
+                onDelete={refreshNotifications}
               />
             </div>
 

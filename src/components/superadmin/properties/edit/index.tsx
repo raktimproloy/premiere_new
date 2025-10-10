@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import EditModal from './editModal';
 import dynamic from 'next/dynamic';
 const RichTextEditor = dynamic(() => import('@/components/common/Editor'), { ssr: false });
+import { FiPlus } from 'react-icons/fi';
 
 interface Property {
   id: number;
@@ -68,6 +69,9 @@ export default function EditPropertyPage() {
   const [pricePerNight, setPricePerNight] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+  const [features, setFeatures] = useState<Array<{name: string}>>([]);
+  const [savedFeatures, setSavedFeatures] = useState<Set<number>>(new Set());
+  const [savingFeature, setSavingFeature] = useState<number | null>(null);
 
   // Fetch property data on component mount
   useEffect(() => {
@@ -118,6 +122,12 @@ export default function EditPropertyPage() {
       setPricePerNight(localPricing.pricePerNight?.toString() || '');
       setLatitude(property.latitude?.toString() || '');
       setLongitude(property.longitude?.toString() || '');
+      
+      // Load features from local data
+      const localFeatures = (property as any)?.localData?.features || (property as any)?.features || [];
+      if (localFeatures.length > 0) {
+        setFeatures(localFeatures);
+      }
       
       // Set existing images
       const localImagesFromMerged: Array<{ url: string; publicId?: string; alt?: string; isPrimary?: boolean }> = (property as any)?.localData?.images || [];
@@ -211,6 +221,7 @@ export default function EditPropertyPage() {
         editorValue: editorValue,
         details: editorValue,
         pricePerNight: pricePerNight ? parseFloat(pricePerNight) : undefined,
+        features: features,
       };
 
       console.log('Updating property with payload:', payload);
@@ -288,6 +299,42 @@ export default function EditPropertyPage() {
       }
       return prev.filter((_, i) => i !== index);
     });
+  };
+
+  // Feature management functions
+  const addFeature = () => {
+    setFeatures(prev => [...prev, { name: '' }]);
+  };
+
+  const removeFeature = (index: number) => {
+    setFeatures(prev => prev.filter((_, i) => i !== index));
+    setSavedFeatures(prev => {
+      const adjustedSet = new Set<number>();
+      prev.forEach(savedIndex => {
+        if (savedIndex < index) adjustedSet.add(savedIndex);
+        else if (savedIndex > index) adjustedSet.add(savedIndex - 1);
+      });
+      return adjustedSet;
+    });
+  };
+
+  const updateFeature = (index: number, value: string) => {
+    setFeatures(prev => prev.map((feature, i) => 
+      i === index ? { name: value } : feature
+    ));
+    setSavedFeatures(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(index);
+      return newSet;
+    });
+  };
+
+  const saveFeature = (index: number) => {
+    setSavingFeature(index);
+    setTimeout(() => {
+      setSavingFeature(null);
+      setSavedFeatures(prev => new Set(prev).add(index));
+    }, 500);
   };
 
   if (fetching) {
@@ -519,6 +566,7 @@ export default function EditPropertyPage() {
                     <option value="">Select Property Type</option>
                     <option value="villa">Villa</option>
                     <option value="townhouse">Townhouse</option>
+                    <option value="guesthouse">Guesthouse</option>
                     <option value="apartment">Apartment</option>
                     <option value="house">House</option>
                     <option value="condo">Condo</option>
@@ -541,6 +589,60 @@ export default function EditPropertyPage() {
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* Free Features Section */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Free Features (Amenities included at no extra cost)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addFeature}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-sm rounded-lg transition-colors"
+                  >
+                    <FiPlus className="w-4 h-4" />
+                    Add Feature
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {features.map((feature, index) => (
+                    <div key={index} className="flex gap-2 items-start">
+                      <input
+                        type="text"
+                        value={feature.name}
+                        onChange={(e) => updateFeature(index, e.target.value)}
+                        placeholder="e.g., Free WiFi, Pool Access, Parking"
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => saveFeature(index)}
+                        disabled={savingFeature === index || savedFeatures.has(index)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          savedFeatures.has(index)
+                            ? 'bg-green-100 text-green-700 cursor-default'
+                            : savingFeature === index
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-blue-500 hover:bg-blue-600 text-white'
+                        }`}
+                      >
+                        {savingFeature === index ? 'Saving...' : savedFeatures.has(index) ? 'Saved' : 'Save'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeFeature(index)}
+                        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-gray-500">
+                  Add amenities that come free with the property (WiFi, Parking, Pool, etc.)
+                </p>
               </div>
 
               {/* Check-in/Check-out Times */}

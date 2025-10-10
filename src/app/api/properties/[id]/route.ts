@@ -68,6 +68,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           isVerified: localProperty.isVerified,
           images: localProperty.images,
           services: localProperty.services,
+          features: localProperty.features || [],
           createdAt: localProperty.createdAt,
           updatedAt: localProperty.updatedAt,
           lastSyncedWithOwnerRez: localProperty.lastSyncedWithOwnerRez
@@ -273,6 +274,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         if (typeof body.editorValue === 'string') localUpdate.description = body.editorValue;
         if (typeof body.details === 'string') localUpdate.description = body.details;
         if (Array.isArray(body.services)) localUpdate.services = body.services;
+        if (Array.isArray(body.features)) localUpdate.features = body.features;
         
         // Update check-in and check-out times
         if (typeof body.check_in === 'string') {

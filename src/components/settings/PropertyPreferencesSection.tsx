@@ -132,6 +132,7 @@ export default function PropertyPreferencesSection({ propertyPreferences, onUpda
                   <option value="">Select property type</option>
                   <option value="apartment">Apartment</option>
                   <option value="townhouse">Townhouse</option>
+                  <option value="guesthouse">Guesthouse</option>
                   <option value="house">House</option>
                   <option value="villa">Villa</option>
                   <option value="condo">Condo</option>

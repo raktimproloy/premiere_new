@@ -104,31 +104,34 @@ const BookingCalendar = ({ bookings, height=350 }: BookingSourcesChartProps) => 
   };
 
   // Transform bookings data into calendar events
-  const events: CalendarEvent[] = bookings.map((booking) => {
-    const isBlocked = booking.is_block || booking.type !== 'booking';
-    const baseColor = isBlocked 
-      ? '#FF5252' // red for blocked
-      : getPropertyColor(booking.property.id);
-    
-    return {
-      id: `event-${booking.id}`,
-      title: isBlocked ? 'Blocked' : booking.property.name,
-      start: booking.arrival,
-      end: booking.departure,
-      color: baseColor,
-      textColor: '#ffffff', // white text for better contrast
-      extendedProps: {
-        source: booking.listing_site,
-        status: booking.status,
-        reservationNumber: booking.platform_reservation_number,
-        notes: booking.notes,
-        isBlock: isBlocked,
-        propertyName: booking.property.name,
-        propertyId: booking.property.id,
-        type: booking.type
-      }
-    };
-  });
+  // Filter out canceled bookings before mapping
+  const events: CalendarEvent[] = bookings
+    .filter((booking) => booking.status?.toLowerCase() !== 'canceled' && booking.status?.toLowerCase() !== 'cancelled')
+    .map((booking) => {
+      const isBlocked = booking.is_block || booking.type !== 'booking';
+      const baseColor = isBlocked 
+        ? '#FF5252' // red for blocked
+        : getPropertyColor(booking.property.id);
+      
+      return {
+        id: `event-${booking.id}`,
+        title: isBlocked ? 'Blocked' : booking.property.name,
+        start: booking.arrival,
+        end: booking.departure,
+        color: baseColor,
+        textColor: '#ffffff', // white text for better contrast
+        extendedProps: {
+          source: booking.listing_site,
+          status: booking.status,
+          reservationNumber: booking.platform_reservation_number,
+          notes: booking.notes,
+          isBlock: isBlocked,
+          propertyName: booking.property.name,
+          propertyId: booking.property.id,
+          type: booking.type
+        }
+      };
+    });
 
   const handleDateSelect = (selectInfo: any) => {
     const title = prompt('Enter a reason for blocking these dates:');
