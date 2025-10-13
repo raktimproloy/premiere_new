@@ -30,7 +30,8 @@ interface PaginationInfo {
   totalPages: number;
 }
 
-const PropertiesListSection = () => {
+const PropertiesListSection = ({title = true}: {title?: boolean}) => {
+  console.log(title)
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -99,8 +100,9 @@ const PropertiesListSection = () => {
 
   if (loading) {
     return (
-      <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-gray-50 to-white">
+      <section className="py-6 md:py-10 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {title && (
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 sm:mb-10 md:mb-12">
             <div className="mb-6 lg:mb-0 w-full lg:w-auto">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">
@@ -109,8 +111,9 @@ const PropertiesListSection = () => {
               <p className="text-base sm:text-lg text-gray-600 max-w-xl">
                 Discover amazing properties that match your needs.
               </p>
+              </div>
             </div>
-          </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
               <div key={i} className="bg-white rounded-xl shadow-md p-4 animate-pulse">
@@ -148,9 +151,10 @@ const PropertiesListSection = () => {
   }
 
   return (
-    <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-gray-50 to-white">
+    <section className="py-6 md:py-10 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header with property count */}
+        {title && (
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 sm:mb-10 md:mb-12">
           <div className="mb-6 lg:mb-0 w-full lg:w-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">
@@ -164,7 +168,7 @@ const PropertiesListSection = () => {
             </p>
           </div>
         </div>
-
+        )}
         {/* Property Cards Grid */}
         {properties.length > 0 ? (
           <>

@@ -188,7 +188,7 @@ export default function SearchForm({ searchData }: { searchData?: SearchData }) 
                   <form 
             ref={formRef}
             onSubmit={handleSearch}
-            className="bg-white mt-4 mb-20 rounded-xl shadow-2xl p-3 sm:p-4 md:p-6 max-w-6xl mx-auto animate-fade-in delay-300"
+            className="bg-white mt-4 mb-10 rounded-xl shadow-md p-3 sm:p-4 md:p-6 max-w-6xl mx-auto animate-fade-in delay-300"
           >
             <div className="flex flex-col lg:flex-row gap-2 md:gap-2 items-stretch rounded-xl">
               {/* Location Search */}

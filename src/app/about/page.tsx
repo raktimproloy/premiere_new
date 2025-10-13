@@ -4,6 +4,7 @@ import DefaultLayout from '@/components/layout/DefaultLayout'
 import Image from 'next/image';
 import React, { useState, useEffect } from 'react'
 import { DoubleTickIcon } from '../../../public/images/svg';
+import MetadataHead from '@/components/common/MetadataHead';
 
 // Define the interface for the about page data
 interface AboutPageData {
@@ -102,6 +103,7 @@ export default function AboutPage() {
   
   return (
     <DefaultLayout>
+      <MetadataHead />
       <section className="py-20 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

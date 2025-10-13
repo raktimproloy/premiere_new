@@ -963,7 +963,7 @@ export default function MainPage() {
                        {/* Mobile Filter Modal */}
                        {showFilters && (
                            <div className="fixed inset-0 z-50 lg:hidden flex items-center justify-center p-4">
-                               <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-in-out">
+                               <div className="bg-white rounded-xl shadow-sm w-full max-w-sm max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-in-out">
                                    <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 rounded-t-xl">
                                        <div className="flex justify-between items-center">
                                            <div>
@@ -1178,7 +1178,7 @@ export default function MainPage() {
        
                        {/* Desktop Sidebar Filter Panel */}
                        {showFilters && !isLoading && !isInitialLoad && properties.length > 0 && (
-                           <div className="hidden lg:block lg:relative lg:w-80 bg-white border border-gray-200 rounded-xl shadow-lg p-6 mr-8 relative z-20">
+                           <div className="hidden lg:block lg:relative lg:w-80 bg-white border border-gray-200 rounded-xl shadow-sm p-6 mr-8 relative z-20">
                                <div className="flex justify-between items-center mb-4">
                                    <div>
                                    <div className="font-semibold text-lg">Filter by</div>
@@ -1472,7 +1472,7 @@ export default function MainPage() {
                </>
 
                ) : (
-                <Properties_list />
+                <Properties_list title={false} />
                )
             }
         </>

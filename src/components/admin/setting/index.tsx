@@ -133,7 +133,7 @@ const Setting: React.FC = () => {
         setUser(prev => prev ? { ...prev, profileImage: data.imageUrl } : null);
         showSuccess('Profile Image Updated', 'Your profile image has been updated successfully!');
       } else {
-        showError('Upload Failed', data.error || 'Failed to upload image');
+        showError('Upload Failed', data.message || 'Failed to upload image');
       }
     } catch (error) {
       showError('Upload Failed', 'Failed to upload image. Please try again.');

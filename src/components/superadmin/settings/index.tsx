@@ -67,7 +67,7 @@ const Setting: React.FC = () => {
       formData.append('image', file);
       const response = await fetch('/api/user/upload-image', { method: 'POST', body: formData });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to upload image');
+      if (!response.ok) throw new Error(data.message || 'Failed to upload image');
       setPersonalInfo(prev => ({ ...prev, profileImage: data.imageUrl || data.profileImage || '' }));
       setSuccess('Profile image updated successfully');
       setTimeout(() => setSuccess(null), 3000);

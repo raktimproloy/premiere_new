@@ -50,7 +50,7 @@ export default function PropertyCard({property, searchId, showPrice = true}: {pr
         </div>
         
         {/* Badge */}
-        <div className="absolute top-3 sm:top-4 left-0 flex items-center z-20">
+        {/* <div className="absolute top-3 sm:top-4 left-0 flex items-center z-20">
           <div className="relative flex items-center h-6 sm:h-8">
             <div className="absolute -left-2 bg-[#586DF7] text-white font-bold px-3 sm:px-4 md:px-6 py-1 sm:py-2 text-xs  flex items-center h-6 sm:h-8 z-10 whitespace-nowrap">
               {property.badge || "FOR RENT"}
@@ -58,7 +58,7 @@ export default function PropertyCard({property, searchId, showPrice = true}: {pr
             <span className="absolute -left-2 top-4.5 sm:top-6 block w-0 h-0 border-t-6 sm:border-t-8 border-b-6 sm:border-b-8 border-r-8 sm:border-r-10 border-t-transparent border-b-transparent text-[#6C81FF] border-l-[#6C81FF] z-5"></span>
             
           </div>
-        </div>
+        </div> */}
         
         {/* Glass Effect Features Panel */}
         <div className="absolute w-[90%] border-2 border-[#F2F2F23D] mx-auto bottom-2 sm:bottom-3 left-0 right-0 bg-white/10 backdrop-blur-md py-2 sm:py-3 px-3 sm:px-4 rounded-full">

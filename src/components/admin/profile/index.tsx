@@ -83,7 +83,7 @@ const ProfilePage = ({role}: {role: string}) => {
         setSuccess('Profile image updated successfully!');
         setTimeout(() => setSuccess(null), 3000);
       } else {
-        setError(data.error || 'Failed to upload image');
+        setError(data.message || 'Failed to upload image');
       }
     } catch (error) {
       setError('Failed to upload image');

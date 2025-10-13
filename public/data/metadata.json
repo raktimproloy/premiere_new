@@ -1,0 +1,87 @@
+{
+  "default": {
+    "title": "Premiere Stays - Luxury Hotel & Resort Booking",
+    "description": "Discover and book luxury hotels and resorts with Premiere Stays. Experience world-class accommodations with premium amenities and exceptional service.",
+    "keywords": "luxury hotels, resort booking, premium accommodations, travel, vacation, hospitality",
+    "author": "Premiere Stays",
+    "robots": "index, follow",
+    "og:title": "Premiere Stays - Luxury Hotel & Resort Booking",
+    "og:description": "Discover and book luxury hotels and resorts with Premiere Stays. Experience world-class accommodations with premium amenities and exceptional service.",
+    "og:image": "/images/hero_section.png",
+    "og:url": "https://premierestays.com",
+    "og:type": "website",
+    "og:site_name": "Premiere Stays",
+    "twitter:card": "summary_large_image",
+    "twitter:title": "Premiere Stays - Luxury Hotel & Resort Booking",
+    "twitter:description": "Discover and book luxury hotels and resorts with Premiere Stays. Experience world-class accommodations with premium amenities and exceptional service.",
+    "twitter:image": "/images/hero_section.png",
+    "canonical": "https://premierestays.com"
+  },
+  "pages": {
+    "/": {
+      "title": "Premiere Stays - Luxury Hotel & Resort Booking Platform",
+      "description": "Book your dream vacation at luxury hotels and resorts worldwide. Premiere Stays offers exclusive deals, premium amenities, and exceptional hospitality services.",
+      "keywords": "luxury hotels, resort booking, vacation rentals, premium accommodations, travel deals, hospitality"
+    },
+    "/about": {
+      "title": "About Us - Premiere Stays | Luxury Hospitality Excellence",
+      "description": "Learn about Premiere Stays' commitment to luxury hospitality. Discover our story, values, and dedication to providing exceptional hotel and resort experiences.",
+      "keywords": "about premiere stays, luxury hospitality, company story, hotel management, resort services"
+    },
+    "/contact": {
+      "title": "Contact Us - Premiere Stays | Get in Touch",
+      "description": "Contact Premiere Stays for bookings, inquiries, or support. Our team is here to help you plan your perfect luxury hotel or resort experience.",
+      "keywords": "contact premiere stays, hotel booking support, customer service, travel assistance"
+    },
+    "/services": {
+      "title": "Our Services - Premiere Stays | Luxury Hotel Services",
+      "description": "Explore the comprehensive services offered by Premiere Stays. From concierge services to exclusive amenities, we provide everything for your perfect stay.",
+      "keywords": "hotel services, luxury amenities, concierge services, premium hospitality, resort facilities"
+    },
+    "/pricing": {
+      "title": "Pricing Plans - Premiere Stays | Transparent Hotel Booking Rates",
+      "description": "View our transparent pricing plans for luxury hotel and resort bookings. Find the perfect accommodation that fits your budget and preferences.",
+      "keywords": "hotel pricing, resort rates, booking plans, accommodation costs, luxury travel deals"
+    },
+    "/privacy-policy": {
+      "title": "Privacy Policy - Premiere Stays | Your Data Protection",
+      "description": "Read Premiere Stays' privacy policy to understand how we protect and handle your personal information when booking luxury hotels and resorts.",
+      "keywords": "privacy policy, data protection, user privacy, information security"
+    },
+    "/terms-and-conditions": {
+      "title": "Terms & Conditions - Premiere Stays | Booking Terms",
+      "description": "Review the terms and conditions for booking luxury hotels and resorts through Premiere Stays platform.",
+      "keywords": "terms and conditions, booking terms, user agreement, service terms"
+    },
+    "/faqs": {
+      "title": "FAQ - Premiere Stays | Frequently Asked Questions",
+      "description": "Find answers to frequently asked questions about booking luxury hotels and resorts through Premiere Stays platform.",
+      "keywords": "FAQ, frequently asked questions, booking help, hotel booking guide"
+    },
+    "/login": {
+      "title": "Login - Premiere Stays | Access Your Account",
+      "description": "Sign in to your Premiere Stays account to manage bookings, view reservations, and access exclusive member benefits.",
+      "keywords": "login, sign in, user account, member login, booking management"
+    },
+    "/signup": {
+      "title": "Sign Up - Premiere Stays | Create Your Account",
+      "description": "Join Premiere Stays to book luxury hotels and resorts worldwide. Create your account and start planning your perfect vacation.",
+      "keywords": "sign up, create account, register, membership, hotel booking account"
+    },
+    "/book-now": {
+      "title": "Book Now - Premiere Stays | Find Your Perfect Stay",
+      "description": "Search and book luxury hotels and resorts instantly. Find the perfect accommodation for your next vacation or business trip.",
+      "keywords": "book hotels, resort booking, instant booking, accommodation search, travel booking"
+    },
+    "/profile": {
+      "title": "My Profile - Premiere Stays | Account Management",
+      "description": "Manage your Premiere Stays account, view booking history, and update your preferences for luxury hotel and resort bookings.",
+      "keywords": "user profile, account management, booking history, user preferences"
+    },
+    "/settings": {
+      "title": "Account Settings - Premiere Stays | Manage Your Preferences",
+      "description": "Update your account settings, preferences, and personal information on Premiere Stays platform.",
+      "keywords": "account settings, user preferences, profile settings, account management"
+    }
+  }
+}

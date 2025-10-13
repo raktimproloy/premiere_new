@@ -10,7 +10,11 @@ import Properties from "@/components/home/Properties";
 import ReviewsWrapper from "@/components/home/ReviewsWrapper";
 import FaqSection from "@/components/home/FaqSection";
 import WorkRating from "@/components/common/WorkRating";
- 
+import { generateNextMetadata } from "@/utils/metadataUtils";
+
+// Generate metadata for the home page
+export const metadata = generateNextMetadata('/');
+
 export default function Home() {
   return (
     <DefaultLayout>

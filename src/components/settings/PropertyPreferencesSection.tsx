@@ -133,10 +133,12 @@ export default function PropertyPreferencesSection({ propertyPreferences, onUpda
                   <option value="apartment">Apartment</option>
                   <option value="townhouse">Townhouse</option>
                   <option value="guesthouse">Guesthouse</option>
+                  <option value="cottage">Cottage</option>
                   <option value="house">House</option>
                   <option value="villa">Villa</option>
                   <option value="condo">Condo</option>
                   <option value="studio">Studio</option>
+                  <option value="villa">Villa</option>
                 </select>
               </div>
 

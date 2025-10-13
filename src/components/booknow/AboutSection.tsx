@@ -290,7 +290,7 @@ const AboutSection = ({ property }: { property: Property | null }) => {
                   )}
                 </ul>
               </div>
-              <div>
+              {/* <div>
                 <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">Amenities</h3>
                 <ul className="space-y-2 text-gray-700 text-sm sm:text-base">
                   {getAmenities().slice(0, 6).map((amenity, index) => (
@@ -305,7 +305,7 @@ const AboutSection = ({ property }: { property: Property | null }) => {
                     </li>
                   )}
                 </ul>
-              </div>
+              </div> */}
             </div>
           </div>
         )}

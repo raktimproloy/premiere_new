@@ -257,7 +257,7 @@ export default function CreatePropertyPage() {
                     required
                   >
                     <option value="">Select Bathroom</option>
-                    {[1, 2, 3, 4, 5, 6].map(num => (
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map(num => (
                       <option key={num} value={num}>{num}</option>
                     ))}
                   </select>
@@ -275,7 +275,7 @@ export default function CreatePropertyPage() {
                     required
                   >
                     <option value="">Select Bedroom</option>
-                    {[1, 2, 3, 4, 5, 6].map(num => (
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map(num => (
                       <option key={num} value={num}>{num}</option>
                     ))}
                   </select>
@@ -296,12 +296,15 @@ export default function CreatePropertyPage() {
                     required
                   >
                     <option value="">Select Property Type</option>
-                    <option value="villa">Villa</option>
-                    <option value="townhouse">Townhouse</option>
-                    <option value="guesthouse">Guesthouse</option>
                     <option value="apartment">Apartment</option>
-                    <option value="house">House</option>
-                    <option value="condo">Condo</option>
+                  <option value="townhouse">Townhouse</option>
+                  <option value="guesthouse">Guesthouse</option>
+                  <option value="cottage">Cottage</option>
+                  <option value="house">House</option>
+                  <option value="villa">Villa</option>
+                  <option value="condo">Condo</option>
+                  <option value="studio">Studio</option>
+                  <option value="villa">Villa</option>
                   </select>
                 </div>
 
