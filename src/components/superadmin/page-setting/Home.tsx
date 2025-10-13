@@ -276,7 +276,7 @@ export default function Home() {
             <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 className="hidden"
                 onChange={(e) => {
                     const partnerId = e.currentTarget.getAttribute('data-partner-id');

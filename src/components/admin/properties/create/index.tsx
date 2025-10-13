@@ -614,11 +614,12 @@ export default function CreatePropertyPage() {
                     id="dropzone-file" 
                     type="file" 
                     multiple
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
                     className="hidden" 
                     onChange={handleFileChange}
                   />
                 </label>
+                <p className="mt-2 text-xs text-gray-500">Accepted: JPEG, PNG, WebP. Max size 5MB.</p>
               </div>
               
               {/* Photo Preview */}

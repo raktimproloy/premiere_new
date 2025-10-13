@@ -169,6 +169,15 @@ export default function Profile() {
     if (!file) return;
 
     try {
+      // Show allowed formats/size info
+      setSuccess(null);
+      setError(null);
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024) {
+        setError('Failed to upload image');
+        return;
+      }
+
       setUploadingImage(true);
       setError(null);
 
@@ -191,7 +200,7 @@ export default function Profile() {
         // Clear success message after 3 seconds
         setTimeout(() => setSuccess(null), 3000);
       } else {
-        setError(data.message || 'Failed to upload image');
+        setError('Failed to upload image');
       }
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -599,11 +608,12 @@ export default function Profile() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={handleImageUpload}
                 className="hidden"
               />
             </div>
+            <p className="mt-2 text-xs text-gray-500">Accepted: JPEG, PNG, WebP. Max size 5MB.</p>
           </div>
         </div>
 

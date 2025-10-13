@@ -2,6 +2,16 @@
   "properties": [
     {
       "active": true,
+      "address": {
+        "street1": "519/3, Dharampur , Thana: Motihar, P.O: Binodpur Bazar",
+        "street2": "",
+        "city": "Rajshahi",
+        "state": "Rajshahi",
+        "country": "Bangladesh",
+        "postal_code": "",
+        "id": 694782901,
+        "is_default": false
+      },
       "bathrooms": 1,
       "bathrooms_full": 1,
       "bathrooms_half": 0,
@@ -12,26 +22,16 @@
       "id": 466282,
       "is_snoozed": false,
       "key": "local-466282",
+      "latitude": 38.7945952,
+      "longitude": -106.5348379,
       "max_guests": 5,
       "name": "Test Properties",
       "property_type": "house",
       "max_children": 0,
       "max_pets": 0,
-      "address": {
-        "street1": "519/3, Dharampur , Thana: Motihar, P.O: Binodpur Bazar",
-        "street2": "",
-        "city": "Rajshahi",
-        "state": "Rajshahi",
-        "country": "Bangladesh",
-        "postal_code": "",
-        "id": 0,
-        "is_default": false
-      },
       "thumbnail_url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758987471/properties/uoe9jrxieayd18ohme1z.jpg",
       "thumbnail_url_medium": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758987471/properties/uoe9jrxieayd18ohme1z.jpg",
       "thumbnail_url_large": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758987471/properties/uoe9jrxieayd18ohme1z.jpg",
-      "latitude": null,
-      "longitude": null,
       "listing_numbers": {},
       "living_area": null,
       "living_area_type": null,
@@ -445,6 +445,6 @@
       "localData": null
     }
   ],
-  "timestamp": 1760346437596,
-  "expiresAt": 1760346467596
+  "timestamp": 1760364396220,
+  "expiresAt": 1760364426220
 }

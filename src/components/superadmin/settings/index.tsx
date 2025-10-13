@@ -63,16 +63,23 @@ const Setting: React.FC = () => {
     try {
       setUploadingImage(true);
       setError(null);
+      // Validate and standardize messaging
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024) {
+        setError('Failed to upload image');
+        setUploadingImage(false);
+        return;
+      }
       const formData = new FormData();
       formData.append('image', file);
       const response = await fetch('/api/user/upload-image', { method: 'POST', body: formData });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Failed to upload image');
+      if (!response.ok) throw new Error('Failed to upload image');
       setPersonalInfo(prev => ({ ...prev, profileImage: data.imageUrl || data.profileImage || '' }));
       setSuccess('Profile image updated successfully');
       setTimeout(() => setSuccess(null), 3000);
     } catch (e: any) {
-      setError(e.message || 'Failed to upload image');
+      setError('Failed to upload image');
     } finally {
       setUploadingImage(false);
     }
@@ -162,8 +169,9 @@ const Setting: React.FC = () => {
             <button onClick={() => fileInputRef.current?.click()} disabled={uploadingImage} className="absolute bottom-1 -right-1 w-8 h-8 bg-white rounded-full shadow flex items-center justify-center border-2 border-gray-100 hover:bg-gray-50 disabled:opacity-50">
               {uploadingImage ? (<Loader2 className="animate-spin" size={14} />) : (<CameraIcon />)}
             </button>
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageUpload} className="hidden" />
             </div>
+            <p className="mt-2 text-xs text-gray-500">Accepted: JPEG, PNG, WebP. Max size 5MB.</p>
           </div>
 
         <div className="grid md:grid-cols-2 gap-8">

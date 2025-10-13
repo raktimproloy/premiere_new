@@ -597,7 +597,7 @@ export default function About() {
             <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 className="hidden"
                 onChange={(e) => {
                     const imageType = e.currentTarget.getAttribute('data-image-type') as 'main' | 'small';

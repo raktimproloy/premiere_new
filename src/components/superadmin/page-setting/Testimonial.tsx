@@ -260,7 +260,7 @@ export default function Testimonial() {
             <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 className="hidden"
                 onChange={(e) => {
                     const testimonialId = e.currentTarget.getAttribute('data-testimonial-id');

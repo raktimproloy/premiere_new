@@ -45,8 +45,8 @@ interface BulkPricingResponse {
 }
 
 async function fetchPropertyPricing(
-  propertyId: string | number, 
-  start: string, 
+  propertyId: string | number,
+  start: string,
   end: string
 ): Promise<PropertyPricingResult> {
   try {
@@ -70,54 +70,55 @@ async function fetchPropertyPricing(
       };
     }
 
-    // First, check if property exists in local database with pricing
-    const client = await clientPromise;
-    const db = client.db("premiere-stays");
-    
-    const localProperty = await db.collection("properties").findOne({
-      ownerRezId: parseInt(propertyId.toString())
-    });
+    // Helper: build local DB pricing summary if available
+    const buildLocalPricing = async () => {
+      const client = await clientPromise;
+      const db = client.db("premiere-stays");
 
-    // If local property has pricePerNight, use it
-    if (localProperty && localProperty.pricing?.pricePerNight && localProperty.pricing.pricePerNight > 0) {
-      const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-      const totalAmount = localProperty.pricing.pricePerNight * daysDiff;
-      
-      // Generate daily pricing array for consistency
-      const dailyPricing = [];
-      for (let i = 0; i < daysDiff; i++) {
-        const currentDate = new Date(startDate);
-        currentDate.setDate(currentDate.getDate() + i);
-        dailyPricing.push({
-          date: currentDate.toISOString().split('T')[0],
-          amount: localProperty.pricing.pricePerNight,
-          isStayDisallowed: false
-        });
+      const localProperty = await db.collection("properties").findOne({
+        ownerRezId: parseInt(propertyId.toString())
+      });
+
+      if (localProperty && localProperty.pricing?.pricePerNight && localProperty.pricing.pricePerNight > 0) {
+        const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        const totalAmount = localProperty.pricing.pricePerNight * daysDiff;
+
+        const dailyPricing: any[] = [];
+        for (let i = 0; i < daysDiff; i++) {
+          const currentDate = new Date(startDate);
+          currentDate.setDate(currentDate.getDate() + i);
+          dailyPricing.push({
+            date: currentDate.toISOString().split('T')[0],
+            amount: localProperty.pricing.pricePerNight,
+            isStayDisallowed: false
+          });
+        }
+
+        const summary = {
+          totalAmount: parseFloat(totalAmount.toFixed(2)),
+          totalNights: daysDiff,
+          availableNights: daysDiff,
+          blockedNights: 0,
+          averagePricePerNight: localProperty.pricing.pricePerNight,
+          startDate: start,
+          endDate: end
+        };
+
+        return {
+          propertyId,
+          success: true,
+          pricing: {
+            pricing: dailyPricing,
+            summary,
+            source: 'local_database'
+          },
+          summary
+        } as PropertyPricingResult;
       }
+      return null;
+    };
 
-      const summary = {
-        totalAmount: parseFloat(totalAmount.toFixed(2)),
-        totalNights: daysDiff,
-        availableNights: daysDiff,
-        blockedNights: 0,
-        averagePricePerNight: localProperty.pricing.pricePerNight,
-        startDate: start,
-        endDate: end
-      };
-
-      return {
-        propertyId,
-        success: true,
-        pricing: {
-          pricing: dailyPricing,
-          summary,
-          source: 'local_database'
-        },
-        summary
-      };
-    }
-
-    // Fallback to OwnerRez API for properties without local pricing
+    // First, try OwnerRez API pricing
     const username = process.env.NEXT_PUBLIC_OWNERREZ_USERNAME || "info@premierestaysmiami.com";
     const password = process.env.NEXT_PUBLIC_OWNERREZ_ACCESS_TOKEN || "pt_1xj6mw0db483n2arxln6rg2zd8xockw2";
     const pricingBaseUrl = process.env.NEXT_PUBLIC_OWNERREZ_API_V1 || "https://api.ownerrez.com/v1";
@@ -140,25 +141,11 @@ async function fetchPropertyPricing(
       },
     });
 
-    if (!pricingRes.ok) {
-      const errorText = await pricingRes.text();
-      let errorMessage = `Failed to fetch pricing: ${pricingRes.status}`;
-      
-      try {
-        const errorJson = JSON.parse(errorText);
-        errorMessage += ` - ${errorJson.message || 'Unknown error'}`;
-      } catch {
-        errorMessage += ` - ${errorText || 'Unknown error'}`;
-      }
-      
-      return {
-        propertyId,
-        success: false,
-        error: errorMessage
-      };
+    const ownerRezOk = pricingRes.ok;
+    let pricingData: any = [];
+    if (ownerRezOk) {
+      pricingData = await pricingRes.json();
     }
-
-    const pricingData = await pricingRes.json();
     
     // Calculate total amount and provide summary
     let totalAmount = 0;
@@ -178,25 +165,63 @@ async function fetchPropertyPricing(
       });
     }
 
-    const summary = {
-      totalAmount: parseFloat(totalAmount.toFixed(2)),
-      totalNights,
-      availableNights,
-      blockedNights,
-      averagePricePerNight: availableNights > 0 ? parseFloat((totalAmount / availableNights).toFixed(2)) : 0,
-      startDate: start,
-      endDate: end
-    };
+    if (ownerRezOk && totalAmount > 0) {
+      const summary = {
+        totalAmount: parseFloat(totalAmount.toFixed(2)),
+        totalNights,
+        availableNights,
+        blockedNights,
+        averagePricePerNight: availableNights > 0 ? parseFloat((totalAmount / availableNights).toFixed(2)) : 0,
+        startDate: start,
+        endDate: end
+      };
 
+      return {
+        propertyId,
+        success: true,
+        pricing: {
+          pricing: pricingData,
+          summary,
+          source: 'ownerrez'
+        },
+        summary
+      };
+    }
+
+    // OwnerRez returned 0 totals or failed; try local DB fallback
+    const localResult = await buildLocalPricing();
+    if (localResult) {
+      return localResult;
+    }
+
+    // If no local fallback, return success with zeroed pricing if OwnerRez was ok; otherwise error
+    if (ownerRezOk) {
+      const summary = {
+        totalAmount: 0,
+        totalNights,
+        availableNights,
+        blockedNights,
+        averagePricePerNight: 0,
+        startDate: start,
+        endDate: end
+      };
+      return {
+        propertyId,
+        success: true,
+        pricing: {
+          pricing: pricingData,
+          summary,
+          source: 'ownerrez'
+        },
+        summary
+      };
+    }
+
+    // Neither OwnerRez nor local pricing available
     return {
       propertyId,
-      success: true,
-      pricing: {
-        pricing: pricingData,
-        summary,
-        source: 'ownerrez'
-      },
-      summary
+      success: false,
+      error: 'Pricing unavailable from OwnerRez and no local fallback found'
     };
 
   } catch (error) {

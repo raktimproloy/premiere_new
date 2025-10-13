@@ -44,6 +44,7 @@ const Setting: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const { showSuccess, showError } = useNotificationHelpers();
+  const { showInfo } = useNotificationHelpers();
   
   const [personalInfo, setPersonalInfo] = useState({
     fullName: '',
@@ -116,6 +117,19 @@ const Setting: React.FC = () => {
     if (!file) return;
 
     try {
+      // Show allowed formats/size info
+      showInfo(
+        'Image Requirements',
+        'JPEG, PNG, WebP only. Max size 5MB.'
+      );
+
+      // Client-side validation
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024) {
+        showError('Upload Failed', 'Failed to upload image');
+        return;
+      }
+
       setUploadingImage(true);
       setError(null);
 
@@ -133,10 +147,10 @@ const Setting: React.FC = () => {
         setUser(prev => prev ? { ...prev, profileImage: data.imageUrl } : null);
         showSuccess('Profile Image Updated', 'Your profile image has been updated successfully!');
       } else {
-        showError('Upload Failed', data.message || 'Failed to upload image');
+        showError('Upload Failed', 'Failed to upload image');
       }
     } catch (error) {
-      showError('Upload Failed', 'Failed to upload image. Please try again.');
+      showError('Upload Failed', 'Failed to upload image');
     } finally {
       setUploadingImage(false);
     }
@@ -386,11 +400,12 @@ const Setting: React.FC = () => {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               onChange={handleImageUpload}
               className="hidden"
             />
           </div>
+          <p className="mt-2 text-xs text-gray-500">Accepted: JPEG, PNG, WebP. Max size 5MB.</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">

@@ -48,7 +48,7 @@ const PropertiesListSection = ({title = true}: {title?: boolean}) => {
   useEffect(() => {
     fetchProperties(1);
   }, []);
-
+  console.log("propertiesssssss", properties)
   // Function to fetch properties with pagination
   const fetchProperties = async (page: number, append: boolean = false) => {
     try {
@@ -63,7 +63,7 @@ const PropertiesListSection = ({title = true}: {title?: boolean}) => {
         throw new Error('Failed to fetch properties');
       }
       const data = await response.json();
-      
+
       if (data.success && data.properties) {
         if (append) {
           // Append to existing properties

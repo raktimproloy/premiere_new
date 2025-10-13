@@ -262,11 +262,25 @@ export class SearchService {
       // Step 6: Ensure thumbnail URLs
       const propertiesWithThumbnails = await ensureThumbnailUrls(paginatedProperties);
 
+      // Step 7: Attach OwnerRez search key to properties
+      const idToKey = new Map<number, string>();
+      if (searchResponse.items && Array.isArray(searchResponse.items)) {
+        searchResponse.items.forEach(item => {
+          if (item && typeof item.id === 'number' && typeof item.key === 'string') {
+            idToKey.set(item.id, item.key);
+          }
+        });
+      }
+      const propertiesWithKeys = propertiesWithThumbnails.map((prop: Property) => ({
+        ...prop,
+        key: idToKey.get(prop.id) || prop.key
+      }));
+
       return {
         success: true,
         message: 'Properties retrieved from OwnerRez search and cached details',
         data: {
-          properties: propertiesWithThumbnails,
+          properties: propertiesWithKeys,
           pagination
         },
         filters: filters,
