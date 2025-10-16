@@ -89,7 +89,6 @@ const MainSection = () => {
   // Fetch property data (without pricing)
   useEffect(() => {
     if (!id) {
-      console.log('No property ID provided, redirecting to home'); // Debug log
       router.push('/');
       return;
     }
@@ -106,14 +105,12 @@ const MainSection = () => {
         } else {
           setProperty(null);
           setPropertyError('Property not found');
-          console.log('Property not found, redirecting to home'); // Debug log
           router.push('/');
         }
       })
       .catch(() => {
         setProperty(null);
         setPropertyError('Failed to fetch property');
-        console.log('Failed to fetch property, redirecting to home'); // Debug log
         router.push('/');
       })
       .finally(() => setPropertyLoading(false));
@@ -121,7 +118,6 @@ const MainSection = () => {
 
   // Prefill right side from search session and URL parameters
   useEffect(() => {
-    console.log('Checkout component mounted with searchId:', searchId); // Debug log
     
     // Parse services from URL parameters
     const servicesParam = searchParams.get('services');
@@ -133,25 +129,19 @@ const MainSection = () => {
     
     if (searchId) {
       const session = getSearchSession(searchId);
-      console.log('Search session found:', session); // Debug log
       if (session) {
         if (session.checkInDate) setCheckInDate(new Date(session.checkInDate));
         if (session.checkOutDate) setCheckOutDate(new Date(session.checkOutDate));
         if (session.guests) setGuests(session.guests);
       } else {
-        // If no search session but user is authenticated and has property ID, 
-        // allow them to continue with checkout (session might have expired)
-        console.log('Search session not found, but allowing checkout to continue');
       }
     } else {
-      console.log('No searchId provided, proceeding with checkout'); // Debug log
     }
   }, [searchId, searchParams, router]);
 
   // Auto-fetch pricing when dates are available from search session
   useEffect(() => {
     if (checkInDate && checkOutDate && property) {
-      console.log('🔄 Auto-fetching pricing for pre-filled dates:', checkInDate, checkOutDate);
       fetchPricing(checkInDate, checkOutDate);
     }
   }, [checkInDate, checkOutDate, property]);

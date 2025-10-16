@@ -62,7 +62,6 @@ export default function MainPage() {
     const [selectedGuests, setSelectedGuests] = useState<string[]>([]);
     const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
     const [isFiltering, setIsFiltering] = useState(false);
-    console.log("searchData",searchData)
     // Ref to track if filters have been initialized to prevent unnecessary API calls
     const filtersInitializedRef = useRef(false);
     
@@ -102,25 +101,21 @@ export default function MainPage() {
         
         // Prevent duplicate API calls
         if (isBulkPricingInProgressRef.current) {
-            console.log('⚠️ Bulk pricing already in progress, skipping duplicate request');
             return;
         }
         
         // Check if this exact request was already made
         if (lastPricingRequestRef.current === requestId) {
-            console.log('⚠️ Same pricing request already made, skipping duplicate');
             return;
         }
         
         // Debounce rapid API calls
         const now = Date.now();
         if (now - lastPricingLoadTimeRef.current < PRICING_DEBOUNCE_DELAY) {
-            console.log('⚠️ Pricing request debounced, too soon since last call');
             return;
         }
 
         try {
-            console.log(`🔄 Fetching bulk pricing for ${properties.length} properties...`);
             isBulkPricingInProgressRef.current = true;
             lastPricingRequestRef.current = requestId;
             setIsPricingLoading(true);
@@ -141,7 +136,6 @@ export default function MainPage() {
                 }))
             };
             
-            console.log('📤 Bulk pricing request:', bulkPricingRequest);
 
             const response = await fetch('/api/properties/bulk-pricing', {
                 method: 'POST',
@@ -152,10 +146,8 @@ export default function MainPage() {
             });
 
             const data = await response.json();
-            console.log('📥 Bulk pricing response:', data);
 
             if (data.success) {
-                console.log(`✅ Bulk pricing loaded successfully for ${data.summary.successfulProperties} properties`);
                 
                 // Update properties with pricing data from bulk response
                 const updatedProperties = properties.map(prop => {
@@ -199,7 +191,6 @@ export default function MainPage() {
                 // Mark pricing as loaded
                 setHasPricingLoaded(true);
             } else {
-                console.log(`❌ Bulk pricing failed:`, data.error);
                 
                 // Update all properties with pricing error
                 const errorProperties = properties.map(prop => ({
@@ -243,16 +234,13 @@ export default function MainPage() {
             try {
                 // Check if searchId exists
                 if (!searchId) {
-                    console.log('No search ID provided, redirecting to home page');
                     // router.push('/');
                     return;
                 }
 
                 // Get search session from cookie
                 const session = getSearchSession(searchId);
-                console.log('🔍 Search session for ID:', searchId, session);
                 if (!session) {
-                    console.log('No valid search session found, redirecting to home page');
                     // router.push('/');
                     return;
                 }
@@ -277,21 +265,19 @@ export default function MainPage() {
                 
                 setSearchData(session)
                 // First, ensure properties are cached
-                console.log('🔄 Step 1: Fetching properties cache...');
                 const cacheResponse = await fetch('/api/properties/cache');
                 if (!cacheResponse.ok) {
                     console.error('Failed to cache properties:', cacheResponse.status, cacheResponse.statusText);
                     // Continue anyway - the search API might still work
                 } else {
                     const cacheData = await cacheResponse.json();
-                    console.log('Cache response:', cacheData);
                 }
 
                 // Then fetch properties from search API
-                console.log('🔄 Step 2: Fetching properties from search API...');
                 const response = await fetch(`/api/properties/search?${searchParams.toString()}`);
                 if (response.ok) {
                     const data = await response.json();
+                    console.log("firstdata" , data)
                     if (data.success && data.data.properties) {
                         // Transform API data to match Property interface
                         const transformedProperties = data.data.properties.map((prop: any) => {
@@ -307,6 +293,7 @@ export default function MainPage() {
                             
                                                          return {
                                  id: prop.id,
+                                 key: prop.key,
                                  title: prop.name,
                                  location: `${prop.address?.city || ''}, ${prop.address?.state || ''}, ${prop.address?.country || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, ''),
                                  image: prop.thumbnail_url_medium || propertyImage1,
@@ -330,22 +317,9 @@ export default function MainPage() {
                              };
                         });
                         
-                        // Debug: Log the transformed properties to see their structure
-                        console.log('🔍 Transformed properties structure:', transformedProperties.map((p: Property) => ({
-                            id: p.id,
-                            title: p.title,
-                            roomType: p.roomType,
-                            beds: p.beds,
-                            bathrooms: p.bathrooms,
-                            persons: p.persons,
-                            facilities: p.facilities
-                        })));
-                        
-                        console.log(`✅ Step 2 Complete: Successfully loaded ${transformedProperties.length} properties`);
                         setProperties(transformedProperties);
                         setFilteredProperties(transformedProperties);
 
-                        console.log('✅ Properties loaded successfully. Bulk pricing will be loaded automatically.');
                     } else {
                         console.error('No properties found in search response');
                         // Don't clear properties if we already have some
@@ -370,7 +344,6 @@ export default function MainPage() {
                     setFilteredProperties([]);
                 }
             } finally {
-                console.log('Initial load complete. Properties count:', properties.length, 'Filtered count:', filteredProperties.length);
                 setIsLoading(false);
                 setIsInitialLoad(false);
             }
@@ -398,29 +371,10 @@ export default function MainPage() {
 
     // Auto-load bulk pricing when properties and search session are available
     useEffect(() => {
-        console.log('🔍 Pricing useEffect triggered:', {
-            isInitialLoad,
-            hasSearchSession: !!searchSession,
-            propertiesCount: properties.length,
-            hasPricingLoaded,
-            isBulkPricingInProgress: isBulkPricingInProgressRef.current,
-            skipNextPricingLoad: skipNextPricingLoadRef.current
-        });
         
         if (!isInitialLoad && searchSession && properties.length > 0 && !hasPricingLoaded && !isBulkPricingInProgressRef.current && !skipNextPricingLoadRef.current) {
             const { checkInDate, checkOutDate } = searchSession;
-            console.log('🔍 Pricing conditions check:', {
-                isInitialLoad,
-                hasSearchSession: !!searchSession,
-                propertiesCount: properties.length,
-                hasPricingLoaded,
-                isBulkPricingInProgress: isBulkPricingInProgressRef.current,
-                skipNextPricingLoad: skipNextPricingLoadRef.current,
-                checkInDate,
-                checkOutDate
-            });
             if (checkInDate && checkOutDate) {
-                console.log('🔄 Auto-loading bulk pricing for properties...');
                 skipNextPricingLoadRef.current = true; // Prevent immediate re-trigger
                 fetchBulkPricing(properties, checkInDate, checkOutDate);
             } else {
@@ -438,27 +392,14 @@ export default function MainPage() {
 
     // Apply filters to properties
     useEffect(() => {
-        console.log('🔍 Filter effect triggered:', {
-            isInitialLoad,
-            hasSearchSession: !!searchSession,
-            propertiesCount: properties.length,
-            filtersInitialized: filtersInitializedRef.current,
-            selectedRoomTypes,
-            selectedBedrooms,
-            selectedBathrooms,
-            selectedGuests,
-            priceRange
-        });
         
         // Skip filter application during initial load or if no search session
         if (isInitialLoad || !searchSession || properties.length === 0) {
-            console.log('🔍 Skipping filter application - conditions not met');
             return;
         }
 
         // Skip if this is the first run (filters are at their default state)
         if (!filtersInitializedRef.current) {
-            console.log('🔍 Skipping filter application - filters not initialized yet');
             filtersInitializedRef.current = true;
             return;
         }
@@ -471,20 +412,8 @@ export default function MainPage() {
                                priceRange[0] > 0 || 
                                priceRange[1] < 10000;
         
-        console.log('🔍 Filter check result:', {
-            hasActiveFilters,
-            roomTypesActive: selectedRoomTypes.length > 0,
-            bedroomsActive: selectedBedrooms.length > 0,
-            bathroomsActive: selectedBathrooms.length > 0,
-            guestsActive: selectedGuests.length > 0,
-            priceMinActive: priceRange[0] > 0,
-            priceMaxActive: priceRange[1] < 10000,
-            priceRange
-        });
-        
         // If no filters are active, show all properties and return early
         if (!hasActiveFilters) {
-            console.log('✅ No filters active, showing all properties');
             setFilteredProperties(properties);
             setCurrentPage(1);
             return;
@@ -496,7 +425,6 @@ export default function MainPage() {
         }
         
         filterDebounceTimerRef.current = setTimeout(() => {
-            console.log('🔍 Filters changed, calling API...');
             applyFiltersWithAPI();
         }, FILTER_DEBOUNCE_DELAY);
         
@@ -507,20 +435,6 @@ export default function MainPage() {
         if (!searchSession || properties.length === 0) return;
 
         try {
-            console.log('🔍 Applying filters via API...');
-            console.log('🔍 Current filter state:', {
-                roomTypes: selectedRoomTypes,
-                bedrooms: selectedBedrooms,
-                bathrooms: selectedBathrooms,
-                guests: selectedGuests,
-                priceRange
-            });
-            console.log('🔍 Price range details:', {
-                min: priceRange[0],
-                max: priceRange[1],
-                minActive: priceRange[0] > 0,
-                maxActive: priceRange[1] < 10000
-            });
             
             setIsFiltering(true);
             
@@ -559,14 +473,12 @@ export default function MainPage() {
                 searchParams.append('priceRange', JSON.stringify(priceRange));
             }
 
-            console.log('📤 Search API request with filters:', searchParams.toString());
 
             // Call the search API with filters
             const response = await fetch(`/api/properties/search?${searchParams.toString()}`);
             if (response.ok) {
                 const data = await response.json();
                 if (data.success && data.data.properties) {
-                    console.log(`✅ Filtered properties loaded: ${data.data.properties.length} properties`);
                     
                     // Transform API data to match Property interface
                     const transformedProperties = data.data.properties.map((prop: any) => {
@@ -577,6 +489,7 @@ export default function MainPage() {
                         
                         return {
                             id: prop.id,
+                            key: prop.key,
                             title: prop.name,
                             location: `${prop.address?.city || ''}, ${prop.address?.state || ''}, ${prop.address?.country || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, ''),
                             image: prop.thumbnail_url_medium || propertyImage1,
@@ -604,13 +517,11 @@ export default function MainPage() {
 
                     // Refresh pricing for the filtered properties
                     if (searchSession.checkInDate && searchSession.checkOutDate && !isBulkPricingInProgressRef.current) {
-                        console.log('🔄 Refreshing pricing for filtered properties...');
                         setHasPricingLoaded(false);
                         lastPricingRequestRef.current = '';
                         fetchBulkPricing(transformedProperties, searchSession.checkInDate, searchSession.checkOutDate);
                     }
                 } else {
-                    console.log('No filtered properties found');
                     setFilteredProperties([]);
                     setCurrentPage(1);
                 }
@@ -630,7 +541,6 @@ export default function MainPage() {
 
     // Fallback local filtering function
     const applyFiltersLocally = () => {
-        console.log('🔍 Applying filters locally as fallback...');
         
         let filtered = [...properties];
         
@@ -644,7 +554,6 @@ export default function MainPage() {
 
         if (!hasActiveFilters) {
             // No filters active, show all properties
-            console.log('✅ No filters active, showing all properties');
             setFilteredProperties(properties);
             setCurrentPage(1);
             return;
@@ -656,11 +565,9 @@ export default function MainPage() {
             filtered = filtered.filter(prop => {
                 const matches = selectedRoomTypes.includes(prop.roomType);
                 if (!matches) {
-                    console.log(`❌ Property ${prop.title} (${prop.id}) filtered out by room type: ${prop.roomType} not in ${selectedRoomTypes.join(', ')}`);
                 }
                 return matches;
             });
-            console.log(`🏠 After room type filter: ${filtered.length} properties (filtered out ${beforeCount - filtered.length})`);
         }
         
         // Bedrooms filter
@@ -674,11 +581,9 @@ export default function MainPage() {
                     return false;
                 });
                 if (!matches) {
-                    console.log(`❌ Property ${prop.title} (${prop.id}) filtered out by bedrooms: ${prop.beds} not in ranges ${selectedBedrooms.join(', ')}`);
                 }
                 return matches;
             });
-            console.log(`🛏️ After bedrooms filter: ${filtered.length} properties (filtered out ${beforeCount - filtered.length})`);
         }
         
         // Bathrooms filter
@@ -692,11 +597,9 @@ export default function MainPage() {
                     return false;
                 });
                 if (!matches) {
-                    console.log(`❌ Property ${prop.title} (${prop.id}) filtered out by bathrooms: ${prop.bathrooms} not in ranges ${selectedBathrooms.join(', ')}`);
                 }
                 return matches;
             });
-            console.log(`🚿 After bathrooms filter: ${filtered.length} properties (filtered out ${beforeCount - filtered.length})`);
         }
         
         // Guests filter
@@ -710,11 +613,9 @@ export default function MainPage() {
                     return false;
                 });
                 if (!matches) {
-                    console.log(`❌ Property ${prop.title} (${prop.id}) filtered out by guests: ${prop.persons} not in ranges ${selectedGuests.join(', ')}`);
                 }
                 return matches;
             });
-            console.log(`👥 After guests filter: ${filtered.length} properties (filtered out ${beforeCount - filtered.length})`);
         }
         
         // Price range filter
@@ -724,14 +625,11 @@ export default function MainPage() {
                 const price = prop.price || 0;
                 const matches = price >= priceRange[0] && price <= priceRange[1];
                 if (!matches) {
-                    console.log(`❌ Property ${prop.title} (${prop.id}) filtered out by price: $${price} not in range $${priceRange[0]} - $${priceRange[1]}`);
                 }
                 return matches;
             });
-            console.log(`💰 After price filter: ${filtered.length} properties (filtered out ${beforeCount - filtered.length})`);
         }
         
-        console.log(`✅ Local filtering complete: ${filtered.length} properties match criteria`);
         setFilteredProperties(filtered);
         setCurrentPage(1);
     };
@@ -752,10 +650,8 @@ export default function MainPage() {
     // Handler for price range
     const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
         const val = Number(e.target.value);
-        console.log(`🔍 Price range change: idx=${idx}, val=${val}, current=${priceRange}`);
         setPriceRange((prev) => {
             const newRange: [number, number] = idx === 0 ? [val, prev[1]] : [prev[0], val];
-            console.log(`🔍 New price range: ${prev} -> ${newRange}`);
             return newRange;
         });
     };
@@ -770,7 +666,6 @@ export default function MainPage() {
         
         // Refresh properties from API when filters are cleared to show all properties
         if (searchSession && !isBulkPricingInProgressRef.current) {
-            console.log('🔄 Refreshing properties after clearing filters...');
             setIsFiltering(true);
             
             // Build search parameters without filters
@@ -794,7 +689,6 @@ export default function MainPage() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data.properties) {
-                        console.log(`✅ All properties restored: ${data.data.properties.length} properties`);
                         
                         // Transform API data to match Property interface
                         const transformedProperties = data.data.properties.map((prop: any) => {
@@ -805,6 +699,7 @@ export default function MainPage() {
                             
                             return {
                                 id: prop.id,
+                                key: prop.key,
                                 title: prop.name,
                                 location: `${prop.address?.city || ''}, ${prop.address?.state || ''}, ${prop.address?.country || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, ''),
                                 image: prop.thumbnail_url_medium || propertyImage1,
@@ -832,7 +727,6 @@ export default function MainPage() {
 
                         // Refresh pricing for all properties
                         if (searchSession.checkInDate && searchSession.checkOutDate && !isBulkPricingInProgressRef.current) {
-                            console.log('🔄 Refreshing pricing for all properties...');
                             setHasPricingLoaded(false);
                             lastPricingRequestRef.current = '';
                             fetchBulkPricing(transformedProperties, searchSession.checkInDate, searchSession.checkOutDate);
@@ -854,7 +748,7 @@ export default function MainPage() {
             setShowFilters(false);
         }
     };
-
+ console.log("propertiesaaaaaaaaaaaaaaaaaaaaaa" , properties)
     // Show loading state during initial load or when loading and no properties yet
     if (isInitialLoad || (isLoading && properties.length === 0)) {
         return (
@@ -990,19 +884,6 @@ export default function MainPage() {
                                                <button 
                                                    className="text-green-500 text-sm" 
                                                    onClick={() => {
-                                                       // Force re-apply filters to debug
-                                                       console.log('🧪 Testing filters...');
-                                                       // Trigger filter re-application
-                                                       const currentFilters = {
-                                                           roomTypes: selectedRoomTypes,
-                                                           bedrooms: selectedBedrooms,
-                                                           bathrooms: selectedBathrooms,
-                                                           guests: selectedGuests,
-                                                           priceRange
-                                                       };
-                                                       console.log('🧪 Current filters:', currentFilters);
-                                                       
-                                                       // Manually trigger the filter API call
                                                        console.log('🧪 Manually triggering filter API call...');
                                                        applyFiltersWithAPI();
                                                    }}
@@ -1012,9 +893,6 @@ export default function MainPage() {
                                                <button 
                                                    className="text-orange-500 text-sm ml-2" 
                                                    onClick={() => {
-                                                       // Test price range filter
-                                                       console.log('🧪 Testing price range filter...');
-                                                       setPriceRange([3000, 10000]);
                                                        console.log('🧪 Set price range to [3000, 10000]');
                                                    }}
                                                >

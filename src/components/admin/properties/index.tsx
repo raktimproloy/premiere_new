@@ -47,7 +47,6 @@ const PropertyRequestList = ({role}: {role: string}) => {
   const totalPages = Math.ceil(total / itemsPerPage);
   
   const openModal = (property: Property) => {
-    console.log("propertylist",property)
     setSelectedProperty(property);
     setIsModalOpen(true);
   };
@@ -141,7 +140,6 @@ const PropertyRequestList = ({role}: {role: string}) => {
         throw new Error(errorMessage);
       }
       const data = await response.json();
-      console.log("data",data)
       if (data.success) {
         setProperties(data.properties || []);
         setTotal(data.total || 0);
@@ -171,7 +169,6 @@ const PropertyRequestList = ({role}: {role: string}) => {
 
   // Filter properties based on status and search term (client-side)
   useEffect(() => {
-    console.log("propertiesee",properties)
     let result = [...properties];
     
     // Apply status filter

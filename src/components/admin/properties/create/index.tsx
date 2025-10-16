@@ -98,19 +98,11 @@ export default function CreatePropertyPage() {
       const formData = new FormData();
       formData.append('propertyData', JSON.stringify(propertyData));
       
-      console.log('FormData created:', {
-        propertyData: propertyData,
-        uploadedFilesCount: uploadedFiles.length,
-        uploadedFiles: uploadedFiles.map(f => ({ name: f.name, size: f.size, type: f.type }))
-      });
-      
       // Append all uploaded images
       uploadedFiles.forEach((file, index) => {
         formData.append('images', file);
-        console.log(`Appended image ${index}:`, file.name, file.size, file.type);
       });
 
-      console.log('FormData entries:', Array.from(formData.entries()).map(([key, value]) => [key, typeof value === 'string' ? value : `${value.name} (${value.size} bytes)`]));
 
       const res = await fetch('/api/properties/create', {
         method: 'POST',

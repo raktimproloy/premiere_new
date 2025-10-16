@@ -95,12 +95,6 @@ async function fetchAdminBookings(limit: number = 50, offset: number = 0, sinceD
   const url = `${v2Url}/bookings?limit=${limit}&offset=${offset}${sinceParam}${propertyParam}${statusParam}`;
   
   if (process.env.NODE_ENV !== 'production') {
-    console.log('Admin Bookings API Request:', {
-      status: status,
-      statusParam: statusParam,
-      propertyIds: propertyIds,
-      url: url
-    });
   }
 
   const response = await fetch(url, {
@@ -112,12 +106,6 @@ async function fetchAdminBookings(limit: number = 50, offset: number = 0, sinceD
   });
   
   if (process.env.NODE_ENV !== 'production') {
-    console.log('Admin Bookings API Response:', {
-      status: response.status,
-      statusText: response.statusText,
-      url: response.url,
-      headers: Object.fromEntries(response.headers.entries())
-    });
   }
 
   if (!response.ok) {
@@ -141,10 +129,6 @@ async function fetchAdminBookings(limit: number = 50, offset: number = 0, sinceD
 
   const data: any = await response.json();
   if (process.env.NODE_ENV !== 'production') {
-    console.log('Admin Bookings data received meta:', {
-      hasItems: Array.isArray((data as any)?.items),
-      itemsCount: Array.isArray((data as any)?.items) ? (data as any).items.length : 0,
-    });
   }
   return data;
 }

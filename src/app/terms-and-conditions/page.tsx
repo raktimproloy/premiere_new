@@ -13,16 +13,12 @@ export default function TermsPage() {
   useEffect(() => {
     const fetchTermsData = async () => {
       try {
-        console.log('Fetching terms & conditions data...');
         const response = await fetch('/api/page-settings/terms/public');
-        console.log('Terms API response status:', response.status);
         
         if (response.ok) {
           const result = await response.json();
-          console.log('Terms API result:', result);
           
           if (result.success) {
-            console.log('Terms content received:', result.data.termsContent);
             setTermsContent(result.data.termsContent || '');
           } else {
             console.error('Terms API returned error:', result.message);

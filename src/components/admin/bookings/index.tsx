@@ -42,7 +42,6 @@ const Bookings = () => {
   const [error, setError] = useState<string | null>(null);
   const [paginationLoading, setPaginationLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
-  console.log(requests)
   const itemsPerPage = 8;
 
   // Fetch bookings from API with pagination
@@ -88,7 +87,6 @@ const Bookings = () => {
         
         // Log admin info for debugging
         if (data.adminInfo) {
-          console.log('Admin Info:', data.adminInfo);
         }
       } else {
         const errorMessage = 'Invalid response format';

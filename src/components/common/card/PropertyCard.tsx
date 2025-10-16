@@ -34,6 +34,13 @@ export default function PropertyCard({property, searchId, showPrice = true}: {pr
   return (
     <div 
       onClick={() => {
+        try {
+          if (typeof window !== 'undefined' && property?.key) {
+            sessionStorage.setItem('selectedPropertyKey', property.key);
+          }
+        } catch (err) {
+          // Ignore storage errors (e.g., private mode)
+        }
         if (showPrice) {
           router.push(`/book-now/${property.id}${searchId ? `?id=${searchId}` : ''}`);
         } else {

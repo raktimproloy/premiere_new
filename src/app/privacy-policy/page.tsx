@@ -13,16 +13,12 @@ export default function PrivacyPage() {
   useEffect(() => {
     const fetchPrivacyData = async () => {
       try {
-        console.log('Fetching privacy policy data...');
         const response = await fetch('/api/page-settings/privacy/public');
-        console.log('Privacy API response status:', response.status);
         
         if (response.ok) {
           const result = await response.json();
-          console.log('Privacy API result:', result);
           
           if (result.success) {
-            console.log('Privacy content received:', result.data.privacyContent);
             setPrivacyContent(result.data.privacyContent || '');
           } else {
             console.error('Privacy API returned error:', result.message);

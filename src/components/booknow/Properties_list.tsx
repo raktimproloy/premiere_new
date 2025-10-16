@@ -31,7 +31,6 @@ interface PaginationInfo {
 }
 
 const PropertiesListSection = ({title = true}: {title?: boolean}) => {
-  console.log(title)
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);

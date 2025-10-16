@@ -102,7 +102,6 @@ export default function MainSection(props: MainSectionProps) {
       setPropertyLoading(true);
       setPropertyError(null);
       
-      console.log('🔄 Step 1: Fetching property data...');
       
       fetch(`/api/properties/${id}`)
         .then(async (res) => {
@@ -110,12 +109,10 @@ export default function MainSection(props: MainSectionProps) {
           const data = await res.json();
           if (isMounted) {
             if (data.success && data.property) {
-              console.log('✅ Step 1 Complete: Property data loaded');
               setProperty(data.property);
               
               // After property loads successfully, show pricing skeleton and fetch pricing
               if (searchSession?.checkInDate && searchSession?.checkOutDate) {
-                console.log('🔄 Step 2: Showing pricing skeleton and fetching pricing...');
                 // Show skeleton immediately after property loads
                 setShowPricingSkeleton(true);
                 
@@ -149,9 +146,6 @@ export default function MainSection(props: MainSectionProps) {
       }
     }, [isAuthenticated, user]);
 
-    console.log(
-      property
-    )
     
     // Extract all images from property
     const propertyImages = property?.localData?.images || [];
@@ -208,7 +202,6 @@ export default function MainSection(props: MainSectionProps) {
     const fetchPricing = async (startDate: string, endDate: string) => {
       if (!startDate || !endDate || !id) return;
       
-      console.log('🔄 Step 2: Fetching pricing data...');
       
       // Validate dates
       const start = new Date(startDate);
@@ -232,7 +225,6 @@ export default function MainSection(props: MainSectionProps) {
         const data = await response.json();
         
         if (data.success) {
-          console.log('✅ Step 2 Complete: Pricing data loaded');
           setPricing(data.pricing);
           setPricingError(null);
         } else {
@@ -282,7 +274,6 @@ export default function MainSection(props: MainSectionProps) {
       
       // Show skeleton first, then fetch pricing if both dates are selected
       if (dateStr && checkOut) {
-        console.log('🔄 User selected dates - showing pricing skeleton...');
         setShowPricingSkeleton(true);
         setTimeout(() => {
           fetchPricing(dateStr, checkOut);
@@ -305,7 +296,6 @@ export default function MainSection(props: MainSectionProps) {
       
       // Show skeleton first, then fetch pricing if both dates are selected
       if (checkIn && dateStr) {
-        console.log('🔄 User selected dates - showing pricing skeleton...');
         setShowPricingSkeleton(true);
         setTimeout(() => {
           fetchPricing(checkIn, dateStr);
@@ -321,91 +311,97 @@ export default function MainSection(props: MainSectionProps) {
     const handleBookNow = async () => {
       if (!isAuthenticated) {
         // Save booking path in cookies and redirect to login
-        saveBookingPath({
-          path: `/book-now/checkout/${id}` + (searchId ? `?id=${searchId}` : ''),
-          propertyId: id,
-          searchId: searchId,
-          checkIn: checkIn,
-          checkOut: checkOut,
-          guests: guests,
-          email: email,
-          selectedServices: selectedServices
-        });
+        // saveBookingPath({
+        //   path: `/book-now/checkout/${id}` + (searchId ? `?id=${searchId}` : ''),
+        //   propertyId: id,
+        //   searchId: searchId,
+        //   checkIn: checkIn,
+        //   checkOut: checkOut,
+        //   guests: guests,
+        //   email: email,
+        //   selectedServices: selectedServices
+        // });
         router.push('/login');
         return;
       }
+      const  propertyKey = sessionStorage.getItem('selectedPropertyKey'); 
+      if (!propertyKey) {
+        showToastFunction('Please select a property to continue', 'error');
+        return;
+      }
+      router.push(`/book-now/confirm?key=${propertyKey}`);
 
       // Check if user has completed their settings
-      try {
-        const response = await fetch('/api/user/settings');
-        const data = await response.json();
+      // try {
+      //   const response = await fetch('/api/user/settings');
+      //   const data = await response.json();
         
-        if (data.success && data.settings) {
-          const { billingAddress, propertyPreferences, socialMedia } = data.settings;
+      //   if (data.success && data.settings) {
+      //     const { billingAddress, propertyPreferences, socialMedia } = data.settings;
           
-          // Check if billing address is complete
-          const hasBillingAddress = billingAddress && 
-            billingAddress.street && 
-            billingAddress.city && 
-            billingAddress.state && 
-            billingAddress.zipCode && 
-            billingAddress.country;
+      //     // Check if billing address is complete
+      //     const hasBillingAddress = billingAddress && 
+      //       billingAddress.street && 
+      //       billingAddress.city && 
+      //       billingAddress.state && 
+      //       billingAddress.zipCode && 
+      //       billingAddress.country;
           
-          // Check if property preferences are set
-          const hasPropertyPreferences = propertyPreferences && 
-            propertyPreferences.preferredLocation && 
-            propertyPreferences.propertyType && 
-            propertyPreferences.maxPrice > 0 && 
-            propertyPreferences.minBedrooms > 0;
+      //     // Check if property preferences are set
+      //     const hasPropertyPreferences = propertyPreferences && 
+      //       propertyPreferences.preferredLocation && 
+      //       propertyPreferences.propertyType && 
+      //       propertyPreferences.maxPrice > 0 && 
+      //       propertyPreferences.minBedrooms > 0;
           
-          // Check if at least one social media profile is set
-          const hasSocialMedia = socialMedia && (
-            socialMedia.facebook || 
-            socialMedia.twitter || 
-            socialMedia.instagram || 
-            socialMedia.linkedin
-          );
+      //     // Check if at least one social media profile is set
+      //     const hasSocialMedia = socialMedia && (
+      //       socialMedia.facebook || 
+      //       socialMedia.twitter || 
+      //       socialMedia.instagram || 
+      //       socialMedia.linkedin
+      //     );
           
-          // if (!hasBillingAddress || !hasPropertyPreferences || !hasSocialMedia) {
-          //   // Show toast message and redirect to settings
-          //   const missingFields = [];
-          //   if (!hasBillingAddress) missingFields.push('billing address');
-          //   if (!hasPropertyPreferences) missingFields.push('property preferences');
-          //   if (!hasSocialMedia) missingFields.push('social media profiles');
+      //     // if (!hasBillingAddress || !hasPropertyPreferences || !hasSocialMedia) {
+      //     //   // Show toast message and redirect to settings
+      //     //   const missingFields = [];
+      //     //   if (!hasBillingAddress) missingFields.push('billing address');
+      //     //   if (!hasPropertyPreferences) missingFields.push('property preferences');
+      //     //   if (!hasSocialMedia) missingFields.push('social media profiles');
             
-          //   // Show toast message and redirect to settings
-          //   showToastFunction(`Please complete your ${missingFields.join(', ')} in your account settings before proceeding.`, 'warning');
+      //     //   // Show toast message and redirect to settings
+      //     //   showToastFunction(`Please complete your ${missingFields.join(', ')} in your account settings before proceeding.`, 'warning');
             
-          //   // Redirect to settings page after a short delay
-          //   // setTimeout(() => {
-          //   //   router.push('/settings');
-          //   // }, 2000);
-          //   return;
-          // }
-        }
+      //     //   // Redirect to settings page after a short delay
+      //     //   // setTimeout(() => {
+      //     //   //   router.push('/settings');
+      //     //   // }, 2000);
+      //     //   return;
+      //     // }
+      //   }
         
-        // All settings are complete, proceed to checkout with selected services
-        const servicesParam = Object.keys(selectedServices).filter(serviceName => selectedServices[serviceName]).join(',');
-        if (searchId) {
-          const url = servicesParam ? 
-            `/book-now/checkout/${id}?id=${searchId}&services=${encodeURIComponent(servicesParam)}` :
-            `/book-now/checkout/${id}?id=${searchId}`;
-          router.push(url);
-        } else {
-          const url = servicesParam ? 
-            `/book-now/checkout/${id}?services=${encodeURIComponent(servicesParam)}` :
-            `/book-now/checkout/${id}`;
-          router.push(url);
-        }
+      //   // All settings are complete, proceed to checkout with selected services
+      //   const servicesParam = Object.keys(selectedServices).filter(serviceName => selectedServices[serviceName]).join(',');
+      //   if (searchId) {
+      //     const url = servicesParam ? 
+      //       `/book-now/checkout/${id}?id=${searchId}&services=${encodeURIComponent(servicesParam)}` :
+      //       `/book-now/checkout/${id}?id=${searchId}`;
+      //     router.push(url);
+      //   } else {
+      //     const url = servicesParam ? 
+      //       `/book-now/checkout/${id}?services=${encodeURIComponent(servicesParam)}` :
+      //       `/book-now/checkout/${id}`;
+      //     router.push(url);
+      //   }
         
-      } catch (error) {
-        console.error('Error checking user settings:', error);
-        // If there's an error checking settings, show a message and redirect to settings
-        showToastFunction('Unable to verify your account settings. Please complete your profile in settings before proceeding.', 'error');
-        setTimeout(() => {
-          router.push('/settings');
-        }, 2000);
-      }
+      // } catch (error) {
+      //   console.error('Error checking user settings:', error);
+      //   // If there's an error checking settings, show a message and redirect to settings
+      //   showToastFunction('Unable to verify your account settings. Please complete your profile in settings before proceeding.', 'error');
+      //   setTimeout(() => {
+      //     router.push('/settings');
+      //   }, 2000);
+      // }
     };
 
     if (propertyLoading) {

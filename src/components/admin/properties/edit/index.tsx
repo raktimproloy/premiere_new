@@ -259,7 +259,6 @@ export default function EditPropertyPage() {
         user_id: 1,
       };
 
-      console.log('Updating property with payload:', payload);
 
       const response = await fetch(`/api/properties/${propertyId}`, {
         method: 'PUT',
@@ -270,7 +269,6 @@ export default function EditPropertyPage() {
       });
 
       const data = await response.json();
-      console.log('Update response:', data);
 
       if (!response.ok) {
         throw new Error(data.error || data.message || 'Failed to update property');
