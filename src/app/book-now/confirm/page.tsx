@@ -1,6 +1,8 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import DefaultLayout from '@/components/layout/DefaultLayout';
+import ProtectedRoute from '@/components/common/ProtectedRoute';
 
 export default function ConfirmBookingPage() {
   const searchParams = useSearchParams();
@@ -56,19 +58,23 @@ export default function ConfirmBookingPage() {
 
 
   return (
-    <section className="w-full min-h-screen">
-      {/* Full-bleed container so it feels native to the site */}
-      <div className="w-full">
-        <iframe
-          title="OwnerRez Booking/Inquiry"
-          src={`https://app.ownerrez.com/widgets/703dd940f3ae4ca9b059cf72e95297d1?view=form&propertyKey=${propertyKey}`}
-          className="w-full h-[calc(100vh-0px)] md:h-[calc(100vh-0px)]"
-          style={{ border: 'none', display: 'block' }}
-          loading="eager"
-          allow="clipboard-write; accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-        />
-      </div>
-    </section>
+    <ProtectedRoute >
+      <DefaultLayout>
+      <section className="w-full min-h-screen">
+        {/* Full-bleed container so it feels native to the site */}
+        <div className="w-full">
+          <iframe
+            title="OwnerRez Booking/Inquiry"
+            src={`https://app.ownerrez.com/widgets/703dd940f3ae4ca9b059cf72e95297d1?view=form&propertyKey=${propertyKey}`}
+            className="w-full h-[calc(100vh-0px)] md:h-[calc(100vh-0px)]"
+            style={{ border: 'none', display: 'block' }}
+            loading="eager"
+            allow="clipboard-write; accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+          />
+        </div>
+      </section>
+      </DefaultLayout>
+    </ProtectedRoute>
   );
 }
 
