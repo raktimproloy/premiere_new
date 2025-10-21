@@ -6,19 +6,19 @@ import AppleProvider from "next-auth/providers/apple";
 const handler = NextAuth({
     providers: [
         GoogleProvider({
-            clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET!,
+            clientId: process.env.GOOGLE_CLIENT_ID! ,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         }),
         FacebookProvider({
-            clientId: process.env.NEXT_PUBLIC_FACEBOOK_CLIENT_ID!,
-            clientSecret: process.env.NEXT_PUBLIC_FACEBOOK_CLIENT_SECRET!,
+            clientId: process.env.FACEBOOK_CLIENT_ID!,
+            clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
         }),
         AppleProvider({
-            clientId: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID!,
-            clientSecret: process.env.NEXT_PUBLIC_APPLE_CLIENT_SECRET!,
+            clientId: process.env.APPLE_CLIENT_ID!,
+            clientSecret: process.env.APPLE_CLIENT_SECRET!,
         }),
     ],
-    secret: process.env.NEXT_PUBLIC_NEXTAUTH_SECRET || process.env.JWT_SECRET,
+    secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET,
     callbacks: {
         async jwt({ token, user, account }) {
             if (account && user) {

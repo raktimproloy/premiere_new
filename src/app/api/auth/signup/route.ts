@@ -5,7 +5,7 @@ async function createGuestInOwnerRez(fullName: string, email: string, phone: str
   try {
     // Get the base URL from the request headers
     const protocol = request.headers.get('x-forwarded-proto') || 'http';
-    const host = request.headers.get('host') || 'localhost:3000';
+    const host = request.headers.get('host') || 'localhost:10001';
     const baseUrl = `${protocol}://${host}`;
     
     const response = await fetch(`${baseUrl}/api/guests`, {

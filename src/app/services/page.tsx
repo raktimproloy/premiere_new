@@ -15,7 +15,7 @@ interface Service {
 // Fetch services data server-side
 async function getServicesData(): Promise<Service[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:10001';
     const response = await fetch(`${baseUrl}/api/page-settings/services`, {
       cache: 'no-store' // Disable caching to always get fresh data
     });

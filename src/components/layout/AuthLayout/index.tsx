@@ -465,7 +465,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ headingName, title, description
               )}
             </button>
             
-            <button
+            {/* <button
               type="button"
               onClick={handleFacebookLogin}
               disabled={facebookLoading || processingAuth}
@@ -501,7 +501,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ headingName, title, description
               ) : (
                 <Image src={AppleIcon} alt='apple' width={56} height={56} />
               )}
-            </button>
+            </button> */}
           </div>
           
           {/* Login Link */}

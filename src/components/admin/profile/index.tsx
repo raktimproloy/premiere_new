@@ -215,8 +215,8 @@ const ProfilePage = ({role}: {role: string}) => {
                 onChange={handleImageUpload}
                 className="hidden"
               />*/}
-              <p className="mt-2 text-xs text-gray-500">Accepted: JPEG, PNG, WebP. Max size 5MB.</p>
             </div>
+              <p className="mt-2 text-xs text-gray-500">Accepted: JPEG, PNG, WebP. Max size 5MB.</p>
           </div>
 
           {/* Details Table Section */}

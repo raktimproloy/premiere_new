@@ -6,7 +6,7 @@ import { ObjectId } from 'mongodb';
 
 async function createGuestInOwnerRez(fullName: string, email: string, phone?: string) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/guests`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:10001'}/api/guests`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

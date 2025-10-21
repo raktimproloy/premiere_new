@@ -350,6 +350,7 @@
       "latitude": 25.81266381,
       "listing_numbers": {
         "Airbnb": "743455221086012901",
+        "BookingCom": "1502385101",
         "Vrbo": "3180366"
       },
       "living_area": 1650,
@@ -389,6 +390,7 @@
       "key": "ed9a8540-bedb-4e07-9d2f-ba077c162a86",
       "latitude": 25.81268886,
       "listing_numbers": {
+        "BookingCom": "1512771101",
         "Airbnb": "1052090851461774832",
         "Vrbo": "4802602"
       },
@@ -429,7 +431,8 @@
       "latitude": 25.8180361,
       "listing_numbers": {
         "Vrbo": "3180084",
-        "Airbnb": "1052156283570567870"
+        "Airbnb": "1052156283570567870",
+        "BookingCom": "1512792901"
       },
       "living_area": 450,
       "living_area_type": "sq. ft.",
@@ -445,6 +448,6 @@
       "localData": null
     }
   ],
-  "timestamp": 1760776934724,
-  "expiresAt": 1760776964724
+  "timestamp": 1761048524113,
+  "expiresAt": 1761048554113
 }

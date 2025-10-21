@@ -405,8 +405,8 @@ const Setting: React.FC = () => {
               className="hidden"
             />
           </div>
-          <p className="mt-2 text-xs text-gray-500">Accepted: JPEG, PNG, WebP. Max size 5MB.</p>
         </div>
+          <p className="mt-2 text-xs text-gray-500">Accepted: JPEG, PNG, WebP. Max size 5MB.</p>
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Personal Information Section */}

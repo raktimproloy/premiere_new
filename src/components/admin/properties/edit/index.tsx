@@ -864,8 +864,8 @@ export default function EditPropertyPage() {
                       onChange={handleFileChange}
                     />
                   </label>
-                  <p className="mt-2 text-xs text-gray-500">Accepted: JPEG, PNG, WebP. Max size 5MB.</p>
                 </div>
+                  <p className="mt-2 text-xs text-gray-500">Accepted: JPEG, PNG, WebP. Max size 5MB.</p>
               </div>
               
               {/* New Photo Preview */}
