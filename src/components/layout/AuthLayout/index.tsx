@@ -415,14 +415,14 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ headingName, title, description
           {children}
           
           {/* Divider */}
-          <div className="mt-8 relative">
+          {/* <div className="mt-8 relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-gray-50 text-gray-500">Or, Sign up with</span>
             </div>
-          </div>
+          </div> */}
           
           {/* Social Sign Up */}
           <div className="mt-2 flex justify-center gap-3">
@@ -446,7 +446,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ headingName, title, description
 
             </button> */}
             
-            <button
+            {/* <button
               type="button"
               onClick={handleGoogleLogin}
               disabled={loading || processingAuth}
@@ -463,7 +463,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ headingName, title, description
               ) : (
                 <Image src={GoogleIcon} alt='google' width={56} height={56} />
               )}
-            </button>
+            </button> */}
             
             {/* <button
               type="button"

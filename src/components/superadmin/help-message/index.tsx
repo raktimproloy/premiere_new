@@ -232,6 +232,12 @@ export default function Index() {
               </div>
               <div className="mt-6 flex justify-end space-x-3">
                 <button onClick={() => setShowModal(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">Close</button>
+                <a
+                href={`mailto:${selectedMessage.user?.email}?subject=Re: Your inquiry about`}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
+              >
+                Reply via Email
+              </a>
               </div>
             </div>
           </div>
