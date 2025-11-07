@@ -100,18 +100,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   // Periodic authentication check to prevent session loss
-  useEffect(() => {
-    if (isAuthenticated) {
-      const interval = setInterval(() => {
-        // Only check if we're not already checking and not in the middle of auth operations
-        if (!authCheckInProgress.current && !signupInProgress.current && !redirectInProgress.current) {
-          checkAuthStatus();
-        }
-      }, 120000); // Check every 2 minutes to prevent rate limiting
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     const interval = setInterval(() => {
+  //       // Only check if we're not already checking and not in the middle of auth operations
+  //       if (!authCheckInProgress.current && !signupInProgress.current && !redirectInProgress.current) {
+  //         checkAuthStatus();
+  //       }
+  //     }, 120000); // Check every 2 minutes to prevent rate limiting
 
-      return () => clearInterval(interval);
-    }
-  }, [isAuthenticated]);
+  //     return () => clearInterval(interval);
+  //   }
+  // }, [isAuthenticated]);
 
   const checkAuthStatus = async () => {
     console.log('checkAuthStatus called'); // Debug log
