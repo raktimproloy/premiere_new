@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
       console.error('OwnerRez API error:', ownerRezData);
       return NextResponse.json({ 
         success: false,
-        error: ownerRezData.message || 'Failed to create property in OwnerRez', 
+        error: ownerRezData.messages[0] || 'Failed to create property in OwnerRez', 
         details: ownerRezData 
       }, { status: ownerRezRes.status });
     }

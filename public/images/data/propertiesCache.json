@@ -3,287 +3,30 @@
     {
       "active": true,
       "address": {
-        "street1": "519/3, Dharampur , Thana: Motihar, P.O: Binodpur Bazar",
-        "street2": "",
-        "city": "Rajshahi",
-        "state": "Rajshahi",
-        "country": "Bangladesh",
-        "postal_code": "",
+        "city": "fdsa",
+        "country": "UNITED STATES",
         "id": 694782901,
-        "is_default": false
+        "is_default": false,
+        "postal_code": "12312",
+        "state": "Federated States of Micronesia",
+        "street1": "dsa",
+        "street2": "dfsa"
       },
-      "bathrooms": 1,
-      "bathrooms_full": 1,
+      "bathrooms": 0,
+      "bathrooms_full": 0,
       "bathrooms_half": 0,
-      "bedrooms": 3,
+      "bedrooms": 1,
       "check_in": "15:00",
       "check_out": "11:00",
       "currency_code": "USD",
       "id": 466282,
       "is_snoozed": false,
-      "key": "local-466282",
+      "key": "9f220f2a-7766-45c7-989c-e03761e7a163",
       "latitude": 38.7945952,
       "longitude": -106.5348379,
-      "max_guests": 5,
+      "max_guests": 0,
       "name": "Test Properties",
-      "property_type": "house",
-      "max_children": 0,
-      "max_pets": 0,
-      "thumbnail_url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758987471/properties/uoe9jrxieayd18ohme1z.jpg",
-      "thumbnail_url_medium": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758987471/properties/uoe9jrxieayd18ohme1z.jpg",
-      "thumbnail_url_large": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758987471/properties/uoe9jrxieayd18ohme1z.jpg",
-      "listing_numbers": {},
-      "living_area": null,
-      "living_area_type": null,
-      "owner_id": "68b46c1558024cbd7e851c65",
-      "services": [
-        {
-          "name": "Breakfast",
-          "price": "4"
-        },
-        {
-          "name": "WiFi",
-          "price": "0"
-        }
-      ],
-      "localData": {
-        "_id": "68d804d2d70bcdec251f9be2",
-        "description": "<p><br></p>",
-        "amenities": [],
-        "rules": [],
-        "pricing": {
-          "pricePerNight": 10
-        },
-        "availability": {
-          "checkInTime": "15:00",
-          "checkOutTime": "11:00"
-        },
-        "policies": {
-          "cancellationPolicy": "Standard",
-          "houseRules": [],
-          "petPolicy": "No pets allowed",
-          "smokingPolicy": "No smoking"
-        },
-        "owner": {
-          "id": "68b46c1558024cbd7e851c65",
-          "name": "Test",
-          "email": "test@gmail.com",
-          "phone": "1234123123"
-        },
-        "status": "active",
-        "isVerified": false,
-        "images": [
-          {
-            "url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758987471/properties/uoe9jrxieayd18ohme1z.jpg",
-            "publicId": "properties/uoe9jrxieayd18ohme1z",
-            "alt": "Test Properties - Image 1",
-            "isPrimary": true,
-            "uploadedAt": "2025-09-27T15:37:54.252Z"
-          },
-          {
-            "url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1760091043/properties/es4pvtlwpyv4bjv5hoow.png",
-            "publicId": "properties/es4pvtlwpyv4bjv5hoow",
-            "alt": "Property image 1",
-            "isPrimary": true,
-            "uploadedAt": "2025-10-10T10:11:01.390Z"
-          }
-        ],
-        "services": [
-          {
-            "name": "Breakfast",
-            "price": "4"
-          },
-          {
-            "name": "WiFi",
-            "price": "0"
-          }
-        ],
-        "createdAt": "2025-09-27T15:37:54.252Z",
-        "updatedAt": "2025-10-10T11:48:50.890Z",
-        "lastSyncedWithOwnerRez": "2025-10-10T11:18:37.262Z"
-      }
-    },
-    {
-      "active": true,
-      "bathrooms": 2,
-      "bathrooms_full": 2,
-      "bathrooms_half": 0,
-      "bedrooms": 3,
-      "check_in": "15:00",
-      "check_out": "11:00",
-      "currency_code": "USD",
-      "id": 466219,
-      "is_snoozed": false,
-      "key": "local-466219",
-      "max_guests": 5,
-      "name": "Kathmundu House",
-      "property_type": "house",
-      "max_children": 0,
-      "max_pets": 0,
-      "address": {
-        "street1": "Kathmundu, Nepal",
-        "street2": "",
-        "city": "Kathmundu",
-        "state": "Kathmundu",
-        "country": "Nepal",
-        "postal_code": "",
-        "id": 0,
-        "is_default": false
-      },
-      "thumbnail_url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758906127/properties/owc791evqarrc6kpofb0.jpg",
-      "thumbnail_url_medium": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758906127/properties/owc791evqarrc6kpofb0.jpg",
-      "thumbnail_url_large": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758906127/properties/owc791evqarrc6kpofb0.jpg",
-      "latitude": 27.729679376858385,
-      "longitude": 85.288648259608,
-      "listing_numbers": {},
-      "living_area": null,
-      "living_area_type": null,
-      "owner_id": "68b46c1558024cbd7e851c65",
-      "services": [
-        {
-          "name": "WiFi",
-          "price": "0"
-        }
-      ],
-      "localData": {
-        "_id": "68d6c7108ee003e9e2f6c325",
-        "description": "<p><br></p>",
-        "amenities": [],
-        "rules": [],
-        "pricing": {
-          "pricePerNight": 20
-        },
-        "availability": {
-          "checkInTime": "15:00",
-          "checkOutTime": "11:00"
-        },
-        "policies": {
-          "cancellationPolicy": "Standard",
-          "houseRules": [],
-          "petPolicy": "No pets allowed",
-          "smokingPolicy": "No smoking"
-        },
-        "owner": {
-          "id": "68b46c1558024cbd7e851c65",
-          "name": "Test",
-          "email": "test@gmail.com",
-          "phone": "1234123123"
-        },
-        "status": "active",
-        "isVerified": false,
-        "images": [
-          {
-            "url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758906127/properties/owc791evqarrc6kpofb0.jpg",
-            "publicId": "properties/owc791evqarrc6kpofb0",
-            "alt": "Kathmundu House - Image 1",
-            "isPrimary": true,
-            "uploadedAt": "2025-09-26T17:02:08.492Z"
-          }
-        ],
-        "services": [
-          {
-            "name": "WiFi",
-            "price": "0"
-          }
-        ],
-        "createdAt": "2025-09-26T17:02:08.492Z",
-        "updatedAt": "2025-09-27T03:14:43.118Z",
-        "lastSyncedWithOwnerRez": "2025-09-27T03:14:43.118Z"
-      }
-    },
-    {
-      "active": true,
-      "bathrooms": 1,
-      "bathrooms_full": 1,
-      "bathrooms_half": 0,
-      "bedrooms": 2,
-      "check_in": "15:00",
-      "check_out": "11:00",
-      "currency_code": "USD",
-      "id": 466217,
-      "is_snoozed": false,
-      "key": "local-466217",
-      "max_guests": 4,
-      "name": "Mumbai Palace",
-      "property_type": "house",
-      "max_children": 0,
-      "max_pets": 0,
-      "address": {
-        "street1": "Mumbail, India",
-        "street2": "",
-        "city": "Mumbai",
-        "state": "Mumbai",
-        "country": "India",
-        "postal_code": "123123",
-        "id": 0,
-        "is_default": false
-      },
-      "thumbnail_url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758903656/properties/yc857liixh8qimoafypn.jpg",
-      "thumbnail_url_medium": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758903656/properties/yc857liixh8qimoafypn.jpg",
-      "thumbnail_url_large": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758903656/properties/yc857liixh8qimoafypn.jpg",
-      "latitude": null,
-      "longitude": null,
-      "listing_numbers": {},
-      "living_area": null,
-      "living_area_type": null,
-      "owner_id": "68b46c1558024cbd7e851c65",
-      "services": [
-        {
-          "name": "Wifi",
-          "price": "0"
-        }
-      ],
-      "localData": {
-        "_id": "68d6bd69219abd227926f621",
-        "description": "<h1>Hello Mumbai, India</h1><p>welcome to India</p>",
-        "amenities": [],
-        "rules": [],
-        "pricing": {
-          "baseRate": 0,
-          "currency": "USD",
-          "cleaningFee": 0,
-          "serviceFee": 0,
-          "taxes": 0
-        },
-        "availability": {
-          "checkInTime": "15:00",
-          "checkOutTime": "11:00",
-          "minStay": 1,
-          "maxStay": 30
-        },
-        "policies": {
-          "cancellationPolicy": "Standard",
-          "houseRules": [],
-          "petPolicy": "No pets allowed",
-          "smokingPolicy": "No smoking"
-        },
-        "owner": {
-          "id": "68b46c1558024cbd7e851c65",
-          "name": "Test",
-          "email": "test@gmail.com",
-          "phone": "1234123123"
-        },
-        "status": "active",
-        "isVerified": false,
-        "images": [
-          {
-            "url": "https://res.cloudinary.com/dxyneuwlb/image/upload/v1758903656/properties/yc857liixh8qimoafypn.jpg",
-            "publicId": "properties/yc857liixh8qimoafypn",
-            "alt": "Mumbai Palace - Image 1",
-            "isPrimary": true,
-            "uploadedAt": "2025-09-26T16:20:57.996Z"
-          }
-        ],
-        "services": [
-          {
-            "name": "Wifi",
-            "price": "0"
-          }
-        ],
-        "createdAt": "2025-09-26T16:20:57.996Z",
-        "updatedAt": "2025-09-26T16:45:37.155Z",
-        "lastSyncedWithOwnerRez": "2025-09-26T16:20:57.996Z"
-      }
+      "localData": null
     },
     {
       "active": true,
@@ -390,8 +133,8 @@
       "key": "ed9a8540-bedb-4e07-9d2f-ba077c162a86",
       "latitude": 25.81268886,
       "listing_numbers": {
-        "BookingCom": "1512771101",
         "Airbnb": "1052090851461774832",
+        "BookingCom": "1512771101",
         "Vrbo": "4802602"
       },
       "living_area": 1650,
@@ -448,6 +191,6 @@
       "localData": null
     }
   ],
-  "timestamp": 1761048524113,
-  "expiresAt": 1761048554113
+  "timestamp": 1762524502799,
+  "expiresAt": 1762524532799
 }
